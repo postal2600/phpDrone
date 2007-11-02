@@ -1,4 +1,6 @@
 <?php
+
+//generates a $size length random string
 function genRandomString($size)
 {
     $result = "";
@@ -14,6 +16,30 @@ function genRandomString($size)
     return $result;
 }
 
+//get the current url
+function getCurrentUrl()
+{
+    return "http".(($_SERVER['HTTPS']=="on")?"s://":"://").$_SERVER['SERVER_NAME'].(($_SERVER["SERVER_PORT"] == "80") ? "" : (":".$_SERVER["SERVER_PORT"])).$_SERVER['REQUEST_URI'];
+}
+
+//get the referer of the page only if it came from the same host as the current page.
+//$paranoic argument tells if the referer is on the same scheme (http/https/ftp) as the current url
+function getSafeReferer($getQueryString=True,$paranoic=False)
+{
+    $referer = $_SERVER['HTTP_REFERER'];
+    $current = getCurrentUrl();
+    
+    $refComps = parse_url($referer);
+    $curComps = parse_url($current);
+    if ($paranoic && $refComps["scheme"]!=$curComps["scheme"])
+        return false;
+    if ($refComps["host"]==$curComps["host"])
+        return $referer;
+    else
+        return false;
+}
+
+//extracts the value from an array from certain key.If the key is not found, it will return NULL or the $default argument.
 function array_get($key,$array,$default=NULL)
 {
     if (gettype($array)=="array")

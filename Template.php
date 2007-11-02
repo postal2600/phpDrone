@@ -98,7 +98,6 @@ class Template
     private function solveVar($input,$php_vars)
     {
         $output = $input;
-        //this will be improved by replacing this with a regExp. Maybe a generic one to solve even {%var.sub.sub2.sub3%}
         preg_match_all('/{%(?P<cont>[^\\}]*)%}/',$output,$vals);
         foreach($vals['cont'] as $f_val)
         {
@@ -120,12 +119,24 @@ class Template
             //apply filters
             if (count($pieces)>1)
                 for ($f=1;$f<count($pieces);$f++)
-                if (function_exists("filter_".$pieces[$f]))
-                    eval('$val=filter_'.$pieces[$f].'("'.$val.'");');
-                else
-                    die("phpDrone error: Unknown filter: <b>{$pieces[$f]}</b>.");
-
-            $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|").'(?:[ ]*|)%}/',$val,$output);
+                {
+                    if (preg_match('/(?P<filterName>.*)\\((?P<filterArgs>.+)\\)/',$pieces[$f],$capt))
+                    {
+                        $filterName = $capt['filterName'];
+                        $filterArgs = ",".$capt['filterArgs'];
+                    }
+                    else
+                    {
+                        $filterName = str_replace(array("(",")"),"",$pieces[$f]);
+                        $filterArgs = "";
+                    }
+                    if (function_exists("filter_".$filterName))
+                        eval('$val=filter_'.$filterName.'("'.$val.'"'.$filterArgs.');');
+                    else
+                        die("phpDrone error: Unknown filter: <b>{$filterName}</b>.");
+                }
+            
+            $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|(.)").'(?:[ ]*|)%}/',$val,$output);
         }
         return $output;
     }

@@ -58,9 +58,23 @@ class DBField
     }
 }
 
+class DBResult extends ArrayObject
+{
+    function atIndex($index,$both=False)
+    {
+        $pas=0;
+        foreach ($this as $key=>$value)
+        if ($pas==$index)
+            if ($both)
+                return array($key,$value);
+            else
+                return $value;
+    }
+}
+
 class Database
 {
-    function __construct($table)
+    function __construct($table="")
     {
         require ("_droneSettings.php");
         if (isset($sqlEngine)&&$sqlEngine=="mysql")
@@ -110,7 +124,7 @@ class Database
     {
         if ($this->tableExists)
         {
-            $tableData = $this->getData();
+            $tableData =(array)$this->getData();
             $toInsert = array_diff_key($this->data,$tableData);
             $toUpdate = array_intersect_key($this->data,$tableData);
 
@@ -211,7 +225,11 @@ class Database
     private function __call($method, $args)
     {
         if (method_exists($this,$method."_p"))
-            eval("\$this->".$method."_p(\$args);");
+        {
+            $result = NULL;
+            eval("\$result = \$this->".$method."_p(\$args);");
+            return $result;
+        }
         else
             die("phpDrone error: Call to undefined method <b>Database->".$method."()</b>");
     }
@@ -219,7 +237,7 @@ class Database
 
     function getData($filter="",$sql="")
     {
-        $result = array();
+        $result = new DBResult();
         if ($filter)
             $whereFilter = "WHERE ".$filter;
         else

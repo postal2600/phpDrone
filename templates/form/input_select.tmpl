@@ -4,6 +4,8 @@
         <div class='error'><span>Error:</span>{%inputError%}</div>
     {%end-if%}
     <select id='{%inputName%}' name='{%inputName%}'>
-        {%inputValue%}
+        {%for item in values%}
+            <option value='{%item.key%}' {%item.selected%}>{%item.value%}</option>
+        {%end-for%}
     </select>
 {%end-block%}

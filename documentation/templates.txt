@@ -54,6 +54,7 @@ SAME VARIABLES EXAMPLE, BUT WITH FILTERS
 <html>
     <body>
         Hello {%fname|toLower%} {%lname|toLower%}! You are {%age%} years old.
+        Birthday: {%birthday|formatTime("M jS, H:i")%}
     </body>
 </html>
 =========================
@@ -66,6 +67,8 @@ SAME VARIABLES EXAMPLE, BUT WITH FILTERS
     $template->write("fname","John");
     $template->write("lname","Smith");
     $template->write("age","22");
+    //1163575926 is a UNIX time. Use time() for curent UNIX time
+    $template->write("birthday",1163575926); 
     $template->render();
 ?>
 ***********************
@@ -74,6 +77,7 @@ SAME VARIABLES EXAMPLE, BUT WITH FILTERS
 <html>
     <body>
         Hello john smith! You are 22 years old.
+        Birthday: Nov 15th, 09:32
     </body>
 </html>
 ##################
@@ -81,6 +85,8 @@ SAME VARIABLES EXAMPLE, BUT WITH FILTERS
 @@@@@ explenations @@@@@
 Filters can be also applyed to complex object variables (multi-level variables). See below.
 For complete list of filters, see filters.txt
+
+Filters can get parameters.
 @@@@@@@@@@@@@@@@@@@@@@@@
 
 -------------------------------------------------------------------------------------------------------------------

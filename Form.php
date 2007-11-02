@@ -72,7 +72,7 @@ class Form
             foreach ($this->inputs as $item)
             {
                 $result = $item->validate($_POST);
-                if (!$result)-
+                if (!$result)
                     $isValid = false;
             }
             
@@ -85,10 +85,11 @@ class Form
         }
         
         foreach ($this->inputs as $item)
-            if (isset($this->valueFlag))
-                $txtresult .= $item->writeValueless($upperTemplate);
-            else
-                $txtresult .= $item->write($upperTemplate);
+            if (!$item->addedLater)
+                if (isset($this->valueFlag))
+                    $txtresult .= $item->writeValueless($upperTemplate);
+                else
+                    $txtresult .= $item->write($upperTemplate);
         return $txtresult;
     }
 }

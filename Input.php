@@ -49,13 +49,26 @@ class Input
 
     function write_select($template)
     {
-        if ($this->validator['regExp'])
-        foreach (array_keys($this->validator['regExp']) as $item)
+        if (gettype($this->validator['regExp'])=="array")
         {
-            $template->write("inputValue","<option value='{$item}'");
-            if ((array_key_exists($this->name,$_POST) && ($item==$_POST[$this->name])) || $item==$this->def)
-                $template->write("inputValue","selected='selected'");
-            $template->write("inputValue",">{$this->validator['regExp'][$item]}</option>");
+            $values = array();
+            $pas=0;
+            $hasSelected = False;
+            foreach ($this->validator['regExp'] as $key=>$value)
+            {
+                $values[$pas] = array();
+                $values[$pas]["key"] = $key;
+                $values[$pas]["value"] = $value;
+                if ((array_key_exists($this->name,$_POST) && ($value==$_POST[$this->name])) || $value==$this->def)
+                {
+                    $values[$pas]["selected"] = "selected='selected'";
+                    $hasSelected = True;
+                }
+                $pas++;
+            }
+            if (!$hasSelected)
+                $values[0]["selected"] = "selected='selected'";
+            $template->write("values",$values);
         }
         return $template->getBuffer();
     }
@@ -101,13 +114,19 @@ class Input
     {
         if ($this->type=="select")
         {
-            foreach (array_keys($this->validator['regExp']) as $item)
+            foreach ($this->validator['regExp'] as $key=>$value)
             {
-                if ($_POST[$this->name]==$item )
+                if ($_POST[$this->name]==$value)
                     return true;
             }
-            $this->error = $this->validator['message'];
-            return false;
+            if ($this->mandatory && $_POST[$this->name]=="")
+            {
+                $this->error = "Choose one";
+                return false;
+            }
+            else
+                return true;
+            
         }
         if ($this->mandatory && strlen($_POST[$this->name])==0)
         {

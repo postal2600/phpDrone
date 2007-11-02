@@ -1,8 +1,8 @@
 <?php
-function filter_trunc($input)
+function filter_trunc($input,$count=1)
 {
-    if (strlen($input)>70)
-        return substr($input, 0, 70)." ...";
+    if (strlen($input)>$count)
+        return substr($input, 0, $count)." ...";
     return $input;
 }
 
@@ -23,5 +23,10 @@ function filter_obfuscate($input)
     $result = "<script type='text/javascript' src='phpDrone/res/scripts/obfuscater.js' /></script>\n";
     $result .= "<script type='text/javascript'>obfuscate('{$text}')</script>";
     return $result;
+}
+
+function filter_formatTime($input,$format)
+{
+    return date($format,$input);
 }
 ?>
