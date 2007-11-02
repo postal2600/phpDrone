@@ -1,9 +1,43 @@
 <?php
 class Utils
 {
-	static function getVideoPreview($videourl)
+	static function getVideoData($videourl)
 	{
-		//http://(?<site>youtube)\.com/watch\?v=(?<vid>\w*)|http://www.(?<site>metacafe).com/watch/(?<vid>807117/blues_guitar_lesson/)
+		//http://(?:www.|)(?<site>youtube)\.com/watch\?v=(?<vid>[^&]*)|http://(?:www.|)(?<site>metacafe)\.com/watch/(?<vid>\d*)/
+		//youtube: http://img.youtube.com/vi/####/default.jpg
+		//metacafe: http://metacafe.com/thumb/embed/####.jpg
+		//daily motion: http://limelight-689.static.dailymotion.com/dyn/preview/320x240/####.jpg
+		
+		$sitePatterns = array("youtube"=>'/http:\/\/(?:www.|)(?P<site>youtube)\\.com\/watch\\?v=(?P<vid>[^&]*)/',
+							  "metacafe"=>'/http:\/\/(?:www.|)(?P<site>metacafe)\\.com\/watch\/(?P<vid>\\d*)\/(?P<vid_a>.*)\//',
+							  "dailymotion"=>'/http:\/\/www\\.dailymotion\\.com\//'
+							 );
+							 
+		foreach($sitePatterns as $site=>$pattern)
+		if (preg_match($pattern, $videourl, $cap))
+		{
+   			switch ($site)
+   			{
+				case "youtube":
+				    return array("preview"=>"http://img.youtube.com/vi/{$cap['vid']}/default.jpg","embed"=>"http://www.youtube.com/v/{$cap['vid']}");
+				    break;
+				case "metacafe":
+				    return array("preview"=>"http://metacafe.com/thumb/embed/{$cap['vid']}.jpg","embed"=>"http://www.metacafe.com/fplayer/{$cap['vid']}/{$cap['vid_a']}.swf");
+				    break;
+				case "dailymotion":
+				    $handle = fopen($videourl, "rb");
+				    $content = stream_get_contents($handle);
+				    fclose($handle);
+				    preg_match('/var WRP_CONTENT[ ]*=[ ]*\'(?P<vid>\\d*)\';/', $content, $prevCap);
+				    preg_match('/http:\/\/www\\.dailymotion\\.com\/swf\/(?P<vid>[^&]*)&quot;&gt;&lt;/m', $content, $embedCap);
+				    return array("preview"=>"http://limelight-689.static.dailymotion.com/dyn/preview/320x240/{$prevCap['vid']}.jpg","embed"=>"http://www.dailymotion.com/swf/{$embedCap['vid']}");
+				    break;
+				default:
+				    return "Error parsing url. Please report url!";
+				    break;
+			}
+		}
+		return false;
 	}
 
     static function querySetVar($userUrl,$varName,$varValue)
@@ -69,8 +103,7 @@ class Utils
             if (array_key_exists($key, $array))
                 return $array[$key];
             else
-                if ($default)
-                    return $default;
+                return $default;
     }
 
     static function advHttpQuery($r_query="")

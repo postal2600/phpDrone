@@ -1,6 +1,6 @@
 {%block droneInput%}
     {%if inputLabel%}
-        <label for='{%inputId%}'>
+        <label for='{%inputId%}' id='{%attributes.id%}_label'>
             {%if2 mandatoryMarker%}
                 <span class='mandatoryMarker'>{%mandatoryMarker%}</span>
             {%end-if2%}

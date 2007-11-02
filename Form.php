@@ -3,6 +3,16 @@ require_once ("Input.php"); //I know captcha already contains Input.php, but mab
 require_once ("Captcha.php");
 class Form
 {
+	const VALID_USERNAME = '/^[\\w_.$]*$/';
+	const VALID_NUMBER = '/^[-+]?(?:\\b[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+\\b)(?:[eE][-+]?[0-9]+\\b)?$/';
+	const VALID_EMAIL = '/^[A-Z0-9._%-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}$/i';
+	const VALID_PASSCOMPLEX = '/\\A(?=[-_a-zA-Z0-9]*?[A-Z])(?=[-_a-zA-Z0-9]*?[a-z])(?=[-_a-zA-Z0-9]*?[0-9])\\S{6,}\\z/';
+    const VALID_URL = '/^(ftp|http|https):\\\/\\\/(\\w+:{0,1}\\w*@)?(\\S+)(:[0-9]+)?(\\\/|\\\/([\\w#!:.?+=&%@!\\-\\\/]))?$/i';
+    const VALID_IP = '/^\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b$/';
+    const VALID_CC_AMERICANEXPRESS = '/^3[47][0-9]{13}$/';
+    const VALID_CC_DISCOVER = '/^6011[0-9]{14}$/';
+    const VALID_CC_MASTERCARD = '/^5[1-5][0-9]{14}$/';
+    const VALID_CC_VISA = '/^4[0-9]{12}(?:[0-9]{3})?$/';
 
     function __construct($onSuccess,$defaults=NULL,$method="both")
     {
@@ -25,6 +35,7 @@ class Form
                 $this->addFilesData($this->request);
                 break;
         }
+        $this->cleanData($this->request);
     }
 
 	private function addFilesData(&$requestObj)
@@ -32,6 +43,26 @@ class Form
 		foreach ($_FILES as $key=>$item)
 		    $requestObj[$key] = $item['name'];
 	}
+
+	private function cleanData(&$data)
+	{
+		foreach ($data as $key=>$value)
+		    if (gettype($value)=="string")
+				$data[$key] = stripcslashes($value);
+			else if (gettype($value)=="array")
+				$this->cleanData($data[$key]);
+	}
+
+	private function clearHTML(&$data)
+	{
+		foreach ($data as $key=>$value)
+		    if (gettype($value)=="string")
+				if (!$this->inputs[$key]->allowHtml)
+				    $this->request[$key] = htmlspecialchars($this->request[$key],ENT_QUOTES);
+			else if (gettype($value)=="array")
+				$this->clearHTML($data[$key]);
+	}
+
 
     private function addInput_p($args)
     {
@@ -50,7 +81,7 @@ class Form
                 $this->inputs[$name] = new Captcha($label,$name);
 
             if (isset($this->defaults[$name]))
-                if ($type!="select")
+                if ($type!="select" && $type!="radio")
                 	$this->inputs[$name]->defaultValue = $this->defaults[$name];
 				else
 				    $this->inputs[$name]->initial = $this->defaults[$name];
@@ -122,6 +153,7 @@ class Form
             {
                 if ($this->onSuccess)
                 {
+                    $this->clearHTML($this->request);
                     $this->valueFlag = true;
                     $meth = $this->onSuccess;
                     $txtresult .= $meth($this->request);

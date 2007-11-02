@@ -19,8 +19,9 @@ class Input
         $this->type = $type;
         $this->validator = null;
         $this->error = "";
-        //used only for selects. determines what was the default value set, to check if changed in case of a mandatory field
         $this->initial = null;
+        
+        $this->allowHtml = False;
         
         $this->attributes = array("name"=>$name,"id"=>$name,"class"=>"textInput");
         if ($type=="submit")
@@ -43,7 +44,7 @@ class Input
     {
         if (!isset($this->defaultValue))
         {
-            if ($this->type=="select")
+            if ($this->type=="select" || $this->type=="radio")
             {
                 $isSelected = false;
                 for($f=0;$f<count($defVal);$f++)
@@ -90,30 +91,41 @@ class Input
         	$this->attributes[$attr] = $value;
     }
 
+    function removeAttribute($attr)
+    {
+        if ($attr != "name")
+        	unset($this->attributes[$attr]);
+    }
+
+	function allowHTML($bool=True)
+	{
+		$this->allowHtml = $bool;
+	}
+
     function write_text($template)
     {
         if (array_key_exists($this->attributes['name'],$this->request))
-            $template->write("inputValue",$this->request[$this->attributes['name']]);
+            $template->write("inputValue",htmlspecialchars($this->request[$this->attributes['name']],ENT_QUOTES));
         else
-            $template->write("inputValue",$this->defaultValue);
+            $template->write("inputValue",htmlspecialchars($this->defaultValue,ENT_QUOTES));
         return $template->getBuffer();
     }
 
     function write_password($template)
     {
         if (array_key_exists($this->attributes['name'],$this->request))
-            $template->write("inputValue",$this->request[$this->attributes['name']]);
+            $template->write("inputValue",htmlspecialchars($this->request[$this->attributes['name']],ENT_QUOTES));
         else
-            $template->write("inputValue",$this->defaultValue);
+            $template->write("inputValue",htmlspecialchars($this->defaultValue,ENT_QUOTES));
         return $template->getBuffer();
     }
 
     function write_textarea($template)
     {
         if (array_key_exists($this->attributes['name'],$this->request))
-            $template->write("inputValue",$this->request[$this->attributes['name']]);
+            $template->write("inputValue",htmlspecialchars($this->request[$this->attributes['name']],ENT_QUOTES));
         else
-            $template->write("inputValue",$this->defaultValue);
+            $template->write("inputValue",htmlspecialchars($this->defaultValue,ENT_QUOTES));
         return $template->getBuffer();
     }
 
@@ -132,12 +144,12 @@ class Input
                 if (gettype($item)=="array")
                 {
                     $values[$pas]["key"] = $item[0];
-                    $values[$pas]["value"] = strtr($item[1],$safeChars);
+                    $values[$pas]["value"] = strtr(htmlspecialchars($item[1],ENT_QUOTES),$safeChars);
                 }
                 else
                 {
                     $values[$pas]["key"] = $item;
-                    $values[$pas]["value"] = strtr($item,$safeChars);
+                    $values[$pas]["value"] = strtr(htmlspecialchars($item,ENT_QUOTES),$safeChars);
                 }
                 if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
                 {
@@ -176,12 +188,12 @@ class Input
                 if (gettype($item)=="array")
                 {
                     $values[$pas]["key"] = $item[0];
-                    $values[$pas]["value"] = strtr($item[1],$safeChars);
+                    $values[$pas]["value"] = strtr(htmlspecialchars($item[1],ENT_QUOTES),$safeChars);
                 }
                 else
                 {
                     $values[$pas]["key"] = $item;
-                    $values[$pas]["value"] = strtr($item,$safeChars);
+                    $values[$pas]["value"] = strtr(htmlspecialchars($item,ENT_QUOTES),$safeChars);
                 }
                 if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
                     $values[$pas]["selected"] = True;
@@ -207,12 +219,12 @@ class Input
                 if (gettype($item)=="array")
                 {
                     $values[$pas]["key"] = $item[0];
-                    $values[$pas]["value"] = strtr($item[1],$safeChars);
+                    $values[$pas]["value"] = strtr(htmlspecialchars($item[1],ENT_QUOTES),$safeChars);
                 }
                 else
                 {
                     $values[$pas]["key"] = $item;
-                    $values[$pas]["value"] = strtr($item,$safeChars);
+                    $values[$pas]["value"] = strtr(htmlspecialchars($item,ENT_QUOTES),$safeChars);
                 }
 
                 if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
@@ -230,13 +242,13 @@ class Input
 
     function write_hidden($template)
     {
-        $template->write("inputValue",$this->defaultValue);
+        $template->write("inputValue",htmlspecialchars($this->defaultValue,ENT_QUOTES));
         return $template->getBuffer();
     }
 
     function write_submit($template)
     {
-        $template->write("inputValue",$this->defaultValue);
+        $template->write("inputValue",htmlspecialchars($this->defaultValue,ENT_QUOTES));
         return $template->getBuffer();
     }
 
@@ -249,7 +261,7 @@ class Input
             $template = new Template("?form/input_{$this->type}.tmpl");
             $template->vars = $upperTemplate->vars;
             $safeChars = get_html_translation_table(HTML_ENTITIES);
-            $template->write("inputLabel",strtr($this->label,$safeChars));
+            $template->write("inputLabel",strtr(htmlspecialchars($this->label,ENT_QUOTES),$safeChars));
             $template->write("attributes",$this->attributes);
             if ($this->mandatory)
                 $template->write("mandatoryMarker",$this->mandatoryMarker);
@@ -282,7 +294,7 @@ class Input
         if ($this->type=="select" || $this->type=="checkbox" || $this->type=="radio")
         {
 
-            if ($this->type=="select")
+            if ($this->type=="select" || $this->type=="radio")
                 if ($this->mandatory && $this->request[$this->attributes['name']]==$this->initial)
                 {
                     $this->error = "Choose one";
