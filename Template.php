@@ -48,7 +48,7 @@ class Template
     {
         $this->solveInheritance($templateFile);
         //clear the block-related tags
-        $this->template = preg_replace('/{%block .*%}|{%end-block%}/',"",$this->template);
+        $this->template = preg_replace('/{%block([\\d]*|) .*%}|{%end-block([\\d]*|)%}/',"",$this->template);
     }
 
     function solveInheritance($templateFile)
@@ -66,15 +66,15 @@ class Template
             $this->solveInheritance(dirname($templateFile)."/".$baseTemplate);
 
             //get the names of all the blocks in the template.
-            preg_match_all('/\\{%(?:\s|)block (?P<blocName>[\\w]*)(?:\s|)%\\}/', $templateContent, $blocks);
+            preg_match_all('/\\{%(?:\s|)block([\\d]*|) (?P<blocName>[\\w]*)(?:\s|)%\\}/', $templateContent, $blocks);
             foreach($blocks['blocName'] as $item)
             {
                 $item = trim($item);
                 //get the content of the found block
                 //note to self: ATENTIE!!!!! AM PUS AICI UN "?" DUPA ".*" FARA SA VERIFIC DACA MERE
-                preg_match('/(?:\\{%(?:\s|)block '.$item.'(?:\s|)%\\})(?P<blockContent>.*?)\\{%(?:\s|)end-block(?:\s|)%\\}/s', $templateContent, $blocksContent);
+                preg_match('/(?:\\{%(?:\s|)block([\\d]*|) '.$item.'(?:\s|)%\\})(?P<blockContent>.*?)\\{%(?:\s|)end-block\\1(?:\s|)%\\}/s', $templateContent, $blocksContent);
                 //replace the block content in the base template with the one from the child template
-                $this->template = preg_replace ('/(.*){%(?:\s|)block '.$item.'(?:\s|)%}.*?{%(?:\s|)end-block(?:\s|)%}(.*)/s','\\1{%block '.$item.'%}'.$blocksContent['blockContent'].'{%end-block%}\\2',$this->template);
+                $this->template = preg_replace ('/(.*){%(?:\s|)block([\\d]*|) '.$item.'(?:\s|)%}.*?{%(?:\s|)end-block\\2(?:\s|)%}(.*)/s','\\1{%block '.$item.'%}'.$blocksContent['blockContent'].'{%end-block%}\\3',$this->template);
             }
         }
         else
@@ -292,6 +292,7 @@ class Template
 
                         //process for steps
                         $builtBlock = preg_replace ('/{%(?:[ ]*|)for-step(?:[ ]*|)%}/',$pas_2,$builtBlock);
+                        $this->vars['for-step'] = $pas_2;
                         
                         $builtBlock = $this->compileTemplate($builtBlock,$this->vars);
                         $newContent .= $builtBlock;
