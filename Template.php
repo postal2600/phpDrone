@@ -95,61 +95,75 @@ class Template
         return $time-$this->startTime;
     }
 
-
-    function compileTemplate()
+    private function solveIf($content,$php_vars)
     {
-        //parse the ifs
-        preg_match_all('/{%([ ]*|)if (?P<ifStatement>[^\\}]*)%}/', $this->template, $ifs);
+        $ret_result = $content;
+        preg_match_all('/{%([ ]*|)if (?P<ifStatement>[^\\}]*)%}/', $ret_result, $ifs);
         foreach($ifs['ifStatement'] as $ifStatement)
         {
             $statement = trim($ifStatement);
-            $v = addslashes($this->vars[$statement]);
+            $v = addslashes($php_vars[$statement]);
             eval("\$result='$v';");
             if (!$result)
                 //{%(?:[ ]*|)if inputError%}(?:[\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}
-                $this->template = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}/','',$this->template,1);
+                $ret_result = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\\\x00]*?){%(?:[ ]*|)end-if(?:[ ]*|)%}/','',$ret_result,1);
         }
-        
-        //now let's parse the fors
-        preg_match_all('/{%(?:[ ]|)for (?P<item>.*) in (?P<bunch>.*)%}/', $this->template, $fors);
+        return $ret_result;
+    }
+
+    private function solveFor($content,$php_vars)
+    {
+        $ret_result = $content;
+        preg_match_all('/{%(?:[ ]|)for (?P<item>.*) in (?P<bunch>.*)%}/', $ret_result, $fors);
         $pas = 0;
         foreach($fors['bunch'] as $bunch)
         {
             $item = $fors['item'][$pas];
             //{%(?:[ ]|)for item in bunch%}(?P<ifblock>[^\x00]*){%end-for%} - get the block
             // get the if block content
-            preg_match('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?P<forblock>[^\\x00]*?){%end-for%}/', $this->template, $forBlocksContent);
+            preg_match('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?P<forblock>[^\\x00]*?){%end-for%}/', $ret_result, $forBlocksContent);
             $blockContent = $forBlocksContent['forblock'];
-            if (isset($this->vars[trim($bunch)]))
+            if (isset($php_vars[trim($bunch)]))
             {
-                $type = gettype($this->vars[trim($bunch)]);
+                $type = gettype($php_vars[trim($bunch)]);
                 if ($type=="array" || $type=="object" || $type=="string")
                 {
                     if ($type=="string")
-                        $pacient = preg_split('//', $this->vars[trim($bunch)], -1, PREG_SPLIT_NO_EMPTY);
+                        $pacient = preg_split('//', $php_vars[trim($bunch)], -1, PREG_SPLIT_NO_EMPTY);
                     else
-                        $pacient = $this->vars[trim($bunch)];
+                        $pacient = $php_vars[trim($bunch)];
 
                     $newContent = "";
                     foreach ($pacient as $key => $value)
                     {
                         if (gettype($value)=="array" || gettype($value)=="object")
-                            $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'.([^\\}|[\\ ]*)(?:[ ]*|)%}/','\\1',$blockContent);
+                        {
+                            preg_match_all('/{%(?:[ ]*|)'.$item.'.(?P<key>[^\\}|[\\ ]*)(?:[ ]*|)%}/',$blockContent,$keys);
+                            $builtBlock = $blockContent;
+                            foreach($keys['key'] as $f_key)
+                                $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'.'.$f_key.'(?:[ ]*|)%}/',$value[$f_key],$builtBlock);
+                            $builtBlock = $this->solveIf($builtBlock,$value);
+                        }
                         else
                             $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'(?:[ ]*|)%}/',$value,$blockContent);
                         $newContent .= $builtBlock;
                     }
 //                     $blockContent = preg_replace('/([\\\\<{%}>*\/])/','\\\\\1',$blockContent);
                     //$this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}'.$blockContent.'{%end-for%}/',$newContent,$this->template);
-                    $this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for%}/',$newContent,$this->template,1,$count);
+                    $ret_result = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for%}/',$newContent,$ret_result,1);
                 }
             }
             else
-            {
-                $this->template = preg_replace ('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?:[\\s]*|.*)*{%end-for%}/','',$this->template,1);
-            }
+                $ret_result = preg_replace ('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?:[\\s]*|.*)*{%end-for%}/','',$ret_result,1);
             $pas++;
         }
+        return $ret_result;
+    }
+    
+    function compileTemplate()
+    {
+        $this->template = $this->solveIf($this->template,$this->vars);
+        $this->template = $this->solveFor($this->template,$this->vars);
     }
 
     function getBuffer()
