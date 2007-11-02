@@ -97,6 +97,12 @@ class Template
         return strtolower($input);
     }
     
+    private function filter_inc($input)
+    {
+        return $input+=1;
+    }
+
+    
     private function solveVar($input,$php_vars)
     {
         $output = $input;
@@ -199,9 +205,9 @@ class Template
             if (isset($php_vars[trim($bunch)]))
             {
                 $type = gettype($php_vars[trim($bunch)]);
-                if ($type=="array" || $type=="object" || $type=="string")
+                if ($type=="array" || $type=="object" || $type=="string" || $type=="integer")
                 {
-                    if (is_numeric($php_vars[trim($bunch)]))
+                    if ($type=="integer")
                     {
                         $pacient = array();
                         for ($f=0;$f<=$php_vars[trim($bunch)];$f++)
