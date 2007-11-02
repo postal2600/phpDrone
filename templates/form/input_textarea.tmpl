@@ -1,5 +1,7 @@
 {%block droneInput%}
     <label for='{%inputName%}'>{%inputLabel%}</label>
-    {%inputError%}
+    {%if inputError%}
+        <div class='error'><span>Error:</span>{%inputError%}</div>
+    {%end-if%}
     <textarea class='textInput' rows='5' cols='9' id='{%inputName%}' name='{%inputName%}'>{%inputValue%}</textarea>
 {%end-block%}

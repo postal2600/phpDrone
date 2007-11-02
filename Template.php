@@ -29,7 +29,6 @@ class Template
         
         $this->title = "Untitled";
         $this->vars = array();
-        $this->vars['meta'] = "";
     }
 
     function buildTemplate($templateFile)
@@ -91,8 +90,7 @@ class Template
     {
         $result = $output;
         foreach($this->vars as $var => $value)
-//             $result = preg_replace ('/{%(?:\\s*|)'.$var.'(?:\\s*|)%}/',$value,$result);
-            $result = str_replace("{%{$var}%}",$value,$result);
+            $result = preg_replace ('/{%(?:[ ]*|)'.$var.'(?:[ ]*|)%}/',$value,$result);
         return $result;
     }
 
@@ -102,17 +100,37 @@ class Template
         return $time-$this->startTime;
     }
 
+
     function compileTemplate()
     {
-        preg_match_all('/{%(\\s*|)if (?P<ifStatement>.*)%}/', $this->template, $ifs);
+        //parse the ifs
+        preg_match_all('/{%([ ]*|)if (?P<ifStatement>.*)%}/', $this->template, $ifs);
         foreach($ifs['ifStatement'] as $ifStatement)
         {
             $statement = trim($ifStatement);
             $v = addslashes($this->vars[$statement]);
-            eval("\$result='$v;';");
+            eval("\$result='$v';");
             if (!$result)
-                //{%(?:[ ]*|)if something%}(?:[\s]*|.*)*{%end-if%}
-                $this->template = preg_replace ('/{%if '.$ifStatement.'%}(?:[\\s]*|.*)*{%end-if%}/','',$this->template);
+                //{%(?:[ ]*|)if inputError%}(?:[\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}
+                $this->template = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[\\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}/','',$this->template);
+        }
+        
+        //now let's parse the fors
+        preg_match_all('/{%(?:[ ]|)for (?P<item>.*) in (?P<bunch>.*)%}/', $this->template, $fors);
+        $pas = 0;
+        foreach($fors['bunch'] as $bunch)
+        {
+            if (isset($this->vars[trim($bunch)]))
+            {
+                print "yyyha!";
+            }
+            else
+            {
+                //{%(?:[ ]|)for item in stuff%}(?P<ifblock>[\s]*|.*)*{%end-for%} - part to get the block (doesn't work yet)
+                $item = $fors['item'][$pas];
+                $this->template = preg_replace ('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?:[\\s]*|.*)*{%end-for%}/','',$this->template,1);
+            }
+            $pas++;
         }
     }
 
@@ -122,7 +140,7 @@ class Template
         $this->compileTemplate();
         $output = $this->template;
         //set the page title if one is defined in template
-        $output = preg_replace ('/{%(?:\\s*|)title(?:\\s*|)%}/',$this->title,$output);
+        $output = preg_replace ('/{%(?:[ ]*|)title(?:[ ]*|)%}/',$this->title,$output);
         $output = $this->injectVars($output);
         //delete the rest of unused vars from template
         $output = preg_replace ('/{%.*%}/',"",$output);

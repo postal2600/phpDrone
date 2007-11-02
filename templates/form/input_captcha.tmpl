@@ -1,6 +1,8 @@
 {%block droneInput%}
     <img id='captchaImage' src='phpDrone/Captcha.php?id={%captchaId%}' alt='Captcha' onclick='regenerate("{%captchaId%}")'/>
-    {%inputError%}
+    {%if inputError%}
+        <div class='error'><span>Error:</span>{%inputError%}</div>
+    {%end-if%}
     <span id="captchaNote"><b>Note:</b>&nbsp;Click image to regenerate</span>
     <script type='text/javascript' src='phpDrone/res/scripts/captcha.js'></script>
     <input type='hidden' name='captchaId' value='{%captchaId%}'/>
