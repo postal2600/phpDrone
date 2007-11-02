@@ -173,9 +173,17 @@ class Input
             foreach ($this->defaultValue as $item)
             {
                 $values[$pas] = array();
-                $values[$pas]["key"] = $item[0];
-                $values[$pas]["value"] = strtr($item[1],$safeChars);
-                if (array_key_exists($this->attributes['name'],$this->request) && in_array($values[$pas]["key"],$this->request[$this->attributes['name']]) || isset($item[2]) && $item[2])
+                if (gettype($item)=="array")
+                {
+                    $values[$pas]["key"] = $item[0];
+                    $values[$pas]["value"] = strtr($item[1],$safeChars);
+                }
+                else
+                {
+                    $values[$pas]["key"] = $item;
+                    $values[$pas]["value"] = strtr($item,$safeChars);
+                }
+                if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
                     $values[$pas]["selected"] = True;
                 $pas++;
             }
@@ -196,9 +204,18 @@ class Input
             foreach ($this->defaultValue as $item)
             {
                 $values[$pas] = array();
-                $values[$pas]["key"] = $item[0];
-                $values[$pas]["value"] = strtr($item[1],$safeChars);
-                if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (isset($item[2]) && $item[2]))
+                if (gettype($item)=="array")
+                {
+                    $values[$pas]["key"] = $item[0];
+                    $values[$pas]["value"] = strtr($item[1],$safeChars);
+                }
+                else
+                {
+                    $values[$pas]["key"] = $item;
+                    $values[$pas]["value"] = strtr($item,$safeChars);
+                }
+
+                if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
                 {
                     $values[$pas]["selected"] = True;
                     $hasSelected = True;
