@@ -142,7 +142,7 @@ class Database
             $template->write("tableName",$this->tableName);
             $template->write("tableFields",join(",",$txtFields));
             $this->exec_qry($template->getBuffer());
-            print $template->getBuffer();
+//             print $template->getBuffer();
         }
     }
 

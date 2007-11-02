@@ -106,7 +106,7 @@ class Template
     function compileTemplate()
     {
         //parse the ifs
-        preg_match_all('/{%([ ]*|)if (?P<ifStatement>.*)%}/', $this->template, $ifs);
+        preg_match_all('/{%([ ]*|)if (?P<ifStatement>[^\\}]*)%}/', $this->template, $ifs);
         foreach($ifs['ifStatement'] as $ifStatement)
         {
             $statement = trim($ifStatement);
@@ -125,8 +125,8 @@ class Template
             $item = $fors['item'][$pas];
             //{%(?:[ ]|)for item in bunch%}(?P<ifblock>[^\x00]*){%end-for%} - get the block
             // get the if block content
-            preg_match('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?P<ifblock>[^\\x00]*){%end-for%}/', $this->template, $ifBlocksContent);
-            $blockContent = $ifBlocksContent['ifblock'];
+            preg_match('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?P<forblock>[^\\x00]*){%end-for%}/', $this->template, $forBlocksContent);
+            $blockContent = $forBlocksContent['forblock'];
             if (isset($this->vars[trim($bunch)]))
             {
                 $type = gettype($this->vars[trim($bunch)]);
@@ -166,7 +166,7 @@ class Template
         //take out comments
         $output = preg_replace('/{%(?:[ ]*|)comment(?:[ ]*|)%}(?:[^\\x00]*){%(?:[ ]*|)end-comment(?:[ ]*|)%}/', '', $output);
         //delete the rest of unused vars from template
-        $output = preg_replace ('/{%.*%}/',"",$output);
+        $output = preg_replace ('/{%[^\\}]*%}/',"",$output);
         return $output;
     }
 
