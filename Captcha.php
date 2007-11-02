@@ -4,11 +4,11 @@ if (!isset($formIsLoaded))
     
 class Captcha extends Input
 {
-//     function __construct()
-//     {
-//         $this->captchaInput = new Input("*Code from image above","text","captcha");
-//         $this->captchaInput->setValidator(validateCaptcha,"Wrong text from image");
-//     }
+     function __construct()
+     {
+         parent::__construct("*Code from image above","text","captcha");
+     }
+    
     function generate($size)
     {
         session_start();
@@ -56,8 +56,9 @@ class Captcha extends Input
         $template = new Template("phpDrone/templates/form/input_captcha.tmpl");
 
         $template->write("captchaId",$this->generate(5));
-        $result = $template->getBuffer();
-        $result .= $this->writeValueless();
+        $result = $template->getBuffer(false);
+        $this->valueDict[$this->name] = "";
+        $result .= parent::write();
         return $result;
     }
 
@@ -68,14 +69,13 @@ class Captcha extends Input
         $captchaId = $_REQUEST['captchaId'];
         if (strtolower($_SESSION[$captchaId])==strtolower($value))
             return true;
+        $this->error = "The image is not good";
         return false;
     }
 
 }
 
-
-
-// $tmp_captcha = new Captcha("*Code from image above","text","captcha");
-// $tmp_captcha->draw($_GET['id']);
+$tmp_captcha = new Captcha("*Code from image above","text","captcha");
+$tmp_captcha->draw($_GET['id']);
 
 ?>

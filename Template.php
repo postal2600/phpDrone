@@ -117,7 +117,7 @@ class Template
         }
     }
 
-    function getBuffer($overrideDebug = false)
+    function getBuffer()
     {
         require ("_droneSettings.php");
 //         $this->compileTemplate();
@@ -125,12 +125,6 @@ class Template
         //set the page title if one is defined in template
         $output = preg_replace ('/{%(?:\\s*|)title(?:\\s*|)%}/',$this->title,$output);
         $output = $this->injectVars($output);
-        if ($overrideDebug==true)
-            $local_debugMode = False;
-        else
-            $local_debugMode = $debugMode;
-        if ($local_debugMode)
-            $output .= "<!--This will apear only in debug mode -->\n<div style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'>Built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v1.0 BETA</div>";
         //delete the rest of unused vars from template
         $output = preg_replace ('/{%.*%}/',"",$output);
         return $output;
@@ -145,14 +139,17 @@ class Template
                 require ($this->guard);
             if ($this->guard=="free" || ($this->guard!="free") && __guard__())
             {
-                print $this->getBuffer();
+                $output = $this->getBuffer();
+                if ($debugMode)
+                    $output .= "<!--This will apear only in debug mode -->\n<div style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'>Built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v1.0 BETA</div>";
+                print $output;
             }
             else
             {
                 if (isset($guardFailPage))
                     $guarFailPage = new Template($guardFailPage);
                 else
-                    $guarFailPage = new Template("phpDrone/droneTemplates/gurd-failure.tmpl");
+                    $guarFailPage = new Template("phpDrone/templates/gurd-failure.tmpl");
                 $guarFailPage->setTitle("Unauthorized - phpDrone");
                 $guarFailPage->render();
             }
