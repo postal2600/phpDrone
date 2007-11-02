@@ -92,7 +92,7 @@ class Input
             eval("\$result .= \$this->write_{$this->type}(\$template);");
         }
         else
-            die("<b>phpDrone error:</b> Unknown form input type: {$this->type}.");
+            throwDroneError("Unknown form input type: {$this->type}.");
         return $result;
     }
 

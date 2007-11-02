@@ -1,6 +1,4 @@
 <?php
-require_once('phpDrone/Utils.php');
-
 class DBField
 {
     function __construct($descArray)
@@ -8,7 +6,7 @@ class DBField
         foreach ($descArray as $key=>$value)
             eval("\$this->".$key." = ".$value.";");
         if (gettype($this->type)!="string")
-            die("<b>phpDrone error:</b> The type of database field <b>{$this->name}</b> must be a string. Recieved: ".gettype($this->type));
+            throwDroneError("The type of database field <b>{$this->name}</b> must be a string. Recieved: ".gettype($this->type));
         if ($this->null)
             $this->null = "NULL";
         else
@@ -25,7 +23,7 @@ class DBField
     function getTextForString()
     {
         if (!$this->size)
-            die("<b>phpDrone error:</b> Please supply a size argument for database field '<b>{$this->name}</b>'.");
+            throwDroneError("Please supply a size argument for database field '<b>{$this->name}</b>'.");
         $template = new Template("?database/field_{$this->type}.tmpl");
         $template->write("fieldName",$this->name);
         $template->write("fieldSize",$this->size);
@@ -53,7 +51,7 @@ class DBField
         if (method_exists($this,"getTextFor{$this->type}"))
             eval("\$result = \$this->getTextFor".$this->type."();");
         else
-            die("<b>phpDrone error:</b> Unknown database field type: {$this->type}.");
+            throwDroneError("Unknown database field type: {$this->type}.");
         return $result;
     }
 }
@@ -76,11 +74,16 @@ class Database
 {
     function __construct($table="")
     {
+        set_error_handler("handleDroneErrors");
         require("_droneSettings.php");
+        restore_error_handler();
         if (isset($sqlEngine)&&$sqlEngine=="mysql")
         {
-            $this->con = mysql_connect($sqlServer, $sqlUser, $sqlPassword) or die("<br /><b>phpDrone error:</b> Can't start connection to the database. SQL said: <b>".mysql_error()."</b><br />Please check your <b>_droneSettings.php</b> file.");
-            mysql_select_db($sqlDatabase,$this->con) or die("<b>phpDrone error:</b> Can't find database <b>{$sqlDatabase}</b> on server <b>{$sqlServer}</b>.<br />Please check your <b>_droneSettings.php</b> file.");
+            set_error_handler("silentDeath");
+            $this->con = mysql_connect($sqlServer, $sqlUser, $sqlPassword) or throwDroneError("Can't start connection to the database. <br />SQL said: <b>".mysql_error()."</b><br />Please check your <b>_droneSettings.php</b> file.");;
+            mysql_select_db($sqlDatabase,$this->con) or throwDroneError("Can't find database <b>{$sqlDatabase}</b> on server <b>{$sqlServer}</b>.<br />Please check your <b>_droneSettings.php</b> file.");
+            restore_error_handler();
+
             $this->tableName = $table;
             $this->tableExists = true;
 
@@ -99,7 +102,7 @@ class Database
                     eval("\$this->types['".mysql_field_name($qry, $f)."'] = ".mysql_field_type($qry, $f).";");
                 }
                 if (!isset($this->id))
-                    die("<b>phpDrone error:</b> Table <b>{$sqlServer}.{$sqlDatabase}.{$this->tableName}</b> has no primary key.");
+                    throwDroneError("Table <b>{$sqlServer}.{$sqlDatabase}.{$this->tableName}</b> has no primary key.");
                 mysql_free_result($qry);
                 $this->data = array();
             }
@@ -108,7 +111,7 @@ class Database
             return $this->tableExists;
         }
         else
-            die("<b>phpDrone error:</b> sqlEngine not defined in <b>_droneSettings.php</b>.");
+            throwDroneError("sqlEngine not defined or invalid in <b>_droneSettings.php</b>.");
 
     }
 
@@ -116,7 +119,7 @@ class Database
     {
         $qry =mysql_query($query,$this->con);
         if (!$qry)
-            die("Querry was:<br /><b>".$query."</b><br /><br /><b>phpDrone error:</b> Database querry error:<br /> <b>".mysql_error()."</b>.");
+            throwDroneError("<b>Database error:</b> ".mysql_error()."<br /> <b>Querry was:</b> ".$query."</b>.");
         return $qry;
     }
 
@@ -188,7 +191,7 @@ class Database
                 if (array_get("name",$args[0]))
                     $this->fields[array_get("name",$args[0])] = new DBField($args[0]);
                 else
-                    die("<b>phpDrone error:</b> You try to add an database field withouth a name.");
+                    throwDroneError("You try to add an database field withouth a name.");
             }
             else
                 if (count($args)==2)
@@ -196,10 +199,10 @@ class Database
                     $this->fields[$args[0]] = new DBField(array("name"=>$args[0],"type"=>$args[1]));
                 }
                 else
-                    die("<b>phpDrone error:</b> Method <b>{$method}</b> recienes 1 or 2 arguments. Recieved:".count($args));
+                    throwDroneError("Method <b>{$method}</b> recienes 1 or 2 arguments. Recieved:".count($args));
         }
         else
-            die("<b>phpDrone error:</b> You tried to add a field to existing table '<b>{$this->tableName}</b>'");
+            throwDroneError("You tried to add a field to existing table '<b>{$this->tableName}</b>'");
     }
 
 
@@ -211,7 +214,7 @@ class Database
         {
             $data = explode("=",$item);
             if (count($data)!=2)
-                die("<b>phpDrone error:</b> Illegal argument supplied to <b>setData</b>: {$item}");
+                throwDroneError("Illegal argument supplied to <b>setData</b>: {$item}");
             else
                 $vars[trim($data[0])] = trim($data[1]);
         }
@@ -228,7 +231,7 @@ class Database
             if (isset($this->types[$key]))
                 $this->data[$id][$key] = $value;
             else
-                die("<b>phpDrone error:</b> Trying to set unknown field <b>{$key}</b> on table <b>{$this->tableName}</b>!");
+                throwDroneError("Trying to set unknown field <b>{$key}</b> on table <b>{$this->tableName}</b>!");
         return $id;
     }
 
@@ -244,7 +247,7 @@ class Database
         {
             $data = explode("=",$item);
             if (count($data)!=2)
-                die("<b>phpDrone error:</b> Illegal argument supplied to <b>delData</b>: {$item}");
+                throwDroneError("Illegal argument supplied to <b>delData</b>: {$item}");
             else
                 $this->toDelete[$step][trim($data[0])] = trim($data[1]);
         }
@@ -259,7 +262,7 @@ class Database
             return $result;
         }
         else
-            die("<b>phpDrone error:</b> Call to undefined method <b>Database->".$method."()</b>");
+            throwDroneError("Call to undefined method <b>Database->".$method."()</b>");
     }
 
 

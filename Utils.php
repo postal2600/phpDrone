@@ -69,4 +69,49 @@ function advHttpQuery($r_query="")
     return $result;
 }
 
+function throwDroneError($msg)
+{
+    set_error_handler("handleDroneErrors");
+    trigger_error($msg,E_USER_ERROR);
+    restore_error_handler();
+}
+
+function printStackTrace()
+{
+    $stack = debug_backtrace();
+    foreach($stack as $item)
+        if ($item['function']!="printStackTrace" &&
+            $item['function']!="handleDroneErrors" &&
+            $item['function']!="trigger_error" &&
+            $item['function']!="throwDroneError")
+            print "<b>File:</b> {$item['file']}, <b>line</b> {$item['line']}, <b>in</b> {$item['function']}<br />";
+}
+
+function handleDroneErrors($errno, $errstr, $errfile, $errline)
+{
+    print "<b>phpDrone error:</b> <br />";
+    if (preg_match_all('/require\(_droneSettings\.php\)/',$errstr,$some))
+    {
+        print "Your project does not have a <b>_droneSettings.php</b> file.<br />";
+        die();
+    }
+    else
+        print $errstr."<br />";
+    
+    set_error_handler("handleDroneErrors");
+    require("_droneSettings.php");
+    restore_error_handler();
+    
+    if ($debugMode)
+    {
+        print "<br /><b>Traceback:</b><br />";
+        printStackTrace();
+    }
+    die();
+}
+
+function silentDeath()
+{
+    return True;
+}
 ?>

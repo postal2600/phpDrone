@@ -49,7 +49,7 @@ class Form
         else
         {
             //this wil be replaced later with a nicer error
-            die("<b>phpDrone error:</b> addInput takes at least one argument.");
+            throwDroneError("Method addInput takes at least one argument.");
         }
     }
     
@@ -59,7 +59,7 @@ class Form
             eval("\$this->".$method."_p(\$args);");
         else
             //this wil be replaced later with a nicer error
-            die("<b>phpDrone error:</b> Call to undefined method Form->".$method."()");
+            throwDroneError("Call to undefined method Form->".$method."()");
     }
     
 
