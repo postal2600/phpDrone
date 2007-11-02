@@ -66,20 +66,22 @@ class Input
             $values = array();
             $pas=0;
             $hasSelected = False;
-            foreach ($this->validator['regExp'] as $key=>$value)
+            foreach ($this->validator['regExp'] as $item)
             {
                 $values[$pas] = array();
-                $values[$pas]["key"] = $key;
-                $values[$pas]["value"] = $value;
-                if ((array_key_exists($this->name,$this->request) && ($value==$this->request[$this->name])) || $value==$this->def)
+                $values[$pas]["key"] = $item[0];
+                $values[$pas]["value"] = $item[1];
+                if ((array_key_exists($this->name,$this->request) && ($values[$pas]["key"]==$this->request[$this->name])) || (isset($item[2]) && $item[2]))
                 {
-                    $values[$pas]["selected"] = "selected='selected'";
+                    $values[$pas]["selected"] = True;
                     $hasSelected = True;
                 }
                 $pas++;
             }
+
             if (!$hasSelected)
-                $values[0]["selected"] = "selected='selected'";
+                $values[0]["selected"] = True;
+                
             $template->write("values",$values);
         }
         return $template->getBuffer();
@@ -87,8 +89,57 @@ class Input
 
     function write_file($template)
     {
-        // al what is needed for tyhis input, is handeled in the write() method
+        // al what is needed for this input, is handeled in the write() method
         // (the value can't be set for a file input). So we return the buffer back.
+        return $template->getBuffer();
+    }
+
+    function write_checkbox($template)
+    {
+        if (gettype($this->validator['regExp'])=="array")
+        {
+            $values = array();
+            $pas=0;
+            foreach ($this->validator['regExp'] as $item)
+            {
+                $values[$pas] = array();
+                $values[$pas]["key"] = $item[0];
+                $values[$pas]["value"] = $item[1];
+                if (array_key_exists($this->name,$this->request) && in_array($values[$pas]["key"],$this->request[$this->name]) || isset($item[2]) && $item[2])
+                    $values[$pas]["selected"] = True;
+                $pas++;
+            }
+            
+            $template->write("values",$values);
+        }
+        return $template->getBuffer();
+    }
+
+    function write_radio($template)
+    {
+        if (gettype($this->validator['regExp'])=="array")
+        {
+            $values = array();
+            $pas=0;
+            $hasSelected = False;
+            foreach ($this->validator['regExp'] as $item)
+            {
+                $values[$pas] = array();
+                $values[$pas]["key"] = $item[0];
+                $values[$pas]["value"] = $item[1];
+                if ((array_key_exists($this->name,$this->request) && ($values[$pas]["key"]==$this->request[$this->name])) || (isset($item[2]) && $item[2]))
+                {
+                    $values[$pas]["selected"] = True;
+                    $hasSelected = True;
+                }
+                $pas++;
+            }
+
+            if (!$hasSelected)
+                $values[0]["selected"] = True;
+
+            $template->write("values",$values);
+        }
         return $template->getBuffer();
     }
 
@@ -126,7 +177,7 @@ class Input
 
     function validate()
     {
-        if ($this->type=="select")
+        if ($this->type=="select" || $this->type=="checkbox" || $this->type=="radio")
         {
             foreach ($this->validator['regExp'] as $key=>$value)
             {

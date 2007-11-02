@@ -5,7 +5,7 @@
     {%end-if%}
     <select id='{%inputName%}' name='{%inputName%}'>
         {%for item in values%}
-            <option value='{%item.key%}' {%item.selected%}>{%item.value%}</option>
+            <option value='{%item.key%}' {%if item.selected%}selected='selected'{%end-if%}>{%item.value%}</option>
         {%end-for%}
     </select>
 {%end-block%}

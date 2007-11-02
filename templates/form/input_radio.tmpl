@@ -1,0 +1,9 @@
+{%block droneInput%}
+    <label for='{%inputName%}'>{%inputLabel%}</label>
+    {%if inputError%}
+        <div class='error'><span>Error: </span>{%inputError%}</div>
+    {%end-if%}
+    {%for item in values%}
+        <input type="radio" id='{%inputName%}' name='{%inputName%}' value='{%item.key%}' {%if item.selected%}checked='checked'{%end-if%}><span class='checkboxValue'>{%item.value%}</span><span class="checkboxDelimiter">&nbsp;</span>
+    {%end-for%}
+{%end-block%}
