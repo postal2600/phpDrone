@@ -1,4 +1,4 @@
-function scramble(text)
+function obfuscate(text)
 {
     document.write(text);
 }

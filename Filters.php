@@ -16,12 +16,12 @@ function filter_inc($input)
     return $input+=1;
 }
 
-function filter_scramble($input)
+function filter_obfuscate($input)
 {
     $text = preg_split("//",$input);
     $text = implode("'+'",$text);
-    $result = "<script type='text/javascript' src='phpDrone/res/scripts/scrambler.js' /></script>\n";
-    $result .= "<script type='text/javascript'>scramble('{$text}')</script>";
+    $result = "<script type='text/javascript' src='phpDrone/res/scripts/obfuscater.js' /></script>\n";
+    $result .= "<script type='text/javascript'>obfuscate('{$text}')</script>";
     return $result;
 }
 ?>

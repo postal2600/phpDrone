@@ -111,7 +111,10 @@ class Template
             //apply filters
             if (count($pieces)>1)
                 for ($f=1;$f<count($pieces);$f++)
+                if (function_exists("filter_".$pieces[$f]))
                     eval('$val=filter_'.$pieces[$f].'("'.$val.'");');
+                else
+                    die("phpDrone error: Unknown filter: <b>{$pieces[$f]}</b>.");
 
             $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|").'(?:[ ]*|)%}/',$val,$output);
         }
@@ -288,8 +291,9 @@ class Template
             $output = $this->getBuffer();
             if ($debugMode)
             {
+                require("ver.php");
                 $codeSize = sprintf("%.2f", strlen($output)/1024);
-                $output .= "<!--This will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'><b>".$codeSize."</b> kb built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v0.1 BETA</div>";
+                $output .= "<!--This will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'><b>".$codeSize."</b> kb built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v{$phpDroneVersion}</div>";
             }
             print $output;
         }
