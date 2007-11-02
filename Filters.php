@@ -27,7 +27,24 @@ function filter_obfuscate($input)
 
 function filter_formatTime($input,$format)
 {
-    $input = (int) $input;
     return date($format,$input);
+}
+
+function filter_htmlSafe($input)
+{
+    $trans = get_html_translation_table(HTML_ENTITIES);
+    return str_replace("\n","<br />",str_replace(" ","&nbsp;",strtr($input,$trans)));
+}
+
+function filter_droneSafe($input)
+{
+    //temporary
+    return str_replace("{","<span>{</span>",$input);
+}
+
+function filter_phpSafe($input)
+{
+    //temporary
+    return str_replace("$","<span>$</span>",$input);
 }
 ?>
