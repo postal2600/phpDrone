@@ -71,7 +71,7 @@ class Input
     {
         if (method_exists($this,"write_{$this->type}"))
         {
-            $template = new Template("phpDrone/templates/form/input_{$this->type}.tmpl");
+            $template = new Template("?form/input_{$this->type}.tmpl");
             $template->vars = $upperTemplate->vars;
             $template->write("inputLabel",$this->label);
             $template->write("inputName",$this->name);

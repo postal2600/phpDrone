@@ -19,11 +19,20 @@ class Template
         require ("_droneSettings.php");
         if ($debugMode)
             $this->startTime = microtime();
-        if (strpos($template,".tmpl"))
-            $filename = $template;
+        if ($template{0}=="?")
+        {   
+            if (isset($templateDir) && file_exists($templateDir.substr($template,1)))
+                $filename = $templateDir.substr($template,1);
+            else
+                $filename = "phpDrone/templates/".substr($template,1);
+        }
         else
-            $filename = "templates/{$template}.tmpl";
-        
+            if (isset($templateDir))
+                $filename = $templateDir.$template;
+            else
+                $filename = "templates/".$template;
+                
+                
         $this->template = "";
         $this->buildTemplate($filename);
         
@@ -39,7 +48,7 @@ class Template
     }
 
     function solveInheritance($templateFile)
-    {
+    {        
         $handle = fopen($templateFile, "r");
         $templateContent = fread($handle, filesize($templateFile));
         fclose($handle);

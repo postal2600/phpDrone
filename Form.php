@@ -4,7 +4,7 @@ require ("Captcha.php");
 class Form
 {
 
-    function __construct($onSuccess,$defaults)
+    function __construct($onSuccess,$defaults=NULL)
     {
         $this->onSuccess = $onSuccess;
         $this->inputs = array();
@@ -27,7 +27,7 @@ class Form
             else
                 $this->inputs[$len] = new Captcha($label,$name);
 
-            if (array_key_exists($name,$this->defaults))
+            if (isset($this->defaults[$name]))            
                 $this->inputs[$len]->def = $this->defaults[$name];
 
 

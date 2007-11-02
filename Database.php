@@ -26,7 +26,7 @@ class DBField
     {
         if (!$this->size)
             die("phpDrone error: Please supply a size argument for database field '<b>{$this->name}</b>'.");
-        $template = new Template("phpDrone/templates/database/field_{$this->type}.tmpl");
+        $template = new Template("?database/field_{$this->type}.tmpl");
         $template->write("fieldName",$this->name);
         $template->write("fieldSize",$this->size);
         $template->write("fieldNull",$this->null);
@@ -36,7 +36,7 @@ class DBField
 
     function getTextForInt()
     {
-        $template = new Template("phpDrone/templates/database/field_{$this->type}.tmpl");
+        $template = new Template("?database/field_{$this->type}.tmpl");
         $template->write("fieldName",$this->name);
         $template->write("fieldSize",$this->size);
         $template->write("fieldNull",$this->null);
@@ -138,7 +138,7 @@ class Database
             foreach($this->fields as $field)
                 array_push($txtFields,$field->getCreateText());
 
-            $template = new Template("phpDrone/templates/database/qry_create_table.tmpl");
+            $template = new Template("?database/qry_create_table.tmpl");
             $template->write("tableName",$this->tableName);
             $template->write("tableFields",join(",",$txtFields));
             $this->exec_qry($template->getBuffer());
