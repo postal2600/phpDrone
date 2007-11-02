@@ -111,16 +111,17 @@ class Template
             $v = $this->vars[$statement];
             eval("\$result='".$v."';");
             if (!$result)
-                print "###Before".$this->template;
-                $this->template = preg_replace ('/(.*){%(?:\s|)if '.$ifStatement.'(?:\s|)%}.*?{%(?:\s|)end-if(?:\s|)%}(.*)/s','',$this->template);
-                print "###After".$this->template;
+                //{%(?:\s|)if chestii(?:\s|)%}(?:.|[\s]*)*{%(?:\s|)end-if(?:\s|)%}
+                print "BEFORE: ".$this->template."\n";
+                $this->template = preg_replace ('/{%if inputError%}(?:.|[\\s])*{%end-if%}/','',$this->template);
+                print "AFTER: ".$this->template."\n";
         }
     }
 
     function getBuffer()
     {
         require ("_droneSettings.php");
-//         $this->compileTemplate();
+        $this->compileTemplate();
         $output = $this->template;
         //set the page title if one is defined in template
         $output = preg_replace ('/{%(?:\\s*|)title(?:\\s*|)%}/',$this->title,$output);
