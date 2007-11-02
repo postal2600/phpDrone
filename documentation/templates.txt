@@ -1,0 +1,342 @@
+###################################
+ATTENTION!!!
+
+This is not the final documentation. It's just a brief description of what you can do with phpDrone.
+This is intended for persons who will like to test the phpDrone or help me write the doc for it.
+###################################
+
+Here are some examples of how to use the phpDrone templateing system.
+
+SIMPLE VARIABLES EXAMPLE
+===== example.tmpl =====
+<html>
+    <body>
+        Hello {%fname%} {%lname%}! You are {%age%} years old.
+    </body>
+</html>
+=========================
+
+
+***** example.php *****
+<?php
+    include ("phpDrone/phpDrone.php");
+    $template = new Template('example.tmpl');
+    $template->write("fname","John");
+    $template->write("lname","Smith");
+    $template->write("age","22");
+    $template->render();
+?>
+***********************
+
+##### result #####
+<html>
+    <body>
+        Hello John Smith! You are 22 years old.
+    </body>
+</html>
+##################
+
+
+@@@@@ explenations @@@@@
+ - $template = new Template('example.tmpl')
+    the template file (example.tmpl) will be search in the following locations:
+    1. in the same directory as the php script
+    2. in the template directorz specified in the config file (see config.txt)
+    3. in a potentially existing "templates/" directory on the same directory level as the php script.
+    if the template file is not found in none of those directories, a phpDrone error is issued.
+@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+-------------------------------------------------------------------------------------------------------------------
+
+SAME VARIABLES EXAMPLE, BUT WITH FILTERS
+===== example.tmpl =====
+<html>
+    <body>
+        Hello {%fname|toLower%} {%lname|toLower%}! You are {%age%} years old.
+    </body>
+</html>
+=========================
+
+
+***** example.php *****
+<?php
+    include ("phpDrone/phpDrone.php");
+    $template = new Template('example.tmpl');
+    $template->write("fname","John");
+    $template->write("lname","Smith");
+    $template->write("age","22");
+    $template->render();
+?>
+***********************
+
+##### result #####
+<html>
+    <body>
+        Hello john smith! You are 22 years old.
+    </body>
+</html>
+##################
+
+@@@@@ explenations @@@@@
+Filters can be also applyed to complex object variables (multi-level variables). See below.
+@@@@@@@@@@@@@@@@@@@@@@@@
+
+-------------------------------------------------------------------------------------------------------------------
+
+OBJECT VARIABLES EXAMPLE (ARRAYS/CLASS WITH MEMBERS) / FOR STATEMEN EXAMPLE
+===== example.tmpl =====
+<html>
+    <body>
+        My favourite colors are:
+        {%for color in colors%}
+            {%color%}
+        {%end-for%}
+    </body>
+</html>
+=========================
+
+
+***** example.php *****
+<?php
+    include ("phpDrone/phpDrone.php");
+    $template = new Template('example.tmpl');
+    $myColors = Array("Red","Green","Blue","Gray");
+    $template->write("colors",$myColors);
+    $template->render();
+?>
+***********************
+
+##### result #####
+<html>
+    <body>
+        My favourite colors are:
+
+            Red
+            Green
+            Blue
+            Gray
+    </body>
+</html>
+##################
+
+
+-------------------------------------------------------------------------------------------------------------------
+
+MORE COMPLEX OBJECT VARIABLES EXAMPLE (MULTI-LEVEL VARIABLES)
+===== example.tmpl =====
+<html>
+    <body>
+        List of employees:
+
+        {%for individual in persons%}
+            {%individual.fname%} {%individual.lname%}: age {%individual.age%}
+        {%end-for%}
+    </body>
+</html>
+=========================
+
+
+***** example.php *****
+<?php
+    include ("phpDrone/phpDrone.php");
+    $template = new Template('example.tmpl');
+    $peoples = Array(Array("fname"=>"John","lname"=>"Smith","age"=>"22"),
+                      Array("fname"=>"Anderson","lname"=>"Thomas","age"=>"18"),
+                      Array("fname"=>"Billy","lname"=>"Joe","age"=>"12"),
+                     );
+    $template->write("persons",$peoples);
+    $template->render();
+?>
+***********************
+
+
+##### result #####
+<html>
+    <body>
+        List of employees:
+
+            John Smith: age 22
+            Anderson Thomas: age 18
+            Billy Joe: age 12
+    </body>
+</html>
+##################
+
+
+-------------------------------------------------------------------------------------------------------------------
+
+IF STATEMENT EXAMPLE
+===== example.tmpl =====
+<html>
+    <body>
+        {%if number0%}
+            There is a number0, yeeei!!!
+        {%else%}
+            Dissapointment... no number0 ...
+        {%end-if%}
+
+        {%if number1>15%}
+            Number1 is ok ...
+        {%else%}
+            Number1 is NOT ok ...
+        {%end-if%}
+
+        {%if number2>21%}
+            Number2 is ok ...
+        {%end-if%}
+
+        {%if number3>10 && number3<20 %}
+            Number3 is ok ...
+        {%else%}
+            Number3 is NOT ok ...
+        {%end-if%}
+    </body>
+</html>
+=========================
+
+
+***** example.php *****
+<?php
+    include ("phpDrone/phpDrone.php");
+    $template = new Template('example.tmpl');
+    $template->write("number1",13);
+    $template->write("number2",22);
+    $template->write("number3",16);
+    $template->render();
+?>
+***********************
+
+
+##### result #####
+<html>
+    <body>
+            Dissapointment... no number0 ...
+            Number1 is NOT ok ...
+            Number2 is ok ...
+            Number3 is ok ...
+    </body>
+</html>
+##################
+
+-------------------------------------------------------------------------------------------------------------------
+
+IF STATEMENT INSIDE FOR STATEMENT EXAMPLE (MULTILEVEL)
+===== example.tmpl =====
+<html>
+    <body>
+        List of employees:<br /><br />
+
+        {%for individual in persons%}
+            {%if individual.age >= 18%}
+                {%individual.fname%} {%individual.lname%}: age {%individual.age%}
+            {%end-if%}
+        {%end-for%}
+    </body>
+</html>
+=========================
+
+
+***** example.php *****
+<?php
+    include ("phpDrone/phpDrone.php");
+    $template = new Template('example.tmpl');
+    $peoples = Array(Array("fname"=>"John","lname"=>"Smith","age"=>"22"),
+                      Array("fname"=>"Anderson","lname"=>"Thomas","age"=>"18"),
+                      Array("fname"=>"Billy","lname"=>"Joe","age"=>"12"),
+                     );
+    $template->write("persons",$peoples);
+    $template->render();
+?>
+***********************
+
+
+##### result #####
+<html>
+    <body>
+        List of employees:<br /><br />
+
+            John Smith: age 22
+            Anderson Thomas: age 18
+    </body>
+</html>
+##################
+
+
+-------------------------------------------------------------------------------------------------------------------
+
+
+TEMPLATE INHERITANCE
+===== base.tmpl =====
+<html>
+    <body>
+        {%block header%}
+        {%end-block%}
+
+        ==== Some text that will apear ====
+
+        {%block content%}
+        {%end-block%}
+
+        ==== Some text that will apear part 2====
+
+        {%block footer%}
+        {%end-block%}
+    </body>
+</html>
+=========================
+
+
+===== example.tmpl =====
+{%extends base.tmpl%}
+
+{%block header%}
+Here comes the header
+{%end-block%}
+
+{%block content%}
+Here comes the content.
+You can write vars in here, watch: {%firstVar%} and {%secondVar%}.
+You can write here evreything that is ilustrated above in the doc (for,if...).
+{%end-block%}
+
+{%block footer%}
+Here comes the footer
+{%end-block%}
+=========================
+
+
+***** example.php *****
+<?php
+    include ("phpDrone/phpDrone.php");
+    $template = new Template('example.tmpl');
+    $template->write("firstVar","the first var");
+    $template->write("secondVar","the second var");
+    $template->render();
+?>
+***********************
+
+
+##### result #####
+<html>
+    <body>
+        Here comes the header
+
+        ==== Some text that will apear ====
+
+        Here comes the content.
+        You can write vars in here, watch: the first var and the second var.
+        You can write here evreything that is ilustrated above in the doc (for,if...).
+
+        ==== Some text that will apear part 2====
+
+        Here comes the footer
+    </body>
+</html>
+##################
+
+
+@@@@@ explenations @@@@@
+The base.tmpl template file must be in the same directory as the example.tmpl template file.
+@@@@@@@@@@@@@@@@@@@@@@@@
+

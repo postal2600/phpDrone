@@ -15,6 +15,9 @@ class Template
             $this->startTime = microtime();
         if ($template{0}=="?")
         {   
+            if (file_exists(substr($template,1)))
+                $filename = substr($template,1);
+            else
             if (isset($templateDir) && file_exists($templateDir.substr($template,1)))
                 $filename = $templateDir.substr($template,1);
             else
@@ -24,10 +27,16 @@ class Template
                     $filename = "phpDrone/templates/".substr($template,1);
         }
         else
+            if (file_exists($template))
+                $filename = $template;
+            else
             if (isset($templateDir))
                 $filename = $templateDir.$template;
             else
-                $filename = "templates/".$template;
+                if (file_exists("templates/".$template))
+                    $filename = "templates/".$template;
+                else
+                    die("phpDrone error: Template file templates/<b>{$template}</b>.");
                 
                 
         $this->template = "";

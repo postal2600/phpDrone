@@ -244,7 +244,7 @@ class Database
 
     function __destruct()
     {
-        mysql_close($this->con);
+//         mysql_close($this->con);
     }
 
 }
