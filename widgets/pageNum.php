@@ -18,7 +18,8 @@
         case "setPref":
             session_start();
             $_SESSION["drone_pn_{$_GET['prefName']}"] = $_GET['pref'];
-            header("Location: {$_SERVER['HTTP_REFERER']}");
+            $url = querySetVar($_SERVER['HTTP_REFERER'],"page",1);
+            header("Location: {$url}");
             break;
     }
 

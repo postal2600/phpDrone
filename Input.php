@@ -21,7 +21,17 @@ class Input
         $this->error = "";
         //used only for selects. determines what was the default value set, to check if changed in case of a mandatory field
         $this->initial = null;
-        $this->attributes = array("name"=>$name,"id"=>$name);
+        
+        $this->attributes = array("name"=>$name,"id"=>$name,"class"=>"textInput");
+        if ($type=="submit")
+            $this->setAttribute("class","buttonInput");
+		elseif ($type=="radio")
+		    $this->setAttribute("class","radioButton");
+		elseif ($type=="checkbox")
+		    $this->setAttribute("class","checkBox");
+		elseif ($type=="select")
+		    $this->setAttribute("class","selectInput");
+
     }
 
     function setRequestData(&$reqData)
@@ -39,7 +49,11 @@ class Input
                 for($f=0;$f<count($defVal);$f++)
                 {
                     $valType = gettype($defVal[$f]);
-	                if (isset($this->initial) && (($valType=='array' && $defVal[$f][0]==$this->initial) || ($valType!='array' && $defVal[$f]==$this->initial)) )
+					if ($valType=='array')
+					    $defaultSetValue = $defVal[$f][0];
+					else
+					    $defaultSetValue = $defVal[$f];
+	                if (isset($this->initial) && ($defaultSetValue==$this->initial) )
 	                {
 	                    unset($this->initial);
 	                    $isSelected = true;
@@ -50,22 +64,31 @@ class Input
                         	$defVal[$f] = array($s_value,$s_text,True);
 						}
 						else
+						{
 						    $defVal[$f] = array($defVal[$f],$defVal[$f],True);
+	  					}
 					}
-	                elseif (isset($defVal[$f][2]) && $defVal[$f][2] && !$isSelected)
-	                    if ($valType=="array")
-	                    	$this->initial = $defVal[$f][0];
-						else
-						    $this->initial = $defVal[$f];
+					elseif (isset($defVal[$f][2]) && $defVal[$f][2] && !$isSelected)
+					    $coderDefaultPos = $f;
 				}
 			}
+            if (isset($coderDefaultPos) && !$isSelected)
+            {
+                $valType = gettype($defVal[$coderDefaultPos]);
+                if ($valType=="array")
+                	$this->initial = $defVal[$coderDefaultPos][0];
+				else
+			    	$this->initial = $defVal[$coderDefaultPos];
+			}
+			
             $this->defaultValue = $defVal;
         }
     }
 
     function setAttribute($attr,$value)
     {
-        $this->attributes[$attr] = $value;
+        if ($attr != "name")
+        	$this->attributes[$attr] = $value;
     }
 
     function write_text($template)

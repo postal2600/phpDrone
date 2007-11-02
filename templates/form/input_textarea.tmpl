@@ -10,5 +10,5 @@
     {%if inputError%}
         <span class='inputError'><span>Error: </span>{%inputError%}</span>
     {%end-if%}
-    <textarea class='textInput' rows='5' cols='9' {%for item in attributes%}{%for_key%}='{%item%}' {%end-for%}>{%inputValue%}</textarea>
+    <textarea rows='5' cols='9' {%for item in attributes%}{%for_key%}='{%item%}' {%end-for%}>{%inputValue%}</textarea>
 {%end-block%}

@@ -11,5 +11,5 @@
     {%if inputError%}
         <span class='inputError'><span>Error: </span>{%inputError%}</span>
     {%end-if%}
-    <input class='textInput' type='text' value='{%inputValue%}' {%for item in attributes%}{%for_key%}='{%item%}' {%end-for%}/>
+    <input type='text' value='{%inputValue%}' {%for item in attributes%}{%for_key%}='{%item%}' {%end-for%}/>
 {%end-block%}

@@ -1,22 +1,34 @@
 {%block htmlWidget%}
     <div class="pageNum">
-        <div>
+        {%if9 showPages%}
+        <div class="pageNumPages">
             {%itemCount%} {%itemLabel%}:
             {%for item in pages%}
+            
                 {%if for_first%}
-                    {%if2 item+1==currentPage%}
+                    {%if2 item==currentPage%}
                         <span class="disabledPageNumBtn">&laquo;Prev</span>
                     {%else2%}
                         <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage-1%}" title="Go to page {%currentPage-1%}">&laquo;Prev</a>
                     {%end-if2%}
                 {%end-if%}
-                {%if item+1==currentPage%}
-                    <span title="You are on page {%item+1%}">{%item+1%}</span>
+                
+                {%if8 cutedLow&&for_first%}
+                    <span class="andSoOn">...</span>
+                {%end-if8%}
+                
+                {%if item==currentPage%}
+                    <span title="You are on page {%item%}">{%item%}</span>
                 {%else%}
-                    <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%item+1%}" title="Go to page {%item+1%}">{%item+1%}</a>
+                    <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%item%}" title="Go to page {%item%}">{%item%}</a>
                 {%end-if%}
+                
+                {%if8 cutedHigh&&for_last%}
+                    <span class="andSoOn">...</span>
+                {%end-if8%}
+                
                 {%if for_last%}
-                    {%if2 item+1==currentPage%}
+                    {%if2 item==currentPage%}
                         <span class="disabledPageNumBtn">Next&raquo;</span>
                     {%else2%}
                         <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage+1%}" title="Go to page {%currentPage+1%}">Next&raquo;</a>
@@ -25,7 +37,10 @@
 
             {%end-for%}
         </div>
-        <div>
+        {%end-if9%}
+        
+        {%if9 showPrefs%}
+        <div  class="pageNumPrefs">
             {%currentPerPage%} per page :
             {%for pref in prefs%}
                 {%if pref==currentPerPage%}
@@ -35,5 +50,13 @@
                 {%end-if%}
             {%end-for%}
         </div>
+        {%end-if9%}
+        
+        {%if9 showQuickJump%}
+        <div class="pageNumQUickJump">
+            Quick jump:{%quickJumpSelector%}
+        </div>
+        {%end-if9%}
+        
     </div>
 {%end-block%}

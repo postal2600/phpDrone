@@ -64,6 +64,10 @@ class PageNum extends HTMLWidgets
         require("drone/settings.php");
         restore_error_handler();
         $this->droneURL = $droneURL;
+        $this->showPages = true;
+        $this->showPrefs = true;
+        $this->showQuickJump = true;
+
     }
 
     function setCount($count)
@@ -81,8 +85,35 @@ class PageNum extends HTMLWidgets
         $template->write("currentPerPage",$itemsPerPage);
         $template->write("prefs",$this->prefOptionList);
         $template->write("prefName",$this->prefName);
-        $template->write("pages",(int)ceil($this->itemCount/$itemsPerPage)-1);
+        $totalPages = (int)ceil($this->itemCount/$itemsPerPage);
+        $currentPage = $this->getCurrentPage();
+        $allPages = range(1,$totalPages);
+        if ($totalPages<$maxLinks)
+        	$pages = $allPages;
+		else
+		{
+			$lowerLimit = max(1, $currentPage-round($this->maxLinks/2));
+			$upperLimit = min($totalPages, $currentPage + ($this->maxLinks-($currentPage-$lowerLimit)));
+			if ($upperLimit-$lowerLimit<$this->maxLinks)
+			    $lowerLimit -= $this->maxLinks - ($upperLimit-$lowerLimit);
+            $pages = range($lowerLimit,$upperLimit);
+            if ($lowerLimit!=1)
+                $template->write("cutedLow","1");
+            if ($upperLimit!=$totalPages)
+                $template->write("cutedHigh","1");
+		}
+
+		$form = new Form(do_success);
+		$form->addInput("","select","page");
+		$form->inputs['page']->setDefault($allPages);
+		$form->inputs['page']->setAttribute("onchange","location=\"{$this->droneURL}/widgets/pageNum.php?action=setPage&amp;page=\"+this.value");
+
+        $template->write("quickJumpSelector",$form->getHTML());
+        $template->write("pages",$pages);
         $template->write("phpDroneURL",$this->droneURL);
+        $template->write("showPages",$this->showPages);
+        $template->write("showPrefs",$this->showPrefs);
+        $template->write("showQuickJump",$this->showQuickJump);
         return $template->getBuffer();
     }
 
@@ -96,7 +127,22 @@ class PageNum extends HTMLWidgets
         session_start();
         return Utils::array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0]);
     }
-    
+
+	function hidePages($bool=true)
+	{
+		$this->showPages = !$bool;
+	}
+
+	function hidePrefs($bool=true)
+	{
+		$this->showPrefs = !$bool;
+	}
+
+	function hideQuickJump($bool=true)
+	{
+		$this->showQuickJump = !$bool;
+	}
+
 }
 
 

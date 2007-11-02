@@ -223,7 +223,7 @@ class Template
                     eval("\$val =$ev;");
                     eval("\$type = gettype($ev);");
 
-                    if ($isSet)
+                    if ($isSet && $val)
                     {
                         if ($type=="string" && $val!="")
                             $val = "'".$val."'";
@@ -231,6 +231,8 @@ class Template
                         if ($toEval=="")
                             $toEval = "False";
                     }
+                    else
+                        $toEval = preg_replace('/'.addslashes($part).'/',"False",$toEval);
                 }
             }
             else
@@ -254,6 +256,7 @@ class Template
                         $toEval.= "['".$item."']";
                 }
             }
+             
             eval("\$result=$toEval;");
 
             if (!$result)
