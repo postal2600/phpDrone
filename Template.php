@@ -188,8 +188,8 @@ class Template
             
             if (!$result)
             {
-                //{%(?:[ ]*|)if item\.image%}(?:[^\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?)){%(?:[ ]*|)end-if(?:[ ]*|)%}
-                preg_match('/{%(?:[ ]*|)if '.$ifStatement.'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?)){%(?:[ ]*|)end-if(?:[ ]*|)%}/',$output,$capt);
+                //{%(?:[ ]*|)if section%}(?P<ifBlock>[^\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?))?{%(?:[ ]*|)end-if(?:[ ]*|)%}
+                preg_match('/{%(?:[ ]*|)if '.$ifStatement.'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if(?:[ ]*|)%}/',$output,$capt);
                 $output = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if(?:[ ]*|)%}/',$capt['elseBlock'],$output,1);
             }
             else
