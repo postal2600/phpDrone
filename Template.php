@@ -1,4 +1,5 @@
 <?php
+require('Filters.php');
 class Template
 {
     
@@ -85,24 +86,6 @@ class Template
         return $time-$this->startTime;
     }
 
-    private function filter_trunc($input)
-    {
-        if (strlen($input)>70)
-            return substr($input, 0, 70)." ...";
-        return $input;
-    }
-
-    private function filter_toLower($input)
-    {
-        return strtolower($input);
-    }
-    
-    private function filter_inc($input)
-    {
-        return $input+=1;
-    }
-
-    
     private function solveVar($input,$php_vars)
     {
         $output = $input;
@@ -128,7 +111,7 @@ class Template
             //apply filters
             if (count($pieces)>1)
                 for ($f=1;$f<count($pieces);$f++)
-                    eval('$val=$this->filter_'.$pieces[$f].'("'.$val.'");');
+                    eval('$val=filter_'.$pieces[$f].'("'.$val.'");');
 
             $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|").'(?:[ ]*|)%}/',$val,$output);
         }
