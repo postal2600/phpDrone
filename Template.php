@@ -103,6 +103,8 @@ class Template
         {
             $statement = trim($ifStatement);
             $v = addslashes($php_vars[$statement]);
+            print "<br />".$php_vars[$statement]."<br />";
+
             eval("\$result='$v';");
             if (!$result)
                 //{%(?:[ ]*|)if inputError%}(?:[\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}
@@ -134,7 +136,7 @@ class Template
                         $pacient = $php_vars[trim($bunch)];
 
                     $newContent = "";
-                    foreach ($pacient as $key => $value)
+                    foreach ($pacient as $value)
                     {
                         if (gettype($value)=="array" || gettype($value)=="object")
                         {
@@ -143,6 +145,7 @@ class Template
                             foreach($keys['key'] as $f_key)
                                 $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'.'.$f_key.'(?:[ ]*|)%}/',$value[$f_key],$builtBlock);
                             $builtBlock = $this->solveIf($builtBlock,$value);
+                            
                         }
                         else
                             $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'(?:[ ]*|)%}/',$value,$blockContent);
@@ -162,8 +165,8 @@ class Template
     
     function compileTemplate()
     {
-        $this->template = $this->solveIf($this->template,$this->vars);
         $this->template = $this->solveFor($this->template,$this->vars);
+        $this->template = $this->solveIf($this->template,$this->vars);
     }
 
     function getBuffer()
