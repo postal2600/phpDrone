@@ -62,7 +62,7 @@ class Form
     }
     
 
-    function getHTML()
+    function getHTML($upperTemplate=False)
     {
         $isValid = true;
         $txtresult = "";
@@ -85,9 +85,9 @@ class Form
         
         foreach ($this->inputs as $item)
             if (isset($this->valueFlag))
-                $txtresult .= $item->writeValueless();
+                $txtresult .= $item->writeValueless($upperTemplate);
             else
-                $txtresult .= $item->write();
+                $txtresult .= $item->write($upperTemplate);
         return $txtresult;
     }
 }

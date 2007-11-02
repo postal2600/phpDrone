@@ -67,9 +67,10 @@ class Input
         return $template->getBuffer();
     }
 
-    function write()
+    function write($upperTemplate="")
     {
         $template = new Template("phpDrone/templates/form/input_{$this->type}.tmpl");
+        $template->vars = $upperTemplate->vars;
         $template->write("inputLabel",$this->label);
         $template->write("inputName",$this->name);
         if ($this->error)
@@ -79,10 +80,10 @@ class Input
         return $result;
     }
 
-    function writeValueless()
+    function writeValueless($upperTemplate="")
     {
         $_POST[$this->name] = "";
-        return $this->write();
+        return $this->write($upperTemplate);
     }
 
 
