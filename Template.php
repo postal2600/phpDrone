@@ -153,7 +153,8 @@ class Template
                 eval("\$isSet = isset($ev);");
                 eval("\$val =$ev;");
                 eval("\$type = gettype($ev);");
-                
+
+
                 if ($isSet)
                 {
                     if ($type=="string" && $val!="")
@@ -163,6 +164,7 @@ class Template
                         $toEval = "False";
                 }
             }
+
             eval("\$result=$toEval;");
             
             if (!$result)
@@ -199,7 +201,13 @@ class Template
                 $type = gettype($php_vars[trim($bunch)]);
                 if ($type=="array" || $type=="object" || $type=="string")
                 {
-                    if ($type=="string")
+                    if (is_numeric($php_vars[trim($bunch)]))
+                    {
+                        $pacient = array();
+                        for ($f=0;$f<=$php_vars[trim($bunch)];$f++)
+                            $pacient[$f] = $f;
+                    }
+                    else if ($type=="string")
                         $pacient = preg_split('//', $php_vars[trim($bunch)], -1, PREG_SPLIT_NO_EMPTY);
                     else
                         $pacient = $php_vars[trim($bunch)];
