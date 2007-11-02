@@ -212,7 +212,7 @@ class Database
 
         foreach($args as $item)
         {
-            $data = explode("=",$item);
+            $data = preg_split("/\=/",$item,2);
             if (count($data)!=2)
                 throwDroneError("Illegal argument supplied to <b>setData</b>: {$item}");
             else

@@ -233,7 +233,10 @@ class Template
                 {
                     if (isset($php_vars[$toEval]))
                     {
-                        $toEval = '"'.$php_vars[$toEval].'"';
+                        if (gettype($php_vars[$toEval])=="string")
+                            $toEval = '"'.$php_vars[$toEval].'"';
+                        else
+                            $toEval = count($php_vars[$toEval]);
                         if ($toEval=="")
                             $toEval = "False";
                     }

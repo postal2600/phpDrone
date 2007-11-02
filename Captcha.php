@@ -70,7 +70,10 @@ class Captcha extends Input
         $value = $_REQUEST[$this->name];
         $captchaId = $_REQUEST['captchaId'];
         if (strtolower($_SESSION[$captchaId])==strtolower($value))
+        {
+            unset($_SESSION[$captchaId]);
             return true;
+        }
         $this->error = "The text didn't match image";
         return false;
     }

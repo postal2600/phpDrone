@@ -27,7 +27,7 @@ function filter_obfuscate($input)
 
 function filter_formatTime($input,$format)
 {
-    return date($format,$input);
+    return date($format,(int)$input);
 }
 
 function filter_htmlSafe($input)
@@ -47,4 +47,10 @@ function filter_phpSafe($input)
     //temporary
     return str_replace("$","<span>$</span>",$input);
 }
+
+function filter_stripTags($input)
+{
+    return strip_tags($input);
+}
+
 ?>
