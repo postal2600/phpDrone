@@ -108,9 +108,19 @@ class Template
         preg_match_all('/{%([ ]*|)if (?P<ifStatement>[^\\}]*)%}/', $output, $ifs);
         foreach($ifs['ifStatement'] as $ifStatement)
         {
-            $statement = trim($ifStatement);
-            $v = addslashes($php_vars[$statement]);
-            eval("\$result='$v';");
+            $statement = preg_split("/\./",trim($ifStatement));
+            if (count($statement)==1)
+            {
+                $ev = "\$php_vars['".$statement[0]."']";
+                eval("\$result=$ev;");
+            }
+            else
+            {
+                $ev = "\$php_vars";
+                foreach ($statement as $item)
+                    $ev.= "['".$item."']";
+                eval("\$result=$ev;");
+            }
             if (!$result)
                 //{%(?:[ ]*|)if inputError%}(?:[\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}
                 $output = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\\\x00]*?){%(?:[ ]*|)end-if(?:[ ]*|)%}/','',$output,1);
@@ -149,11 +159,12 @@ class Template
                             $builtBlock = $blockContent;
                             foreach($keys['key'] as $f_key)
                                 $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'.'.$f_key.'(?:[ ]*|)%}/',$value[$f_key],$builtBlock);
-                            $builtBlock = $this->solveIf($builtBlock,$value);
                             
                         }
                         else
                             $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'(?:[ ]*|)%}/',$value,$blockContent);
+                        $this->vars[$item] = $value;
+                        $builtBlock = $this->compileTemplate($builtBlock,$this->vars);
                         $newContent .= $builtBlock;
                     }
 //                     $blockContent = preg_replace('/([\\\\<{%}>*\/])/','\\\\\1',$blockContent);
@@ -174,6 +185,8 @@ class Template
         $output = $this->solveFor($output,$phpVars);
         $output = $this->solveIf($output,$phpVars);
         $output = $this->solveVar($output,$phpVars);
+        //delete the rest of unused vars from template
+        $output = preg_replace ('/{%[^\\}]*%}/',"",$output);
         return $output;
     }
 
@@ -183,8 +196,6 @@ class Template
         $output = $this->compileTemplate($this->template,$this->vars);
         //take out reminders
         $output = preg_replace('/{%(?:[ ]*|)rem(?:[ ]*|)%}(?:[^\\x00]*){%(?:[ ]*|)end-rem(?:[ ]*|)%}/', '', $output);
-        //delete the rest of unused vars from template
-        $output = preg_replace ('/{%[^\\}]*%}/',"",$output);
         if (isset($compressHTML) && $compressHTML)
         {
             $output = preg_replace('/\n|\r\n|\t/', '', $output);
