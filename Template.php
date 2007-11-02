@@ -118,7 +118,7 @@ class Template
             $item = $fors['item'][$pas];
             //{%(?:[ ]|)for item in bunch%}(?P<ifblock>[^\x00]*){%end-for%} - get the block
             // get the if block content
-            preg_match('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?P<forblock>[^\\x00]*){%end-for%}/', $this->template, $forBlocksContent);
+            preg_match('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?P<forblock>[^\\x00]*?){%end-for%}/', $this->template, $forBlocksContent);
             $blockContent = $forBlocksContent['forblock'];
             if (isset($this->vars[trim($bunch)]))
             {
@@ -133,11 +133,15 @@ class Template
                     $newContent = "";
                     foreach ($pacient as $key => $value)
                     {
-                        $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'(?:[ ]*|)%}/',$value,$blockContent);
+                        if (gettype($value)=="array" || gettype($value)=="object")
+                            $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'.([^\\}|[\\ ]*)(?:[ ]*|)%}/','\\1',$blockContent);
+                        else
+                            $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'(?:[ ]*|)%}/',$value,$blockContent);
                         $newContent .= $builtBlock;
                     }
-                    $blockContent = preg_replace('/([\\\\<>*\/])/','\\\\\1',$blockContent);                    
-                    $this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}'.$blockContent.'{%end-for%}/',$newContent,$this->template);
+//                     $blockContent = preg_replace('/([\\\\<{%}>*\/])/','\\\\\1',$blockContent);
+                    //$this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}'.$blockContent.'{%end-for%}/',$newContent,$this->template);
+                    $this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for%}/',$newContent,$this->template,1,$count);
                 }
             }
             else
@@ -155,7 +159,7 @@ class Template
         $output = $this->template;
         $output = $this->injectVars($output);
         //take out comments
-        $output = preg_replace('/{%(?:[ ]*|)comment(?:[ ]*|)%}(?:[^\\x00]*){%(?:[ ]*|)end-comment(?:[ ]*|)%}/', '', $output);
+        $output = preg_replace('/{%(?:[ ]*|)rem(?:[ ]*|)%}(?:[^\\x00]*){%(?:[ ]*|)end-rem(?:[ ]*|)%}/', '', $output);
         //delete the rest of unused vars from template
         $output = preg_replace ('/{%[^\\}]*%}/',"",$output);
         if (isset($compressHTML) && $compressHTML)
@@ -175,7 +179,7 @@ class Template
         {
             $output = $this->getBuffer();
             if ($debugMode)
-                $output .= "<!--This will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'>Built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v1.0 BETA</div>";
+                $output .= "<!--This will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'>Built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v0.1 BETA</div>";
             print $output;
         }
         else
