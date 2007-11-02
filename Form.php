@@ -78,9 +78,12 @@ class Form
             
             if ($isValid)
             {
-                $this->valueFlag = true;
-                $meth = $this->onSuccess;
-                $txtresult .= $meth();
+                if ($this->onSuccess)
+                {
+                    $this->valueFlag = true;
+                    $meth = $this->onSuccess;
+                    $txtresult .= $meth();
+                }
             }
         }
         

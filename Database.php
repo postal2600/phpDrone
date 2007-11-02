@@ -68,6 +68,21 @@ class DBResult extends ArrayObject
             else
                 return $value;
     }
+    
+    function getGroupedBy($newK,$newId="")
+    {
+        $result = array();
+        if ($newId=="")
+            $newId="__id";
+        foreach ($this as $key=>$value)
+        {
+            $newKey = $value[$newK];
+            unset($value[$newK]);
+            $value[$newId] = $key;
+            $result[$newKey] = $value;
+        }
+        return $result;
+    }
 }
 
 class Database
@@ -75,13 +90,13 @@ class Database
     function __construct($table="")
     {
         set_error_handler("handleDroneErrors");
-        require("_droneSettings.php");
+        require("drone/settings.php");
         restore_error_handler();
         if (isset($sqlEngine)&&$sqlEngine=="mysql")
         {
             set_error_handler("silentDeath");
-            $this->con = mysql_connect($sqlServer, $sqlUser, $sqlPassword) or throwDroneError("Can't start connection to the database. <br />SQL said: <b>".mysql_error()."</b><br />Please check your <b>_droneSettings.php</b> file.");;
-            mysql_select_db($sqlDatabase,$this->con) or throwDroneError("Can't find database <b>{$sqlDatabase}</b> on server <b>{$sqlServer}</b>.<br />Please check your <b>_droneSettings.php</b> file.");
+            $this->con = mysql_connect($sqlServer, $sqlUser, $sqlPassword) or throwDroneError("Can't start connection to the database. <br />SQL said: <b>".mysql_error()."</b><br />Please check your <b>drone/settings.php</b> file.");;
+            mysql_select_db($sqlDatabase,$this->con) or throwDroneError("Can't find database <b>{$sqlDatabase}</b> on server <b>{$sqlServer}</b>.<br />Please check your <b>drone/settings.php</b> file.");
             restore_error_handler();
 
             $this->tableName = $table;
@@ -111,7 +126,7 @@ class Database
             return $this->tableExists;
         }
         else
-            throwDroneError("sqlEngine not defined or invalid in <b>_droneSettings.php</b>.");
+            throwDroneError("sqlEngine not defined or invalid in <b>drone/settings.php</b>.");
 
     }
 

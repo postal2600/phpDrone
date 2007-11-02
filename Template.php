@@ -1,5 +1,11 @@
 <?php
 require_once('Filters.php');
+
+if (file_exists('drone/Filters.php'))
+{
+    include('drone/Filters.php');
+}
+
 class Template
 {
     
@@ -11,12 +17,13 @@ class Template
     function __construct($template)
     {
         set_error_handler("handleDroneErrors");
-        require("_droneSettings.php");
+        require("drone/settings.php");
         restore_error_handler();
         if ($debugMode)
             $this->startTime = microtime();
         if ($template{0}=="?")
         {
+            $droneDir = dirname(__FILE__);
             if (file_exists(substr($template,1)))
                 $filename = substr($template,1);
             else
@@ -26,7 +33,7 @@ class Template
                 if (file_exists("templates/".substr($template,1)))
                     $filename = "templates/".substr($template,1);
                 else
-                    $filename = "phpDrone/templates/".substr($template,1);
+                    $filename = "{$droneDir}/templates/".substr($template,1);
         }
         else
             if (file_exists($template))
@@ -114,76 +121,44 @@ class Template
         preg_match_all('/{%(?P<cont>[^\\}]*)%}/',$output,$vals);
         foreach($vals['cont'] as $f_val)
         {
-            $filterParts = preg_split("/\|/",trim($f_val));
-            
-            $operands = preg_split('/\\+|-|\\*|\//',trim($filterParts[0]));
-            if (count($operands)!=1)
+            $pieces = preg_split("/\|/",trim($f_val));
+            $subs = preg_split("/\./",trim($pieces[0]));
+            if (count($subs)==1)
             {
-                foreach ($operands as $part)
-                {
-                    $subs = preg_split("/\./",trim($part));
-                    if (count($subs)==1)
-                    {
-                        $ev = "\$php_vars['".$subs[0]."']";
-                    }
-                    else
-                    {
-                        $ev = "\$php_vars";
-                        foreach ($subs as $item)
-                            $ev.= "['".$item."']";
-                    }
-                    eval("\$isSet = isset($ev);");
-                    eval("\$val =$ev;");
-                    eval("\$type = gettype($ev);");
-                    
-                    if ($isSet)
-                    {
-                        if ($type=="string" && $val!="")
-                            $val = "'".$val."'";
-                        $toEval = preg_replace('/'.addslashes($part).'/',$val,trim($filterParts[0]));
-                    }
-                }
-                
+                $ev = "\$php_vars['".$subs[0]."']";
+                eval("\$val=$ev;");
             }
             else
             {
-                $subs = preg_split("/\./",trim($filterParts[0]));
-                if (count($subs)==1)
-                {
-                    $toEval = "\$php_vars['".$subs[0]."']";
-                }
-                else
-                {
-                    $toEval = "\$php_vars";
-                    foreach ($subs as $item)
-                        $toEval.= "['".$item."']";
-                }
+                $ev = "\$php_vars";
+                foreach ($subs as $item)
+                    $ev.= "['".$item."']";
+                eval("\$val=$ev;");
             }
-//             print "###".$f_val." - ".$toEval."<br />";
-            eval("\$result=$toEval;");
             
             //apply filters
-            if (count($filterParts)>1)
-                for ($f=1;$f<count($filterParts);$f++)
+            if (count($pieces)>1)
+                for ($f=1;$f<count($pieces);$f++)
                 {
-                    if (preg_match('/(?P<filterName>.*)\\((?P<filterArgs>.+)\\)/',$filterParts[$f],$capt))
+                    if (preg_match('/(?P<filterName>.*)\\((?P<filterArgs>.+)\\)/',$pieces[$f],$capt))
                     {
                         $filterName = $capt['filterName'];
                         $filterArgs = ",".$capt['filterArgs'];
                     }
                     else
                     {
-                        $filterName = str_replace(array("(",")"),"",$filterParts[$f]);
+                        $filterName = str_replace(array("(",")"),"",$pieces[$f]);
                         $filterArgs = "";
                     }
                     if (function_exists("filter_".$filterName))
                     {
-                        eval('$result=filter_'.$filterName.'(\''.$result.'\''.$filterArgs.');');
+                        eval('$val=filter_'.$filterName.'(\''.addcslashes($val,"'").'\''.$filterArgs.');');
                     }
                     else
                         throwDroneError("Unknown filter: <b>{$filterName}</b>.");
                 }
-            $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|(.)+-/").'(?:[ ]*|)%}/',$result,$output);
+            
+            $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|(.)").'(?:[ ]*|)%}/',$val,$output);
         }
         return $output;
     }
@@ -195,10 +170,10 @@ class Template
         foreach($ifs['ifStatement'] as $ifStatement)
         {
             $toEval = trim($ifStatement);
-            $operands = preg_split('/(?:==)|(?:<=)|(?:>=)|(?:<)|(?:>)|(?:\|\|)|(?:&&)|(?:\()|(?:\))|(?:\+)|(?:-)|(?:\*)/',$toEval);
-            if (count($operands)!=1)
+            $parts = preg_split('/(?:==)|(?:<=)|(?:>=)|(?:<)|(?:>)|(?:\|\|)|(?:&&)|(?:\()|(?:\))/',$toEval);
+            if (count($parts)!=1)
             {
-                foreach ($operands as $part)
+                foreach ($parts as $part)
                 {
                     $val_parts = preg_split("/\./",trim($part));
                     if (count($val_parts)==1)
@@ -233,10 +208,7 @@ class Template
                 {
                     if (isset($php_vars[$toEval]))
                     {
-                        if (gettype($php_vars[$toEval])=="string")
-                            $toEval = '"'.$php_vars[$toEval].'"';
-                        else
-                            $toEval = count($php_vars[$toEval]);
+                        $toEval = '"'.$php_vars[$toEval].'"';
                         if ($toEval=="")
                             $toEval = "False";
                     }
@@ -255,15 +227,15 @@ class Template
             if (!$result)
             {
                 //{%(?:[ ]*|)if section%}(?P<ifBlock>[^\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?))?{%(?:[ ]*|)end-if(?:[ ]*|)%}
-                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.addcslashes($ifStatement,"+-/").'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
-                $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.addcslashes($ifStatement,"+-/").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$capt['elseBlock'],$output,1);
+                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
+                $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$capt['elseBlock'],$output,1);
             }
             else
             {
-                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.addcslashes($ifStatement,"+-/").'%}(?P<ifCont>[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
+                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?P<ifCont>[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
                 $ifContent = $capt['ifCont'];
                 $ifContent = preg_replace('/(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\\\x00]*?))[^\\x00]*/','',$ifContent);
-                $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.addcslashes($ifStatement,"+-/").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$ifContent,$output,1);
+                $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$ifContent,$output,1);
             }
         }
         return $output;
@@ -329,8 +301,8 @@ class Template
                         }
 
                         //process for steps
-                        $builtBlock = preg_replace ('/{%(?:[ ]*|)forStep(?:[ ]*|)%}/',$pas_2,$builtBlock);
-                        $this->vars['forStep'] = $pas_2;
+                        $builtBlock = preg_replace ('/{%(?:[ ]*|)for-step(?:[ ]*|)%}/',$pas_2,$builtBlock);
+                        $this->vars['for-step'] = $pas_2;
                         
                         $builtBlock = $this->compileTemplate($builtBlock,$this->vars);
                         $newContent .= $builtBlock;
@@ -362,7 +334,7 @@ class Template
     function getBuffer()
     {
         set_error_handler("handleDroneErrors");
-        require("_droneSettings.php");
+        require("drone/settings.php");
         restore_error_handler();
         $output = $this->compileTemplate($this->template,$this->vars);
         //take out reminders
@@ -378,7 +350,7 @@ class Template
     private function render_p($args)
     {
         set_error_handler("handleDroneErrors");
-        require("_droneSettings.php");
+        require("drone/settings.php");
         restore_error_handler();
         $output = $this->getBuffer();
         if ($debugMode)

@@ -80,26 +80,26 @@ function printStackTrace()
 {
     $stack = debug_backtrace();
     foreach($stack as $item)
-        if ($item['function']!="printStackTrace" &&
-            $item['function']!="handleDroneErrors" &&
-            $item['function']!="trigger_error" &&
-            $item['function']!="throwDroneError")
+//         if ($item['function']!="printStackTrace" &&
+//             $item['function']!="handleDroneErrors" &&
+//             $item['function']!="trigger_error" &&
+//             $item['function']!="throwDroneError")
             print "<b>File:</b> {$item['file']}, <b>line</b> {$item['line']}, <b>in</b> {$item['function']}<br />";
 }
 
 function handleDroneErrors($errno, $errstr, $errfile, $errline)
 {
     print "<b>phpDrone error:</b> <br />";
-    if (preg_match_all('/require\(_droneSettings\.php\)/',$errstr,$some))
+    if (preg_match_all('/require\(drone\/settings\.php\)/',$errstr,$some))
     {
-        print "Your project does not have a <b>_droneSettings.php</b> file.<br />";
+        print "Your project does not have a <b>drone/settings.php</b> file.<br />";
         die();
     }
     else
         print $errstr."<br />";
     
     set_error_handler("handleDroneErrors");
-    require("_droneSettings.php");
+    require("drone/settings.php");
     restore_error_handler();
     
     if ($debugMode)

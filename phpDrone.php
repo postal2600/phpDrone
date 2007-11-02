@@ -5,7 +5,7 @@ if (version_compare(phpversion(),"5")>-1)
     include_once ("Database.php");
     include_once ("Form.php");
     include_once ("Template.php");
-    include_once ("HtmlWidgets.php");
+    include_once ("HTMLwidgets.php");
 }
 else
 {
