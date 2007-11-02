@@ -27,6 +27,7 @@ function filter_obfuscate($input)
 
 function filter_formatTime($input,$format)
 {
+    $input = (int) $input;
     return date($format,$input);
 }
 ?>

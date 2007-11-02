@@ -289,6 +289,10 @@ class Template
                             $parts = preg_split('/\,/',$i_item);
                             $builtBlock = preg_replace('/{%(?:[ ]*|)cycle '.$i_item.'(?:[ ]*|)%}/',$parts[$pas_2%count($parts)],$builtBlock);
                         }
+
+                        //process for steps
+                        $builtBlock = preg_replace ('/{%(?:[ ]*|)for-step(?:[ ]*|)%}/',$pas_2,$builtBlock);
+                        
                         $builtBlock = $this->compileTemplate($builtBlock,$this->vars);
                         $newContent .= $builtBlock;
                         $pas_2 ++;
