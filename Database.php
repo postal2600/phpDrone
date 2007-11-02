@@ -229,7 +229,6 @@ class Database
             $query = $sql;
         else
             $query = "SELECT * FROM {$this->tableName} {$whereFilter};";
-
         $qry =$this->exec_qry($query);
         while ($row = mysql_fetch_assoc($qry))
         {
