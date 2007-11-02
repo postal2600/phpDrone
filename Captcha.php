@@ -1,13 +1,13 @@
 <?php
-if (!isset($formIsLoaded))
-    include("Form.php");
+if (!isset($inputClassIsIncluded))
+    require("Input.php");
     
 class Captcha extends Input
 {
-     function __construct()
-     {
-         parent::__construct("*Code from image above","text","captcha");
-     }
+    function __construct($label,$name)
+    {
+       parent::__construct($label,"text",$name);
+    }
     
     function generate($size,$id="")
     {
@@ -37,6 +37,7 @@ class Captcha extends Input
             $im     = imagecreate(160,50);
             $bkgColor = imagecolorallocate($im, 255, 255, 255);
             $frgColor = imagecolorallocate($im, 35, 52, 29);
+            $redColor = imagecolorallocate($im, 255, 0, 0);
             $font = realpath("res/fonts/captcha6.ttf");
             $px=10;
             for ($f=0;$f<strlen($text);$f++)
@@ -48,7 +49,7 @@ class Captcha extends Input
             for ($f=0;$f<1200;$f++)
                  imagesetpixel($im,rand(0,160),rand(0,50),$frgColor);
             for ($f=0;$f<1200;$f++)
-                 imagesetpixel($im,rand(0,160),rand(0,50),$bkgColor);
+                 imagesetpixel($im,rand(0,160),rand(0,50),$redColor);
             imagegif($im);
             imagedestroy($im);
         }
@@ -68,7 +69,7 @@ class Captcha extends Input
     function validate()
     {
         session_start();
-        $value = $_REQUEST['captcha'];
+        $value = $_REQUEST[$this->name];
         $captchaId = $_REQUEST['captchaId'];
         if (strtolower($_SESSION[$captchaId])==strtolower($value))
             return true;
@@ -79,7 +80,7 @@ class Captcha extends Input
 }
 
 
-$tmp_captcha = new Captcha();
+$tmp_captcha = new Captcha("not set","not set");
 if ($_GET['action']=='regen' && $_GET['id']!="")
     $tmp_captcha->generate(5,$_GET['id']);
 $tmp_captcha->draw($_GET['id']);
