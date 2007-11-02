@@ -1,7 +1,14 @@
 {%block droneInput%}
-    <label for='{%inputName%}'>{%inputLabel%}</label>
+    {%if inputLabel%}
+        <label for='{%inputName%}'>
+            {%if2 mandatoryMarker%}
+                <span class='mandatoryMarker'>{%mandatoryMarker%}</span>
+            {%end-if2%}
+            {%inputLabel%}:
+        </label>
+    {%end-if%}
     {%if inputError%}
-        <div class='error'><span>Error: </span>{%inputError%}</div>
+        <span class='inputError'><span>Error: </span>{%inputError%}</span>
     {%end-if%}
     <textarea class='textInput' rows='5' cols='9' id='{%inputName%}' name='{%inputName%}'>{%inputValue%}</textarea>
 {%end-block%}

@@ -9,6 +9,8 @@ class Form
         $this->onSuccess = $onSuccess;
         $this->inputs = array();
         $this->defaults =$defaults;
+        $this->madatoryMarker = "*";
+        $this->submitTriggers = array();
         switch ($method)
         {
             case "post":
@@ -36,7 +38,7 @@ class Form
 
             $len = count($this->inputs);
             if ($type!="captcha")
-                $this->inputs[$len] = new Input($label,$type,$name);
+                $this->inputs[$len] = new Input($label,$type,$name,$this->madatoryMarker);
             else
                 $this->inputs[$len] = new Captcha($label,$name);
 
@@ -53,6 +55,8 @@ class Form
                 $this->inputs[$len]->setMaxSize($maxLen);
 
             $this->inputs[$len]->setRequestData($this->request);
+            if  ($type=="submit")
+                $this->submitTriggers[$this->inputs[$len]->name]="";
         }
         else
         if (count($args)==1)
@@ -81,20 +85,24 @@ class Form
             throwDroneError("Call to undefined method Form->".$method."()");
     }
     
-
-    function getHTML($upperTemplate=False)
+    function validateForm()
     {
         $isValid = true;
-        $txtresult = "";
-        if (count($this->request)!=0)
+        
+        $trigger = array_intersect_key($this->submitTriggers,$this->request);
+        if (array_key_exists("droneSubmitTrigger",$this->request) || count($trigger)!=0)
         {
+            unset($this->request['droneSubmitTrigger']);
+            unset($_POST['droneSubmitTrigger']);
+            unset($_GET['droneSubmitTrigger']);
+
             foreach ($this->inputs as $item)
             {
                 $result = $item->validate();
                 if (!$result)
                     $isValid = false;
             }
-            
+
             if ($isValid)
             {
                 if ($this->onSuccess)
@@ -105,14 +113,41 @@ class Form
                 }
             }
         }
-        
+
+        if (count($this->submitTriggers)==0)
+        {
+            $validate_trigger = new Input("needed for phpDrone form validation","hidden","droneSubmitTrigger");
+            $validate_trigger->setValidator("required","required");
+            array_push($this->inputs,$validate_trigger);
+        }
+    }
+
+
+    function getHTML($upperTemplate=False)
+    {
+        $this->validateForm();
+        $htmlResult = "";
         foreach ($this->inputs as $item)
             if (!$item->addedLater)
                 if (isset($this->valueFlag))
-                    $txtresult .= $item->writeValueless($upperTemplate);
+                    $htmlResult .= $item->writeValueless($upperTemplate);
                 else
-                    $txtresult .= $item->write($upperTemplate);
-        return $txtresult;
+                    $htmlResult .= $item->write($upperTemplate);
+        return $htmlResult;
+    }
+    
+    function getHTMLinputs($upperTemplate=False)
+    {
+        $this->validateForm();
+        $arrayResult = array();
+        foreach ($this->inputs as $item)
+            if (!$item->addedLater)
+                if (isset($this->valueFlag))
+                    $arrayResult[$item->name] = $item->writeValueless($upperTemplate);
+                else
+                    $arrayResult[$item->name] = $item->write($upperTemplate);
+        return $arrayResult;
+
     }
 }
 
