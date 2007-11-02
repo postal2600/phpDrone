@@ -165,6 +165,12 @@ class Template
                 else
                     throw new Exception('Function <b>Template->write()</b> takes at least one argument.');
         }
+        else
+        {
+            //this wil be replaced later with a nicer error
+            die("phpDrone error: Call to undefined method Template->".$method."()");
+        }
+
         
     }
 }

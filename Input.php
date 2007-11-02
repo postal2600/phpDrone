@@ -28,47 +28,43 @@ class Input
             $template->write("inputValue",$_POST[$this->name]);
         else
             $template->write("inputValue",$this->def);
-        return $template->getBuffer(true);
+        return $template->getBuffer();
     }
 
     function write_password($template)
     {
         if (array_key_exists($this->name,$_POST))
             $template->write("inputValue",$_POST[$this->name]);
-        return $template->getBuffer(true);
+        return $template->getBuffer();
     }
 
-    function write_textarea()
+    function write_textarea($template)
     {
-        $result = "";
-        $result .= "<textarea rows='5' cols='9' id='{$this->name}' name='{$this->name}' class='textInput'>";
         if (array_key_exists($this->name,$_POST))
-            $result .= $_POST[$this->name];
+            $template->write("inputValue",$_POST[$this->name]);
         else
-            $result .= $this->def;
-        $result .= "</textarea>";
-        return $result;
+            $template->write("inputValue",$this->def);
+        return $template->getBuffer();
     }
 
-    function write_select()
+    function write_select($template)
     {
-        $result = "";
-        $result .= "<select id='{$this->name}' name='{$this->name}' class='select'>";
-//         $keys =array_keys($this->valueDict);
+        if ($this->validator['regExp'])
         foreach (array_keys($this->validator['regExp']) as $item)
         {
-            $result .= "<option value='{$item}'";
+            $template->write("inputValue","<option value='{$item}'");
             if ((array_key_exists($this->name,$_POST) && ($item==$_POST[$this->name])) || $item==$this->def)
-                $result .= "selected='selected'";
-            $result .= ">{$this->validator['regExp'][$item]}</option>";
+                $template->write("inputValue","selected='selected'");
+            $template->write("inputValue",">{$this->validator['regExp'][$item]}</option>");
         }
-        $result .= "</select>";
-        return $result;
+        return $template->getBuffer();
     }
 
-    function write_file()
+    function write_file($template)
     {
-        return "<input class='textInput' type='file' id='{$this->name}' name='{$this->name}' />";
+        // al what is needed for tyhis input, is handeled in the write() method
+        // (the value can't be set for a file input). So we return the buffer back.
+        return $template->getBuffer();
     }
 
     function write()
@@ -76,7 +72,6 @@ class Input
         $template = new Template("phpDrone/templates/form/input_{$this->type}.tmpl");
         $template->write("inputLabel",$this->label);
         $template->write("inputName",$this->name);
-        $template->write("inputType",$this->type);
         if ($this->error)
             $template->write("inputError","<div class='error'><span>Error:</span> {$this->error}</div>");
 
@@ -86,7 +81,7 @@ class Input
 
     function writeValueless()
     {
-        $this->valueDict[$this->name] = "";
+        $_POST[$this->name] = "";
         return $this->write();
     }
 

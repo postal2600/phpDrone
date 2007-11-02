@@ -50,9 +50,14 @@ class Form
             }
             else
             {
-                //this wil be replaced later witha nicer error
+                //this wil be replaced later with a nicer error
                 die("phpDrone error: addInput takes at least one argument.");
             }
+        }
+        else
+        {
+            //this wil be replaced later with a nicer error
+            die("phpDrone error: Call to undefined method Form->".$method."()");
         }
     }
     

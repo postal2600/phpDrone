@@ -37,7 +37,6 @@ class Captcha extends Input
             $im     = imagecreate(160,50);
             $bkgColor = imagecolorallocate($im, 255, 255, 255);
             $frgColor = imagecolorallocate($im, 35, 52, 29);
-            $redColor = imagecolorallocate($im, 255, 0, 0);
             $font = realpath("res/fonts/captcha6.ttf");
             $px=10;
             for ($f=0;$f<strlen($text);$f++)
@@ -49,7 +48,7 @@ class Captcha extends Input
             for ($f=0;$f<1200;$f++)
                  imagesetpixel($im,rand(0,160),rand(0,50),$frgColor);
             for ($f=0;$f<1200;$f++)
-                 imagesetpixel($im,rand(0,160),rand(0,50),$redColor);
+                 imagesetpixel($im,rand(0,160),rand(0,50),$bkgColor);
             imagegif($im);
             imagedestroy($im);
         }
@@ -61,7 +60,7 @@ class Captcha extends Input
 
         $template->write("captchaId",$this->generate(5));
         $result = $template->getBuffer(false);
-        $this->valueDict[$this->name] = "";
+        $_POST[$this->name] = "";
         $result .= parent::write();
         return $result;
     }
