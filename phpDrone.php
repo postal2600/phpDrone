@@ -1,7 +1,7 @@
 <?php
 if (version_compare(phpversion(),"5")>-1)
 {
-    require_once ("_droneSettings.php");
+    require_once('Utils.php');
     include_once ("Database.php");
     include_once ("Form.php");
     include_once ("Template.php");
