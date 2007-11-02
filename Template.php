@@ -205,7 +205,7 @@ class Template
                         $pacient = $php_vars[trim($bunch)];
 
                     $newContent = "";
-                    $pas = 0;
+                    $pas_2 = 0;
                     foreach ($pacient as $value)
                     {
                         if (gettype($value)=="array" || gettype($value)=="object")
@@ -214,7 +214,6 @@ class Template
                             $builtBlock = $blockContent;
                             foreach($keys['key'] as $f_key)
                                 $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'.'.$f_key.'(?:[ ]*|)%}/',$value[$f_key],$builtBlock);
-                            
                         }
                         else
                             $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'(?:[ ]*|)%}/',$value,$blockContent);
@@ -225,12 +224,12 @@ class Template
                         foreach ($capt['elems'] as $i_item)
                         {
                             $parts = preg_split('/\,/',$i_item);
-                            $builtBlock = preg_replace('/{%(?:[ ]*|)cycle '.$i_item.'(?:[ ]*|)%}/',$parts[$pas%count($parts)],$builtBlock);
+                            $builtBlock = preg_replace('/{%(?:[ ]*|)cycle '.$i_item.'(?:[ ]*|)%}/',$parts[$pas_2%count($parts)],$builtBlock);
                         }
 
                         $builtBlock = $this->compileTemplate($builtBlock,$this->vars);
                         $newContent .= $builtBlock;
-                        $pas ++;
+                        $pas_2 ++;
                     }
 //                     $blockContent = preg_replace('/([\\\\<{%}>*\/])/','\\\\\1',$blockContent);
                     //$this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}'.$blockContent.'{%end-for%}/',$newContent,$this->template);
