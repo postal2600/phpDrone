@@ -49,4 +49,24 @@ function array_get($key,$array,$default=NULL)
             if ($default)
                 return $default;
 }
+
+function advHttpQuery($r_query="")
+{
+    if ($r_query=="")
+        $r_query = $_SERVER['QUERY_STRING'];
+    
+    $result = array();
+    $query = $r_query."&";
+
+    preg_match_all('/(?P<key>.*?)=(?P<value>.*?)&/', $query, $capt);
+    $count = count($capt['key']);
+    for ($f=0;$f<$count;$f++)
+    {
+        if (!isset($result[$capt['key'][$f]]))
+            $result[$capt['key'][$f]] = array();
+        $result[$capt['key'][$f]][count($result[$capt['key'][$f]])] = $capt['value'][$f];
+    }
+    return $result;
+}
+
 ?>

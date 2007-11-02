@@ -52,7 +52,9 @@ class Template
     }
 
     function solveInheritance($templateFile)
-    {        
+    {
+        if (!file_exists($templateFile))
+            die("phpDrone error: Template file <b>{$templateFile}</b> needed to extend other template was not found.");
         $handle = fopen($templateFile, "r");
         $templateContent = fread($handle, filesize($templateFile));
         fclose($handle);
@@ -86,7 +88,17 @@ class Template
 
     function setGuard($guard)
     {
-        $this->guard = $guard;
+        require($guard);
+        if (!__guard__())
+        {
+            if (isset($guardFailPage))
+                $guarFailPage = new Template($guardFailPage);
+            else
+                $guarFailPage = new Template("?gurd-failure.tmpl");
+            $guarFailPage->write("title","Unauthorized - phpDrone");
+            $guarFailPage->render();
+            die();
+        }
     }
 
     private function deltaTime()
@@ -321,28 +333,15 @@ class Template
     private function render_p($args)
     {
         require ("_droneSettings.php");
-        if ($this->guard!="free")
-            require ($this->guard);
-        if ($this->guard=="free" || ($this->guard!="free") && __guard__())
+        $output = $this->getBuffer();
+        if ($debugMode)
         {
-            $output = $this->getBuffer();
-            if ($debugMode)
-            {
-                require("ver.php");
-                $codeSize = sprintf("%.2f", strlen($output)/1024);
-                $output .= "<!--This will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'><b>".$codeSize."</b> kb built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v{$phpDroneVersion}</div>";
-            }
-            print $output;
+            require("ver.php");
+            $codeSize = sprintf("%.2f", strlen($output)/1024);
+            $output .= "<!--This will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'><b>".$codeSize."</b> kb built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v{$phpDroneVersion}</div>";
         }
-        else
-        {
-            if (isset($guardFailPage))
-                $guarFailPage = new Template($guardFailPage);
-            else
-                $guarFailPage = new Template("phpDrone/templates/gurd-failure.tmpl");
-            $guarFailPage->write("title","Unauthorized - phpDrone");
-            $guarFailPage->render();
-        }
+        print $output;
+
     }
 
     private function write_p($args)

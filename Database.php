@@ -145,6 +145,16 @@ class Database
                 $updateDataString = join(",",$toBuild);
                 $this->exec_qry("UPDATE {$this->tableName} SET {$updateDataString} WHERE {$this->id}='{$item}' LIMIT 1;");
             }
+            
+            if (isset($this->toDelete))
+                foreach ($this->toDelete as $item)
+                {
+                    $criteria = "";
+                    foreach ($item as $key=>$value)
+                        $criteria .= "AND {$key}={$value}";
+                    $criteria = substr($criteria,4);
+                    $this->exec_qry("DELETE FROM {$this->tableName} WHERE {$criteria} LIMIT 1;");
+                }
         }
         else
         {
@@ -220,6 +230,24 @@ class Database
             else
                 die("phpDrone error: Trying to set unknown field <b>{$key}</b> on table <b>{$this->tableName}</b>!");
         return $id;
+    }
+
+    private function delData_p($args)
+    {
+        if (!isset($this->toDelete))
+            $this->toDelete = array();
+            
+        $step = count($this->toDelete);
+        $this->toDelete[$step] = array();
+        
+        foreach($args as $item)
+        {
+            $data = explode("=",$item);
+            if (count($data)!=2)
+                die("phpDrone error: Illegal argument supplied to <b>delData</b>: {$item}");
+            else
+                $this->toDelete[$step][trim($data[0])] = trim($data[1]);
+        }
     }
 
     private function __call($method, $args)
