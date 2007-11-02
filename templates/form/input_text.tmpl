@@ -3,5 +3,5 @@
     {%if inputError%}
         <div class='error'><span>Error: </span>{%inputError%}</div>
     {%end-if%}
-    <input class='textInput' type='text' id='{%inputName%}' name='{%inputName%}' value='{%inputValue%}' />
+    <input class='textInput' {%if maxlength%}maxlength='{%maxlength%}'{%end-if%} type='text' id='{%inputName%}' name='{%inputName%}' value='{%inputValue%}' />
 {%end-block%}

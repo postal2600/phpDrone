@@ -4,11 +4,23 @@ require_once ("Captcha.php");
 class Form
 {
 
-    function __construct($onSuccess,$defaults=NULL)
+    function __construct($onSuccess,$defaults=NULL,$method="both")
     {
         $this->onSuccess = $onSuccess;
         $this->inputs = array();
         $this->defaults =$defaults;
+        switch ($method)
+        {
+            case "post":
+                $this->request = $_POST;
+                break;
+            case "get":
+                $this->request = $_GET;
+                break;
+            default:
+                $this->request = $_GET;
+                break;
+        }
     }
     
     
@@ -20,6 +32,7 @@ class Form
             $type = $args[1];
             $name = $args[2];
             $validator = $args[3];
+            $maxLen = $args[4];
 
             $len = count($this->inputs);
             if ($type!="captcha")
@@ -33,9 +46,13 @@ class Form
 
             if ($validator!="")
                 if (!is_array($validator) || function_exists($validator))
-                    $this->inputs[$len]-> setValidator($validator,"Invalid ".strtolower($label));
+                    $this->inputs[$len]->setValidator($validator,"Invalid ".strtolower($label));
                 else
-                    $this->inputs[$len]-> setValidator($validator,"Invalid value");
+                    $this->inputs[$len]->setValidator($validator,"Invalid value");
+            if ($maxLen)
+                $this->inputs[$len]->setMaxSize($maxLen);
+
+            $this->inputs[$len]->setRequestData($this->request);
         }
         else
         if (count($args)==1)
@@ -45,12 +62,14 @@ class Form
             $len = count($this->inputs);
             $this->inputs[$len] = $input;
             $input->addedLater = true;
+            $input->setRequestData($this->request);
         }
         else
         {
             //this wil be replaced later with a nicer error
             throwDroneError("Method addInput takes at least one argument.");
         }
+        
     }
     
     private function __call($method, $args)
@@ -67,11 +86,11 @@ class Form
     {
         $isValid = true;
         $txtresult = "";
-        if (count($_POST)!=0)
+        if (count($this->request)!=0)
         {
             foreach ($this->inputs as $item)
             {
-                $result = $item->validate($_POST);
+                $result = $item->validate();
                 if (!$result)
                     $isValid = false;
             }
@@ -82,7 +101,7 @@ class Form
                 {
                     $this->valueFlag = true;
                     $meth = $this->onSuccess;
-                    $txtresult .= $meth();
+                    $txtresult .= $meth($this->request);
                 }
             }
         }

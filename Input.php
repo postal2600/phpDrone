@@ -20,26 +20,40 @@ class Input
         $this->def="";
     }
 
+    function setRequestData(&$reqData)
+    {
+        $this->request = $reqData;
+    }
+
+    function setMaxSize($size)
+    {
+        $this->maxSize = intval($size);
+    }
+
     function write_text($template)
     {
-        if (array_key_exists($this->name,$_POST))
-            $template->write("inputValue",$_POST[$this->name]);
+        if (array_key_exists($this->name,$this->request))
+            $template->write("inputValue",$this->request[$this->name]);
         else
             $template->write("inputValue",$this->def);
+        if (isset($this->maxSize))
+            $template->write("maxlength",$this->maxSize);
         return $template->getBuffer();
     }
 
     function write_password($template)
     {
-        if (array_key_exists($this->name,$_POST))
-            $template->write("inputValue",$_POST[$this->name]);
+        if (array_key_exists($this->name,$this->request))
+            $template->write("inputValue",$this->request[$this->name]);
+        if (isset($this->maxSize))
+            $template->write("maxlength",$this->maxSize);
         return $template->getBuffer();
     }
 
     function write_textarea($template)
     {
-        if (array_key_exists($this->name,$_POST))
-            $template->write("inputValue",$_POST[$this->name]);
+        if (array_key_exists($this->name,$this->request))
+            $template->write("inputValue",$this->request[$this->name]);
         else
             $template->write("inputValue",$this->def);
         return $template->getBuffer();
@@ -57,7 +71,7 @@ class Input
                 $values[$pas] = array();
                 $values[$pas]["key"] = $key;
                 $values[$pas]["value"] = $value;
-                if ((array_key_exists($this->name,$_POST) && ($value==$_POST[$this->name])) || $value==$this->def)
+                if ((array_key_exists($this->name,$this->request) && ($value==$this->request[$this->name])) || $value==$this->def)
                 {
                     $values[$pas]["selected"] = "selected='selected'";
                     $hasSelected = True;
@@ -98,13 +112,15 @@ class Input
 
     function writeValueless($upperTemplate="")
     {
-        $_POST[$this->name] = "";
+        $this->request[$this->name] = "";
         return $this->write($upperTemplate);
     }
 
 
-    function setValidator($validator,$msg)
+    function setValidator($validator,$msg=false)
     {
+        if (!$msg)
+            $msg = "";
         $this->validator=array('regExp'=>$validator,'message'=>$msg);
     }
 
@@ -114,10 +130,10 @@ class Input
         {
             foreach ($this->validator['regExp'] as $key=>$value)
             {
-                if ($_POST[$this->name]==$value)
+                if ($this->request[$this->name]==$value)
                     return true;
             }
-            if ($this->mandatory && $_POST[$this->name]=="")
+            if ($this->mandatory && $this->request[$this->name]=="")
             {
                 $this->error = "Choose one";
                 return false;
@@ -126,14 +142,19 @@ class Input
                 return true;
             
         }
-        if ($this->mandatory && strlen($_POST[$this->name])==0)
+        if ($this->mandatory && strlen($this->request[$this->name])==0)
         {
             $this->error = "Can't be ampty";
             return false;
         }
-        if (!$this->mandatory && strlen($_POST[$this->name])==0)
+        if (!$this->mandatory && strlen($this->request[$this->name])==0)
         {
             return true;
+        }
+        if (isset($this->maxSize) && strlen($this->request[$this->name])>$this->maxSize)
+        {
+            $this->error = "Max length for input is {$this->maxSize}";
+            return false;
         }
         $meth = $this->validator['regExp'];
 
@@ -148,7 +169,7 @@ class Input
         }
         else
         if ($this->validator!=null)
-            if (!preg_match ($this->validator['regExp'],$_POST[$this->name]))
+            if (!preg_match ($this->validator['regExp'],$this->request[$this->name]))
             {
                 $this->error= $this->validator['message'];
                 return false;

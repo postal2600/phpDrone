@@ -55,7 +55,7 @@ class Captcha extends Input
     
     function write()
     {
-        $template = new Template("phpDrone/templates/form/input_captcha.tmpl");
+        $template = new Template("?form/input_captcha.tmpl");
 
         $template->write("captchaId",$this->generate(5));
         $result = $template->getBuffer(false);
