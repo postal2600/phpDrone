@@ -111,20 +111,22 @@ class Template
             $v = $this->vars[$statement];
             eval("\$result='".$v."';");
             if (!$result)
-                $this->template = preg_replace ('/{%(\\s*|)if '.$ifStatement.'%}.*?{%(\\s*|)end-if(\\s*|)%}/','',$this->template);
+                print "###Before".$this->template;
+                $this->template = preg_replace ('/(.*){%(?:\s|)if '.$ifStatement.'(?:\s|)%}.*?{%(?:\s|)end-if(?:\s|)%}(.*)/s','',$this->template);
+                print "###After".$this->template;
         }
     }
 
     function getBuffer($overrideDebug = false)
     {
         require ("_droneSettings.php");
-        $this->compileTemplate();
+//         $this->compileTemplate();
         $output = $this->template;
         //set the page title if one is defined in template
         $output = preg_replace ('/{%(?:\\s*|)title(?:\\s*|)%}/',$this->title,$output);
         $output = $this->injectVars($output);
         if ($overrideDebug==true)
-            $local_debugMode = !$debugMode;
+            $local_debugMode = False;
         else
             $local_debugMode = $debugMode;
         if ($local_debugMode)

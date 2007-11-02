@@ -1,5 +1,6 @@
 <?php
-
+//workaround for captha
+$formIsLoaded = True;
 class Input
 {
     function __construct($label,$type,$name)
@@ -76,7 +77,8 @@ class Input
         $template->write("inputLabel",$this->label);
         $template->write("inputName",$this->name);
         $template->write("inputType",$this->type);
-        $template->write("inputError",$this->error);
+        if ($this->error)
+            $template->write("inputError","<div class='error'><span>Error:</span> {$this->error}</div>");
         
         eval("\$result .= \$this->write_{$this->type}(\$template);");
         return $result;
