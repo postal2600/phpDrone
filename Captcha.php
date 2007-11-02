@@ -1,6 +1,5 @@
 <?php
-if (!isset($inputClassIsIncluded))
-    require("Input.php");
+require_once("Input.php");
     
 class Captcha extends Input
 {

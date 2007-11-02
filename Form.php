@@ -1,6 +1,6 @@
 <?php
-require ("Input.php"); //I know captcha already contains Input.php, but maby later I'll want to get it separated somewhow
-require ("Captcha.php");
+require_once ("Input.php"); //I know captcha already contains Input.php, but maby later I'll want to get it separated somewhow
+require_once ("Captcha.php");
 class Form
 {
 
@@ -49,7 +49,7 @@ class Form
         else
         {
             //this wil be replaced later with a nicer error
-            die("phpDrone error: addInput takes at least one argument.");
+            die("<b>phpDrone error:</b> addInput takes at least one argument.");
         }
     }
     
@@ -59,7 +59,7 @@ class Form
             eval("\$this->".$method."_p(\$args);");
         else
             //this wil be replaced later with a nicer error
-            die("phpDrone error: Call to undefined method Form->".$method."()");
+            die("<b>phpDrone error:</b> Call to undefined method Form->".$method."()");
     }
     
 

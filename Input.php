@@ -1,6 +1,4 @@
 <?php
-//workaround for captcha
-$inputClassIsIncluded = True;
 class Input
 {
     function __construct($label,$type,$name)
@@ -94,7 +92,7 @@ class Input
             eval("\$result .= \$this->write_{$this->type}(\$template);");
         }
         else
-            die("phpDrone error: Unknown form input type: {$this->type}.");
+            die("<b>phpDrone error:</b> Unknown form input type: {$this->type}.");
         return $result;
     }
 

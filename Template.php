@@ -1,5 +1,5 @@
 <?php
-require('Filters.php');
+require_once('Filters.php');
 class Template
 {
     
@@ -10,7 +10,7 @@ class Template
     
     function __construct($template)
     {
-        require ("_droneSettings.php");
+        require_once("_droneSettings.php");
         if ($debugMode)
             $this->startTime = microtime();
         if ($template{0}=="?")
@@ -36,7 +36,7 @@ class Template
                 if (file_exists("templates/".$template))
                     $filename = "templates/".$template;
                 else
-                    die("phpDrone error: Template file <b>templates/{$template}</b> was not be found.");
+                    die("<b>phpDrone error:</b> Template file <b>templates/{$template}</b> was not be found.");
                 
                 
         $this->template = "";
@@ -54,7 +54,7 @@ class Template
     function solveInheritance($templateFile)
     {
         if (!file_exists($templateFile))
-            die("phpDrone error: Template file <b>{$templateFile}</b> needed to extend other template was not found.");
+            die("<b>phpDrone error:</b> Template file <b>{$templateFile}</b> needed to extend other template was not found.");
         $handle = fopen($templateFile, "r");
         $templateContent = fread($handle, filesize($templateFile));
         fclose($handle);
@@ -88,7 +88,7 @@ class Template
 
     function setGuard($guard)
     {
-        require($guard);
+        require_once($guard);
         if (!__guard__())
         {
             if (isset($guardFailPage))
@@ -145,7 +145,7 @@ class Template
                     if (function_exists("filter_".$filterName))
                         eval('$val=filter_'.$filterName.'("'.$val.'"'.$filterArgs.');');
                     else
-                        die("phpDrone error: Unknown filter: <b>{$filterName}</b>.");
+                        die("<b>phpDrone error:</b> Unknown filter: <b>{$filterName}</b>.");
                 }
             
             $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|(.)").'(?:[ ]*|)%}/',$val,$output);
@@ -323,7 +323,7 @@ class Template
 
     function getBuffer()
     {
-        require ("_droneSettings.php");
+        require_once("_droneSettings.php");
         $output = $this->compileTemplate($this->template,$this->vars);
         //take out reminders
         $output = preg_replace('/{%(?:[ ]*|)rem(?:[ ]*|)%}(?:[^\\x00]*){%(?:[ ]*|)end-rem(?:[ ]*|)%}/', '', $output);
@@ -337,11 +337,11 @@ class Template
 
     private function render_p($args)
     {
-        require ("_droneSettings.php");
+        require_once("_droneSettings.php");
         $output = $this->getBuffer();
         if ($debugMode)
         {
-            require("ver.php");
+            require_once("ver.php");
             $codeSize = sprintf("%.2f", strlen($output)/1024);
             $output .= "<!--This will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'><b>".$codeSize."</b> kb built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v{$phpDroneVersion}</div>";
         }
@@ -357,7 +357,7 @@ class Template
             if (count($args)==1)
                 $this->vars["body"] .= $args[0];
             else
-                die('phpDrone error: Function <b>Template->write()</b> takes at least one argument.');
+                die('<b>phpDrone error:</b> Function <b>Template->write()</b> takes at least one argument.');
     }
 
     private function __call($method, $args)
@@ -367,7 +367,7 @@ class Template
             eval("\$this->".$method."_p(\$args);");
         else
             //this wil be replaced later with a nicer error
-            die("phpDrone error: Call to undefined method Template->".$method."()");
+            die("<b>phpDrone error:</b> Call to undefined method Template->".$method."()");
     }
 }
 

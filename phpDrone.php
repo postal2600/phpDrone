@@ -1,7 +1,13 @@
 <?php
-require ("_droneSettings.php");
-include ("Database.php");
-include ("Form.php");
-include ("Template.php");
-$phpDrone_is_imported = True;
+if (version_compare(phpversion(),"5")>-1)
+{
+    require_once ("_droneSettings.php");
+    include_once ("Database.php");
+    include_once ("Form.php");
+    include_once ("Template.php");
+}
+else
+{
+    die("<b>phpDrone error:</b> phpDrone runs only on php5 or above. Your php version is: ".phpversion());
+}
 ?>
