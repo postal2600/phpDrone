@@ -143,34 +143,47 @@ class Template
         {
             $toEval = trim($ifStatement);
             $parts = preg_split('/(?:==)|(?:<=)|(?:>=)|(?:<)|(?:>)|(?:\|\|)|(?:&&)|(?:\()|(?:\))/',$toEval);
-            foreach ($parts as $part)
+            if (count($parts)!=1)
             {
-                $val_parts = preg_split("/\./",trim($part));
-                if (count($val_parts)==1)
+                foreach ($parts as $part)
                 {
-                    $ev = "\$php_vars['".$val_parts[0]."']";
-                }
-                else
-                {
-                    $ev = "\$php_vars";
-                    foreach ($val_parts as $item)
-                        $ev.= "['".$item."']";
-                }
-                eval("\$isSet = isset($ev);");
-                eval("\$val =$ev;");
-                eval("\$type = gettype($ev);");
+                    $val_parts = preg_split("/\./",trim($part));
+                    if (count($val_parts)==1)
+                    {
+                        $ev = "\$php_vars['".$val_parts[0]."']";
+                    }
+                    else
+                    {
+                        $ev = "\$php_vars";
+                        foreach ($val_parts as $item)
+                            $ev.= "['".$item."']";
+                    }
+                    eval("\$isSet = isset($ev);");
+                    eval("\$val =$ev;");
+                    eval("\$type = gettype($ev);");
 
 
-                if ($isSet)
+                    if ($isSet)
+                    {
+                        if ($type=="string" && $val!="")
+                            $val = "'".$val."'";
+                        $toEval = preg_replace('/'.addslashes($part).'/',$val,$toEval);
+                        if ($toEval=="")
+                            $toEval = "False";
+                    }
+                }
+            }
+            else
+            {
+                if (isset($php_vars[$toEval]))
                 {
-                    if ($type=="string" && $val!="")
-                        $val = "'".$val."'";
-                    $toEval = preg_replace('/'.addslashes($part).'/',$val,$toEval);
+                    $toEval = $php_vars[$toEval];
                     if ($toEval=="")
                         $toEval = "False";
                 }
+                else
+                    $toEval = "False";
             }
-
             eval("\$result=$toEval;");
             
             if (!$result)
