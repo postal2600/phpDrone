@@ -1,5 +1,13 @@
 <?php
 
+function querySetVar($userUrl,$varName,$varValue)
+{
+    $url = preg_replace("/".$varName."=(?:.*?(&))|".$varName."=(?:.*?(\\z))/",$varName."=".$varValue."\\1",$userUrl);
+    if ($url==$userUrl)
+        $url .=(strpos($url,"?")?"&":"?")."{$varName}={$varValue}";
+    return $url;
+}
+
 //generates a hexadecimal random string
 function genRandomHex($len){
         $rhex="";

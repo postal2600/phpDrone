@@ -53,11 +53,10 @@ class LoginWidget extends HTMLWidgets
 
 class PageNum extends HTMLWidgets
 {
-    function __construct($itemCount,$itemLabel,$itemPageURL,$prefName,$prefOptionList,$maxLinks)
+    function __construct($itemCount,$itemLabel,$prefName,$prefOptionList,$maxLinks=9)
     {
         $this->itemCount = $itemCount;
         $this->itemLabel = $itemLabel;
-        $this->itemPageURL = $itemPageURL;
         $this->prefName = $prefName;
         $this->prefOptionList = $prefOptionList;
         $this->maxLinks = $maxLinks;

@@ -2,26 +2,27 @@
     <div class="pageNum">
         <div>
             {%itemCount%} {%itemLabel%}:
+
             {%for item in pages%}
                 {%if for_first%}
-                    {%if2 for_step!=currentPage%}
-                        <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%for_step%}" title="Go to page {%for_step%}">&laquo;Prev</a>
+                    {%if2 item+1==currentPage%}
+                        <span class="disabledPageNumBtn">&laquo;Prev</span>
                     {%else2%}
-                        <b>&laquo;Prev</b>
+                        <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage-1%}" title="Go to page {%currentPage-1%}">&laquo;Prev</a>
                     {%end-if2%}
                 {%end-if%}
 
-                {%if for_step==currentPage%}
-                    <span title="You are on page {%for_step%}">{%for_step%}</span>
+                {%if item+1==currentPage%}
+                    <span title="You are on page {%item+1%}">{%item+1%}</span>
                 {%else%}
-                    <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%for_step%}" title="Go to page {%for_step%}">{%for_step%}</a>
+                    <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%item+1%}" title="Go to page {%item+1%}">{%item+1%}</a>
                 {%end-if%}
 
                 {%if for_last%}
-                    {%if2 for_step!=currentPage%}
-                        <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%for_step%}" title="Go to page {%for_step%}">Next&raquo;</a>
+                    {%if2 item+1==currentPage%}
+                        <span class="disabledPageNumBtn">Next&raquo;</span>
                     {%else2%}
-                        <!-- <b>Next&raquo;</b> -->
+                        <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage+1%}" title="Go to page {%currentPage+1%}">Next&raquo;</a>
                     {%end-if2%}
                 {%end-if%}
 
