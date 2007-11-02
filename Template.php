@@ -85,20 +85,42 @@ class Template
         return $time-$this->startTime;
     }
 
+    private function filter_trunc($input)
+    {
+        if (strlen($input)>70)
+            return substr($input, 0, 70)." ...";
+        return $input;
+    }
+
     private function solveVar($input,$php_vars)
     {
         $output = $input;
         //this will be improved by replacing this with a regExp. Maybe a generic one to solve even {%var.sub.sub2.sub3%}
-        foreach($php_vars as $key => $value)
-            if (gettype($value)!="array" && gettype($value)!="object")
-                $output = preg_replace ('/{%(?:[ ]*|)'.$key.'(?:[ ]*|)%}/',$value,$output);
+        preg_match_all('/{%(?P<cont>[^\\}]*)%}/',$output,$vals);
+        foreach($vals['cont'] as $f_val)
+        {
+            $pieces = preg_split("/\|/",trim($f_val));
+            $subs = preg_split("/\./",trim($pieces[0]));
+            if (count($subs)==1)
+            {
+                $ev = "\$php_vars['".$subs[0]."']";
+                eval("\$val=$ev;");
+            }
             else
             {
-                preg_match_all('/{%(?:[ ]*|)'.$key.'.(?P<key>[^\\}|[\\ ]*)(?:[ ]*|)%}/',$output,$keys);
-                foreach($keys['key'] as $f_key)
-                    if (gettype($value[$f_key])!="array" && gettype($value[$f_key])!="object")
-                        $output = preg_replace('/{%(?:[ ]*|)'.$key.'.'.$f_key.'(?:[ ]*|)%}/',$value[$f_key],$output);
+                $ev = "\$php_vars";
+                foreach ($subs as $item)
+                    $ev.= "['".$item."']";
+                eval("\$val=$ev;");
             }
+            
+            //apply filters
+            if (count($pieces)>1)
+                for ($f=1;$f<count($pieces);$f++)
+                    eval('$val=$this->filter_'.$pieces[$f].'("'.$val.'");');
+
+            $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|").'(?:[ ]*|)%}/',$val,$output);
+        }
         return $output;
     }
 
@@ -122,8 +144,11 @@ class Template
                 eval("\$result=$ev;");
             }
             if (!$result)
-                //{%(?:[ ]*|)if inputError%}(?:[\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}
-                $output = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\\\x00]*?){%(?:[ ]*|)end-if(?:[ ]*|)%}/','',$output,1);
+            {
+                //{%(?:[ ]*|)if item\.image%}(?:[^\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?)){%(?:[ ]*|)end-if(?:[ ]*|)%}
+                preg_match('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?)){%(?:[ ]*|)end-if(?:[ ]*|)%}/',$output,$capt);
+                $output = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if(?:[ ]*|)%}/',$capt['elseBlock'],$output,1);
+            }
         }
         return $output;
     }

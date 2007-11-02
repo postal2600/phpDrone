@@ -85,7 +85,7 @@ class Database
                     eval("\$this->types['".mysql_field_name($qry, $f)."'] = ".mysql_field_type($qry, $f).";");
                 }
                 if (!isset($this->id))
-                    die("phpDrone error: Table <b>{$sqlServer}.{$this->tableName}</b> has no primary key.");
+                    die("phpDrone error: Table <b>{$sqlServer}.{$sqlDatabase}.{$this->tableName}</b> has no primary key.");
                 mysql_free_result($qry);
                 $this->data = array();
             }
