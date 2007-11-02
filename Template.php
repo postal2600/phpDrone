@@ -170,7 +170,7 @@ class Template
         foreach($ifs['ifStatement'] as $ifStatement)
         {
             $toEval = trim($ifStatement);
-            $parts = preg_split('/(?:==)|(?:<=)|(?:>=)|(?:<)|(?:>)|(?:\|\|)|(?:&&)|(?:\()|(?:\))/',$toEval);
+            $parts = preg_split('/(?:\!=)|(?:==)|(?:<=)|(?:>=)|(?:<)|(?:>)|(?:\|\|)|(?:&&)|(?:\()|(?:\))/',$toEval);
             if (count($parts)!=1)
             {
                 foreach ($parts as $part)
@@ -223,18 +223,21 @@ class Template
                 }
             }
             eval("\$result=$toEval;");
-            
             if (!$result)
             {
-                //{%(?:[ ]*|)if section%}(?P<ifBlock>[^\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?))?{%(?:[ ]*|)end-if(?:[ ]*|)%}
-                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
+//                 print "{$ifStatement} - h1<br />";
+                //{%(?:[ ]*|)if([\d]*|) .*%}(?P<ifBlock>[^\x00]*?)(?:(?:{%(?:[ ]*|)else\1(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?))?{%(?:[ ]*|)end-if\1(?:[ ]*|)%}
+                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else\\1(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
                 $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$capt['elseBlock'],$output,1);
             }
             else
             {
+//                 print "{$ifStatement} - h2<br />";
                 preg_match('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?P<ifCont>[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
                 $ifContent = $capt['ifCont'];
-                $ifContent = preg_replace('/(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\\\x00]*?))[^\\x00]*/','',$ifContent);
+//                 print "BEFORE:::".$ifContent."<br /><br />";
+                $ifContent = preg_replace('/(?:(?:{%(?:[ ]*|)else([\\d]*|)(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))[^\\x00].*/','',$ifContent);
+//                 print "AFTER:::".$ifContent."<br /><br />";
                 $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$ifContent,$output,1);
             }
         }
@@ -253,7 +256,6 @@ class Template
             // get the if block content
             preg_match('/{%(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:\\n){0,1}(?P<forblock>[^\\x00]*?)(?:\\n){0,1}{%end-for\\1%}/', $output, $forBlocksContent);
             $blockContent = $forBlocksContent['forblock'];
-
             if (isset($php_vars[trim($bunch)]) || is_numeric(trim($bunch)))
             {
                 if (is_numeric(trim($bunch)))
@@ -300,9 +302,22 @@ class Template
                             $builtBlock = preg_replace('/{%(?:[ ]*|)cycle '.$i_item.'(?:[ ]*|)%}/',$parts[$pas_2%count($parts)],$builtBlock);
                         }
 
-                        //process for steps
-                        $builtBlock = preg_replace ('/{%(?:[ ]*|)for-step(?:[ ]*|)%}/',$pas_2,$builtBlock);
-                        $this->vars['for-step'] = $pas_2;
+                        //process for variables
+//                         $builtBlock = preg_replace ('/{%(?:[ ]*|)for-step(?:[ ]*|)%}/',$pas_2,$builtBlock);
+                        $this->vars['for_step'] = $pas_2+1;
+                        $this->vars['for_index'] = $pas_2;
+                        $this->vars['for_total'] = count($pacient);
+                        if ($pas_2==0)
+                            $this->vars['for_first'] = true;
+                        else
+                            $this->vars['for_first'] = false;
+
+                        if ($pas_2==$this->vars['for_total']-1)
+                            $this->vars['for_last'] = true;
+                        else
+                            $this->vars['for_last'] = false;
+
+
                         
                         $builtBlock = $this->compileTemplate($builtBlock,$this->vars);
                         $newContent .= $builtBlock;

@@ -1,5 +1,14 @@
 <?php
 
+//generates a hexadecimal random string
+function genRandomHex($len){
+        $rhex="";
+        for ($i = 1; $i <= $len/2; $i++) {
+            $rhex=$rhex.chr(mt_rand(0, 255));
+        }
+        return bin2hex($rhex);
+    }
+
 //generates a $size length random string
 function genRandomString($size)
 {

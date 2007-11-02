@@ -2,12 +2,29 @@
     <div class="pageNum">
         <div>
             {%itemCount%} {%itemLabel%}:
-            {%for page in pages%}
-                {%if page==currentPage-1%}
-                    <span title="You are on page {%page+1%}">{%page+1%}</span>
-                {%else%}
-                    <a href="/phpDrone/HtmlWidgets.php?action=setPage&amp;page={%page+1%}">{%page+1%}</a>
+            {%for item in pages%}
+                {%if for_first%}
+                    {%if2 for_step!=currentPage%}
+                        <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%for_step%}" title="Go to page {%for_step%}">&laquo;Prev</a>
+                    {%else2%}
+                        <b>&laquo;Prev</b>
+                    {%end-if2%}
                 {%end-if%}
+
+                {%if for_step==currentPage%}
+                    <span title="You are on page {%for_step%}">{%for_step%}</span>
+                {%else%}
+                    <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%for_step%}" title="Go to page {%for_step%}">{%for_step%}</a>
+                {%end-if%}
+
+                {%if for_last%}
+                    {%if2 for_step!=currentPage%}
+                        <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%for_step%}" title="Go to page {%for_step%}">Next&raquo;</a>
+                    {%else2%}
+                        <!-- <b>Next&raquo;</b> -->
+                    {%end-if2%}
+                {%end-if%}
+
             {%end-for%}
         </div>
         <div>
@@ -16,7 +33,7 @@
                 {%if pref==currentPerPage%}
                     <span title="Curently set at {%currentPerPage%} per page">{%currentPerPage%}</span>
                 {%else%}
-                    <a title="Switch to {%pref%} per page" href="/phpDrone/HtmlWidgets.php?action=setPref&amp;prefName={%prefName%}&amp;pref={%pref%}">{%pref%}</a>
+                    <a title="Switch to {%pref%} per page" href="{%phpDroneURL%}/widgets/pageNum.php?action=setPref&amp;prefName={%prefName%}&amp;pref={%pref%}">{%pref%}</a>
                 {%end-if%}
             {%end-for%}
         </div>

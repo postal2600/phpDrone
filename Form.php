@@ -20,7 +20,7 @@ class Form
                 $this->request = $_GET;
                 break;
             default:
-                $this->request = $_GET;
+                $this->request = array_merge_recursive($_GET,$_POST);
                 break;
         }
     }
@@ -36,37 +36,42 @@ class Form
             $validator = $args[3];
             $maxLen = $args[4];
 
-            $len = count($this->inputs);
+//             $len = count($this->inputs);
             if ($type!="captcha")
-                $this->inputs[$len] = new Input($label,$type,$name,$this->madatoryMarker);
+                $this->inputs[$name] = new Input($label,$type,$name,$this->madatoryMarker);
             else
-                $this->inputs[$len] = new Captcha($label,$name);
+                $this->inputs[$name] = new Captcha($label,$name);
 
-            if (isset($this->defaults[$name]))            
-                $this->inputs[$len]->def = $this->defaults[$name];
-
+            if (isset($this->defaults[$name]))
+                $this->inputs[$name]->defaultValue = $this->defaults[$name];
 
             if ($validator!="")
-                if (!is_array($validator) || function_exists($validator))
-                    $this->inputs[$len]->setValidator($validator,"Invalid ".strtolower($label));
+                if (is_array($validator))
+                {
+                    $this->inputs[$name]->setValidator($validator[0],$validator[1]);
+                }
                 else
-                    $this->inputs[$len]->setValidator($validator,"Invalid value");
+                    $this->inputs[$name]->setValidator($validator,"Invalid ".strtolower($label));
+                    
+                    
             if ($maxLen)
-                $this->inputs[$len]->setMaxSize($maxLen);
+                $this->inputs[$name]->setMaxSize($maxLen);
 
-            $this->inputs[$len]->setRequestData($this->request);
+            $this->inputs[$name]->setRequestData($this->request);
             if  ($type=="submit")
-                $this->submitTriggers[$this->inputs[$len]->name]="";
+                $this->submitTriggers[$this->inputs[$name]->name]="";
+//             return $len;
         }
         else
         if (count($args)==1)
         {
             $input = $args[0];
 
-            $len = count($this->inputs);
-            $this->inputs[$len] = $input;
+//             $len = count($this->inputs);
+            $this->inputs[$name] = $input;
             $input->addedLater = true;
             $input->setRequestData($this->request);
+//             return $len;
         }
         else
         {

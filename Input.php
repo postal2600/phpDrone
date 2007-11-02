@@ -20,8 +20,8 @@ class Input
         $this->name = $name;
         $this->validator = null;
         $this->error = "";
-        $this->def="";
-        
+        //used only for selects. determines what was the default value set, to check if changed in case of a mandatory field
+        $this->initial = null;
     }
 
     function setRequestData(&$reqData)
@@ -34,12 +34,24 @@ class Input
         $this->maxSize = intval($size);
     }
 
+    function setDefault($defVal)
+    {
+        if (!isset($this->defaultValue))
+        {
+            if ($this->type=="select")
+                foreach ($defVal as $item)
+                    if (isset($item[2]) && $item[2])
+                        $this->initial = $item[0];
+            $this->defaultValue = $defVal;
+        }
+    }
+
     function write_text($template)
     {
         if (array_key_exists($this->name,$this->request))
             $template->write("inputValue",$this->request[$this->name]);
         else
-            $template->write("inputValue",$this->def);
+            $template->write("inputValue",$this->defaultValue);
         if (isset($this->maxSize))
             $template->write("maxlength",$this->maxSize);
         return $template->getBuffer();
@@ -59,29 +71,30 @@ class Input
         if (array_key_exists($this->name,$this->request))
             $template->write("inputValue",$this->request[$this->name]);
         else
-            $template->write("inputValue",$this->def);
+            $template->write("inputValue",$this->defaultValue);
         return $template->getBuffer();
     }
 
     function write_select($template)
     {
-        if (gettype($this->validator['regExp'])=="array")
+        if (isset($this->defaultValue))
         {
             $values = array();
             $pas=0;
             $hasSelected = False;
-            foreach ($this->validator['regExp'] as $item)
+            $safeChars = get_html_translation_table(HTML_ENTITIES);
+            foreach ($this->defaultValue as $item)
             {
                 $values[$pas] = array();
                 if (gettype($item)=="array")
                 {
                     $values[$pas]["key"] = $item[0];
-                    $values[$pas]["value"] = $item[1];
+                    $values[$pas]["value"] = strtr($item[1],$safeChars);
                 }
                 else
                 {
                     $values[$pas]["key"] = $item;
-                    $values[$pas]["value"] = $item;
+                    $values[$pas]["value"] = strtr($item,$safeChars);
                 }
                 if ((array_key_exists($this->name,$this->request) && ($values[$pas]["key"]==$this->request[$this->name])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
                 {
@@ -93,7 +106,7 @@ class Input
 
             if (!$hasSelected)
                 $values[0]["selected"] = True;
-                
+
             $template->write("values",$values);
         }
         return $template->getBuffer();
@@ -108,15 +121,16 @@ class Input
 
     function write_checkbox($template)
     {
-        if (gettype($this->validator['regExp'])=="array")
+        if (isset($this->defaultValue))
         {
             $values = array();
             $pas=0;
-            foreach ($this->validator['regExp'] as $item)
+            $safeChars = get_html_translation_table(HTML_ENTITIES);
+            foreach ($this->defaultValue as $item)
             {
                 $values[$pas] = array();
                 $values[$pas]["key"] = $item[0];
-                $values[$pas]["value"] = $item[1];
+                $values[$pas]["value"] = strtr($item[1],$safeChars);
                 if (array_key_exists($this->name,$this->request) && in_array($values[$pas]["key"],$this->request[$this->name]) || isset($item[2]) && $item[2])
                     $values[$pas]["selected"] = True;
                 $pas++;
@@ -129,16 +143,17 @@ class Input
 
     function write_radio($template)
     {
-        if (gettype($this->validator['regExp'])=="array")
+        if (isset($this->defaultValue))
         {
             $values = array();
             $pas=0;
             $hasSelected = False;
-            foreach ($this->validator['regExp'] as $item)
+            $safeChars = get_html_translation_table(HTML_ENTITIES);
+            foreach ($this->defaultValue as $item)
             {
                 $values[$pas] = array();
                 $values[$pas]["key"] = $item[0];
-                $values[$pas]["value"] = $item[1];
+                $values[$pas]["value"] = strtr($item[1],$safeChars);
                 if ((array_key_exists($this->name,$this->request) && ($values[$pas]["key"]==$this->request[$this->name])) || (isset($item[2]) && $item[2]))
                 {
                     $values[$pas]["selected"] = True;
@@ -146,9 +161,6 @@ class Input
                 }
                 $pas++;
             }
-
-            if (!$hasSelected)
-                $values[0]["selected"] = True;
 
             $template->write("values",$values);
         }
@@ -208,20 +220,46 @@ class Input
     {
         if ($this->type=="select" || $this->type=="checkbox" || $this->type=="radio")
         {
-            foreach ($this->validator['regExp'] as $key=>$value)
-            {
-                if ($this->request[$this->name]==$value)
-                    return true;
-            }
-            if ($this->mandatory && $this->request[$this->name]=="")
-            {
-                $this->error = "Choose one";
-                return false;
-            }
-            else
-                return true;
+
+            if ($this->type=="select")
+                if ($this->mandatory && $this->request[$this->name]==$this->initial)
+                {
+                    $this->error = "Choose one";
+                    return false;
+                }
+
+            $meth = $this->validator['regExp'];
+            $validatorResult = True;
             
+            if (function_exists($meth))
+            {
+                if ($meth($this->request)!=True)
+                {
+                    $this->error = $this->validator['message'];
+                    $validatorResult = false;
+                }
+            }
+
+            foreach ($this->defaultValue as $item)
+            {
+                if (gettype($item)=="array")
+                    $key=$item[0];
+                else
+                    $key = $item;
+                if (gettype($this->request[$this->name])=="array")
+                {
+                    if (in_array($key,$this->request[$this->name]) && $validatorResult)
+                        return true;
+                }
+                else
+                    if ($this->request[$this->name]==$key && $validatorResult)
+                        return true;
+            }
+            
+            $this->error = "Invalid value";
+            return false;
         }
+        
         if ($this->mandatory && strlen($this->request[$this->name])==0)
         {
             $this->error = "Can't be empty";
@@ -240,7 +278,7 @@ class Input
 
         if (function_exists($meth))
         {
-            if ($meth()!=True)
+            if ($meth($this->request)!=True)
             {
                 $this->error = $this->validator['message'];
                 return false;
