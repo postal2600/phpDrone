@@ -1,7 +1,7 @@
 {%block droneInput%}
     <label for='{%inputName%}'>{%inputLabel%}</label>
     {%if inputError%}
-        <div class='error'><span>Error:</span>{%inputError%}</div>
+        <div class='error'><span>Error: </span>{%inputError%}</div>
     {%end-if%}
     <select id='{%inputName%}' name='{%inputName%}'>
         {%for item in values%}

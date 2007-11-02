@@ -186,7 +186,7 @@ class Template
                 {
                     if (isset($php_vars[$toEval]))
                     {
-                        $toEval = $php_vars[$toEval];
+                        $toEval = '"'.$php_vars[$toEval].'"';
                         if ($toEval=="")
                             $toEval = "False";
                     }
