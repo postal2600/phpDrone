@@ -12,53 +12,54 @@ class Form
     }
     
     
-    private function __call($method, $args)
+    private function addInput_p($args)
     {
-        if ($method=="addInput")
+        if (count($args)>1)
         {
-            if (count($args)>1)
-            {
-                $label = $args[0];
-                $type = $args[1];
-                $name = $args[2];
-                $validator = $args[3];
+            $label = $args[0];
+            $type = $args[1];
+            $name = $args[2];
+            $validator = $args[3];
 
-                $len = count($this->inputs);
-                if ($type!="captcha")
-                    $this->inputs[$len] = new Input($label,$type,$name);
+            $len = count($this->inputs);
+            if ($type!="captcha")
+                $this->inputs[$len] = new Input($label,$type,$name);
+            else
+                $this->inputs[$len] = new Captcha($label,$name);
+
+            if (array_key_exists($name,$this->defaults))
+                $this->inputs[$len]->def = $this->defaults[$name];
+
+
+            if ($validator!="")
+                if (!is_array($validator) || function_exists($validator))
+                    $this->inputs[$len]-> setValidator($validator,"Invalid ".strtolower($label));
                 else
-                    $this->inputs[$len] = new Captcha($label,$name);
+                    $this->inputs[$len]-> setValidator($validator,"Invalid value");
+        }
+        else
+        if (count($args)==1)
+        {
+            $input = $args[0];
 
-                if (array_key_exists($name,$this->defaults))
-                    $this->inputs[$len]->def = $this->defaults[$name];
-
-
-                if ($validator!="")
-                    if (!is_array($validator) || function_exists($validator))
-                        $this->inputs[$len]-> setValidator($validator,"Invalid ".strtolower($label));
-                    else
-                        $this->inputs[$len]-> setValidator($validator,"Invalid value");
-            }
-            else
-            if (count($args)==1)
-            {
-                $input = $args[0];
-
-                $len = count($this->inputs);
-                $this->inputs[$len] = $input;
-                $input->addedLater = true;
-            }
-            else
-            {
-                //this wil be replaced later with a nicer error
-                die("phpDrone error: addInput takes at least one argument.");
-            }
+            $len = count($this->inputs);
+            $this->inputs[$len] = $input;
+            $input->addedLater = true;
         }
         else
         {
             //this wil be replaced later with a nicer error
-            die("phpDrone error: Call to undefined method Form->".$method."()");
+            die("phpDrone error: addInput takes at least one argument.");
         }
+    }
+    
+    private function __call($method, $args)
+    {
+        if (method_exists($this,$method."_p"))
+            eval("\$this->".$method."_p(\$args);");
+        else
+            //this wil be replaced later with a nicer error
+            die("phpDrone error: Call to undefined method Form->".$method."()");
     }
     
 

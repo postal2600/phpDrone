@@ -1,0 +1,10 @@
+{%block droneDBField%}
+{%fieldName%} INT
+{% if fieldSize%}
+({%fieldSize%})
+{%end-if%}
+{%fieldUnsigned%} {%fieldNull%} {%fieldAutoIncrement%} {%primary%}
+{% if fieldDefault%}
+ DEFAULT '{%fieldDefault%}'
+{%end-if%}
+{%end-block%}

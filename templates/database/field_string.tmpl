@@ -1,0 +1,8 @@
+{%block droneDBField%}
+{%fieldName%} VARCHAR({%fieldSize%}) {%fieldNull%}
+
+{%comment%}The if must work for in-line also{%end-comment%}
+{% if fieldDefault%}
+ DEFAULT '{%fieldDefault%}'
+{%end-if%}
+{%end-block%}

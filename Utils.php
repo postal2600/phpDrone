@@ -14,4 +14,13 @@ function genRandomString($size)
     return $result;
 }
 
+function array_get($key,$array,$default=NULL)
+{
+    if (gettype($array)=="array")
+        if (array_key_exists($key, $array))
+            return $array[$key];
+        else
+            if ($default)
+                return $default;
+}
 ?>

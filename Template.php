@@ -114,7 +114,7 @@ class Template
             eval("\$result='$v';");
             if (!$result)
                 //{%(?:[ ]*|)if inputError%}(?:[\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}
-                $this->template = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[\\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}/','',$this->template);
+                $this->template = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\x00]*){%(?:[ ]*|)end-if(?:[ ]*|)%}/','',$this->template);
         }
         
         //now let's parse the fors
@@ -143,7 +143,7 @@ class Template
                         $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'(?:[ ]*|)%}/',$value,$blockContent);
                         $newContent .= $builtBlock;
                     }
-                    $blockContent = preg_replace('/([\\\\<>{}*\/])/','\\\1',$blockContent);
+                    $blockContent = preg_replace('/([\\\\<>*\/])/','\\\1',$blockContent);
                     $this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}'.$blockContent.'{%end-for%}/',$newContent,$this->template);
                 }
             }
@@ -163,53 +163,55 @@ class Template
         //set the page title if one is defined in template
         $output = preg_replace ('/{%(?:[ ]*|)title(?:[ ]*|)%}/',$this->title,$output);
         $output = $this->injectVars($output);
+        //take out comments
+        $output = preg_replace('/{%(?:[ ]*|)comment(?:[ ]*|)%}(?:[^\\x00]*){%(?:[ ]*|)end-comment(?:[ ]*|)%}/', '', $output);
         //delete the rest of unused vars from template
         $output = preg_replace ('/{%.*%}/',"",$output);
         return $output;
     }
 
-    private function __call($method, $args)
+    private function render_p($args)
     {
-        if ($method=="render")
+        require ("_droneSettings.php");
+        if ($this->guard!="free")
+            require ($this->guard);
+        if ($this->guard=="free" || ($this->guard!="free") && __guard__())
         {
-            require ("_droneSettings.php");
-            if ($this->guard!="free")
-                require ($this->guard);
-            if ($this->guard=="free" || ($this->guard!="free") && __guard__())
-            {
-                $output = $this->getBuffer();
-                if ($debugMode)
-                    $output .= "<!--This will apear only in debug mode -->\n<div style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'>Built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v1.0 BETA</div>";
-                print $output;
-            }
-            else
-            {
-                if (isset($guardFailPage))
-                    $guarFailPage = new Template($guardFailPage);
-                else
-                    $guarFailPage = new Template("phpDrone/templates/gurd-failure.tmpl");
-                $guarFailPage->setTitle("Unauthorized - phpDrone");
-                $guarFailPage->render();
-            }
-        }else
-        
-        if ($method=="write")
-        {
-            if (count($args)>1)
-                $this->vars[$args[0]] = $args[1];
-            else
-                if (count($args)==1)
-                    $this->vars["body"] .= $args[0];
-                else
-                    throw new Exception('Function <b>Template->write()</b> takes at least one argument.');
+            $output = $this->getBuffer();
+            if ($debugMode)
+                $output .= "<!--This will apear only in debug mode -->\n<div style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'>Built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v1.0 BETA</div>";
+            print $output;
         }
         else
         {
+            if (isset($guardFailPage))
+                $guarFailPage = new Template($guardFailPage);
+            else
+                $guarFailPage = new Template("phpDrone/templates/gurd-failure.tmpl");
+            $guarFailPage->setTitle("Unauthorized - phpDrone");
+            $guarFailPage->render();
+        }
+    }
+
+    private function write_p($args)
+    {
+        if (count($args)>1)
+            $this->vars[$args[0]] = $args[1];
+        else
+            if (count($args)==1)
+                $this->vars["body"] .= $args[0];
+            else
+                die('phpDrone error: Function <b>Template->write()</b> takes at least one argument.');
+    }
+
+    private function __call($method, $args)
+    {
+        
+        if (method_exists($this,$method."_p"))
+            eval("\$this->".$method."_p(\$args);");
+        else
             //this wil be replaced later with a nicer error
             die("phpDrone error: Call to undefined method Template->".$method."()");
-        }
-
-        
     }
 }
 

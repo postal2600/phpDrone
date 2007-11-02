@@ -69,14 +69,19 @@ class Input
 
     function write($upperTemplate="")
     {
-        $template = new Template("phpDrone/templates/form/input_{$this->type}.tmpl");
-        $template->vars = $upperTemplate->vars;
-        $template->write("inputLabel",$this->label);
-        $template->write("inputName",$this->name);
-        if ($this->error)
-            $template->write("inputError",$this->error);
+        if (method_exists($this,"write_{$this->type}"))
+        {
+            $template = new Template("phpDrone/templates/form/input_{$this->type}.tmpl");
+            $template->vars = $upperTemplate->vars;
+            $template->write("inputLabel",$this->label);
+            $template->write("inputName",$this->name);
+            if ($this->error)
+                $template->write("inputError",$this->error);
 
-        eval("\$result .= \$this->write_{$this->type}(\$template);");
+            eval("\$result .= \$this->write_{$this->type}(\$template);");
+        }
+        else
+            die("phpDrone error: Unknown form input type: {$this->type}.");
         return $result;
     }
 
