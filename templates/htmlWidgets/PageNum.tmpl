@@ -1,0 +1,24 @@
+{%block htmlWidget%}
+    <div class="pageNum">
+        <div>
+            {%itemCount%} {%itemLabel%}:
+            {%for page in pages%}
+                {%if page==currentPage-1%}
+                    <span title="You are on page {%page+1%}">{%page+1%}</span>
+                {%else%}
+                    <a href="/phpDrone/HtmlWidgets.php?action=setPage&amp;page={%page+1%}">{%page+1%}</a>
+                {%end-if%}
+            {%end-for%}
+        </div>
+        <div>
+            {%currentPerPage%} per page :
+            {%for pref in prefs%}
+                {%if pref==currentPerPage%}
+                    <span title="Curently set at {%currentPerPage%} per page">{%currentPerPage%}</span>
+                {%else%}
+                    <a title="Switch to {%pref%} per page" href="/phpDrone/HtmlWidgets.php?action=setPref&amp;prefName={%prefName%}&amp;pref={%pref%}">{%pref%}</a>
+                {%end-if%}
+            {%end-for%}
+        </div>
+    </div>
+{%end-block%}

@@ -114,44 +114,76 @@ class Template
         preg_match_all('/{%(?P<cont>[^\\}]*)%}/',$output,$vals);
         foreach($vals['cont'] as $f_val)
         {
-            $pieces = preg_split("/\|/",trim($f_val));
-            $subs = preg_split("/\./",trim($pieces[0]));
-            if (count($subs)==1)
+            $filterParts = preg_split("/\|/",trim($f_val));
+            
+            $operands = preg_split('/\\+|-|\\*|\//',trim($filterParts[0]));
+            if (count($operands)!=1)
             {
-                $ev = "\$php_vars['".$subs[0]."']";
-                eval("\$val=$ev;");
+                foreach ($operands as $part)
+                {
+                    $subs = preg_split("/\./",trim($part));
+                    if (count($subs)==1)
+                    {
+                        $ev = "\$php_vars['".$subs[0]."']";
+                    }
+                    else
+                    {
+                        $ev = "\$php_vars";
+                        foreach ($subs as $item)
+                            $ev.= "['".$item."']";
+                    }
+                    eval("\$isSet = isset($ev);");
+                    eval("\$val =$ev;");
+                    eval("\$type = gettype($ev);");
+                    
+                    if ($isSet)
+                    {
+                        if ($type=="string" && $val!="")
+                            $val = "'".$val."'";
+                        $toEval = preg_replace('/'.addslashes($part).'/',$val,trim($filterParts[0]));
+                    }
+                }
+                
             }
             else
             {
-                $ev = "\$php_vars";
-                foreach ($subs as $item)
-                    $ev.= "['".$item."']";
-                eval("\$val=$ev;");
+                $subs = preg_split("/\./",trim($filterParts[0]));
+                if (count($subs)==1)
+                {
+                    $toEval = "\$php_vars['".$subs[0]."']";
+                }
+                else
+                {
+                    $toEval = "\$php_vars";
+                    foreach ($subs as $item)
+                        $toEval.= "['".$item."']";
+                }
             }
+//             print "###".$f_val." - ".$toEval."<br />";
+            eval("\$result=$toEval;");
             
             //apply filters
-            if (count($pieces)>1)
-                for ($f=1;$f<count($pieces);$f++)
+            if (count($filterParts)>1)
+                for ($f=1;$f<count($filterParts);$f++)
                 {
-                    if (preg_match('/(?P<filterName>.*)\\((?P<filterArgs>.+)\\)/',$pieces[$f],$capt))
+                    if (preg_match('/(?P<filterName>.*)\\((?P<filterArgs>.+)\\)/',$filterParts[$f],$capt))
                     {
                         $filterName = $capt['filterName'];
                         $filterArgs = ",".$capt['filterArgs'];
                     }
                     else
                     {
-                        $filterName = str_replace(array("(",")"),"",$pieces[$f]);
+                        $filterName = str_replace(array("(",")"),"",$filterParts[$f]);
                         $filterArgs = "";
                     }
                     if (function_exists("filter_".$filterName))
                     {
-                        eval('$val=filter_'.$filterName.'(\''.$val.'\''.$filterArgs.');');
+                        eval('$result=filter_'.$filterName.'(\''.$result.'\''.$filterArgs.');');
                     }
                     else
                         throwDroneError("Unknown filter: <b>{$filterName}</b>.");
                 }
-            
-            $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|(.)").'(?:[ ]*|)%}/',$val,$output);
+            $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|(.)+-/").'(?:[ ]*|)%}/',$result,$output);
         }
         return $output;
     }
@@ -163,10 +195,10 @@ class Template
         foreach($ifs['ifStatement'] as $ifStatement)
         {
             $toEval = trim($ifStatement);
-            $parts = preg_split('/(?:==)|(?:<=)|(?:>=)|(?:<)|(?:>)|(?:\|\|)|(?:&&)|(?:\()|(?:\))/',$toEval);
-            if (count($parts)!=1)
+            $operands = preg_split('/(?:==)|(?:<=)|(?:>=)|(?:<)|(?:>)|(?:\|\|)|(?:&&)|(?:\()|(?:\))|(?:\+)|(?:-)|(?:\*)/',$toEval);
+            if (count($operands)!=1)
             {
-                foreach ($parts as $part)
+                foreach ($operands as $part)
                 {
                     $val_parts = preg_split("/\./",trim($part));
                     if (count($val_parts)==1)
@@ -220,15 +252,15 @@ class Template
             if (!$result)
             {
                 //{%(?:[ ]*|)if section%}(?P<ifBlock>[^\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?))?{%(?:[ ]*|)end-if(?:[ ]*|)%}
-                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
-                $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$capt['elseBlock'],$output,1);
+                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.addcslashes($ifStatement,"+-/").'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
+                $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.addcslashes($ifStatement,"+-/").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$capt['elseBlock'],$output,1);
             }
             else
             {
-                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?P<ifCont>[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
+                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.addcslashes($ifStatement,"+-/").'%}(?P<ifCont>[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
                 $ifContent = $capt['ifCont'];
                 $ifContent = preg_replace('/(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\\\x00]*?))[^\\x00]*/','',$ifContent);
-                $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$ifContent,$output,1);
+                $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.addcslashes($ifStatement,"+-/").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$ifContent,$output,1);
             }
         }
         return $output;
@@ -294,8 +326,8 @@ class Template
                         }
 
                         //process for steps
-                        $builtBlock = preg_replace ('/{%(?:[ ]*|)for-step(?:[ ]*|)%}/',$pas_2,$builtBlock);
-                        $this->vars['for-step'] = $pas_2;
+                        $builtBlock = preg_replace ('/{%(?:[ ]*|)forStep(?:[ ]*|)%}/',$pas_2,$builtBlock);
+                        $this->vars['forStep'] = $pas_2;
                         
                         $builtBlock = $this->compileTemplate($builtBlock,$this->vars);
                         $newContent .= $builtBlock;
