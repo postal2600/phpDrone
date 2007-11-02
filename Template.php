@@ -108,13 +108,11 @@ class Template
         foreach($ifs['ifStatement'] as $ifStatement)
         {
             $statement = trim($ifStatement);
-            $v = $this->vars[$statement];
-            eval("\$result='".$v."';");
+            $v = addslashes($this->vars[$statement]);
+            eval("\$result='$v;';");
             if (!$result)
-                //{%(?:\s|)if chestii(?:\s|)%}(?:.|[\s]*)*{%(?:\s|)end-if(?:\s|)%}
-                print "BEFORE: ".$this->template."\n";
-                $this->template = preg_replace ('/{%if inputError%}(?:.|[\\s])*{%end-if%}/','',$this->template);
-                print "AFTER: ".$this->template."\n";
+                //{%(?:[ ]*|)if something%}(?:[\s]*|.*)*{%end-if%}
+                $this->template = preg_replace ('/{%if '.$ifStatement.'%}(?:[\\s]*|.*)*{%end-if%}/','',$this->template);
         }
     }
 

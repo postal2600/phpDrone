@@ -73,7 +73,7 @@ class Input
         $template->write("inputLabel",$this->label);
         $template->write("inputName",$this->name);
         if ($this->error)
-            $template->write("inputError","<div class='error'><span>Error:</span> {$this->error}</div>");
+            $template->write("inputError",$this->error);
 
         eval("\$result .= \$this->write_{$this->type}(\$template);");
         return $result;
