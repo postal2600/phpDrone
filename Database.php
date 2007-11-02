@@ -19,10 +19,13 @@ class Database
                     $qry = $this->exec_qry("SELECT * from {$table};");
                     $numFields = mysql_num_fields($qry);
                     for($f=0;$f<$numFields;$f++)
+                    {
                         if (preg_match('/primary_key/',mysql_field_flags($qry, $f)))
                             $this->id = mysql_field_name($qry, $f);
-                        else
-                            eval("\$this->types['".mysql_field_name($qry, $f)."'] = ".mysql_field_type($qry, $f).";");
+                        eval("\$this->types['".mysql_field_name($qry, $f)."'] = ".mysql_field_type($qry, $f).";");
+                    }
+                    if (!isset($this->id))
+                        die("phpDrone error: Table <b>{$sqlServer}.{$this->tableName}</b> has no primary key.");
                     mysql_free_result($qry);
                     $this->data = array();
                 }
@@ -59,40 +62,53 @@ class Database
             $this->exec_qry("INSERT INTO {$this->tableName} ({$this->id},{$insertKeys}) VALUES {$insertDataString};");
         }
         
-        
+        foreach (array_keys($toUpdate) as $item)
+        {
+            $toBuild = array();
+            foreach ($toUpdate[$item] as $key => $value)
+            {
+                array_push($toBuild,"{$key} = '{$value}'");
+            }
+            $updateDataString = join(",",$toBuild);
+            $this->exec_qry("UPDATE {$this->tableName} SET {$updateDataString} WHERE {$this->id}='{$item}' LIMIT 1;");
+        }
+    }
 
-//         //UPDATE `test` SET `test1` = 'Duis porttitor elita',`test2` = 'Integer fringilla. In a' WHERE CONVERT( `id` USING utf8 ) = 'aa' LIMIT 1 ;  n times
-//         $this->exec_qry("UPDATE {$this->tableName} SET {$updateDataString} WHERE {$this->id}='{$id}' LIMIT 1;");
+    private function getUniqueKey($size)
+    {
+        $result = genRandomString($size);
+        while (mysql_num_rows($this->exec_qry("SELECT * FROM {$this->tableName} WHERE {$this->id}='{$result}'"))>0)
+            $result = genRandomString($size);
+        return $result;
     }
 
     private function __call($method, $args)
     {
         if ($method=="setData")
         {
-            if (count($args)==2)
+            $vars = array();
+            foreach($args as $item)
             {
-                $key = $args[0];
-                $value = $args[1];
+                $data = explode("=",$item);
+                if (count($data)!=2)
+                    die("phpDrone error: Illegal argument supplied to <b>setData</b>: {$item}");
+                else
+                    $vars[trim($data[0])] = trim($data[1]);
             }
-            else
-            if (count($args)==3)
-            {
-                $id = $args[0];
-                $key = $args[1];
-                $value = $args[2];
-            }
-            else
-                die("phpDrone error: Method Database->".$method."() recieves only 2 or 3 arguments. Supplied: ".count($args).".");
 
-            if (!isset($id))
+            if (!isset($vars[$this->id]))
+                $id = $this->getUniqueKey(22);
+            else
             {
-                $id = genRandomString(22);
+                $id = $vars['id'];
+                unset($vars['id']);
             }
             
-            if (isset($this->types[$key]))
-                $this->data[$id][$key] = $value;
-            else
-                die("phpDrone error: Trying to set unknown field <b>{$key}</b> on table <b>{$this->tableName}</b>!");
+            foreach ($vars as $key => $value)
+                if (isset($this->types[$key]))
+                    $this->data[$id][$key] = $value;
+                else
+                    die("phpDrone error: Trying to set unknown field <b>{$key}</b> on table <b>{$this->tableName}</b>!");
         }
         else
             die("phpDrone error: Call to undefined method Database->".$method."()");
