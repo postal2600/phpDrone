@@ -80,6 +80,7 @@ SAME VARIABLES EXAMPLE, BUT WITH FILTERS
 
 @@@@@ explenations @@@@@
 Filters can be also applyed to complex object variables (multi-level variables). See below.
+For complete list of filters, see filters.txt
 @@@@@@@@@@@@@@@@@@@@@@@@
 
 -------------------------------------------------------------------------------------------------------------------

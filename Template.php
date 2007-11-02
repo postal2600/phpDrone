@@ -36,7 +36,7 @@ class Template
                 if (file_exists("templates/".$template))
                     $filename = "templates/".$template;
                 else
-                    die("phpDrone error: Template file templates/<b>{$template}</b>.");
+                    die("phpDrone error: Template file <b>templates/{$template}</b> was not be found.");
                 
                 
         $this->template = "";
@@ -133,7 +133,7 @@ class Template
     private function solveIf($input,$php_vars)
     {
         $output = $input;
-        preg_match_all('/{%([ ]*|)if (?P<ifStatement>[^\\}]*)%}/', $output, $ifs);
+        preg_match_all('/{%([ ]*|)if([\\d]*|) (?P<ifStatement>[^\\}]*)%}/', $output, $ifs);
         foreach($ifs['ifStatement'] as $ifStatement)
         {
             $toEval = trim($ifStatement);
@@ -170,29 +170,39 @@ class Template
             }
             else
             {
-                if (isset($php_vars[$toEval]))
+                $val_parts = preg_split("/\./",trim($toEval));
+                if (count($val_parts)==1)
                 {
-                    $toEval = $php_vars[$toEval];
-                    if ($toEval=="")
+                    if (isset($php_vars[$toEval]))
+                    {
+                        $toEval = $php_vars[$toEval];
+                        if ($toEval=="")
+                            $toEval = "False";
+                    }
+                    else
                         $toEval = "False";
                 }
                 else
-                    $toEval = "False";
+                {
+                    $toEval = "\$php_vars";
+                    foreach ($val_parts as $item)
+                        $toEval.= "['".$item."']";
+                }
             }
             eval("\$result=$toEval;");
             
             if (!$result)
             {
                 //{%(?:[ ]*|)if section%}(?P<ifBlock>[^\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?))?{%(?:[ ]*|)end-if(?:[ ]*|)%}
-                preg_match('/{%(?:[ ]*|)if '.$ifStatement.'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if(?:[ ]*|)%}/',$output,$capt);
-                $output = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if(?:[ ]*|)%}/',$capt['elseBlock'],$output,1);
+                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
+                $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$capt['elseBlock'],$output,1);
             }
             else
             {
-                preg_match('/{%(?:[ ]*|)if '.$ifStatement.'%}(?P<ifCont>[^\\x00]*?){%(?:[ ]*|)end-if(?:[ ]*|)%}/',$output,$capt);
+                preg_match('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?P<ifCont>[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$output,$capt);
                 $ifContent = $capt['ifCont'];
                 $ifContent = preg_replace('/(?:(?:{%(?:[ ]*|)else(?:[ ]*|)%})(?P<elseBlock>[^\\\\x00]*?))[^\\x00]*/','',$ifContent);
-                $output = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if(?:[ ]*|)%}/',$ifContent,$output,1);
+                $output = preg_replace ('/{%(?:[ ]*|)if([\\d]*|) '.$ifStatement.'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if\\1(?:[ ]*|)%}/',$ifContent,$output,1);
             }
         }
         return $output;
@@ -201,24 +211,32 @@ class Template
     private function solveFor($input,$php_vars)
     {
         $output = $input;
-        preg_match_all('/{%(?:[ ]|)for (?P<item>.*) in (?P<bunch>.*)%}/', $output, $fors);
+        preg_match_all('/{%(?:[ ]|)for([\\d]*|) (?P<item>.*) in (?P<bunch>.*?)%}/', $output, $fors);
         $pas = 0;
         foreach($fors['bunch'] as $bunch)
         {
             $item = $fors['item'][$pas];
-            //{%(?:[ ]|)for item in bunch%}(?P<ifblock>[^\x00]*){%end-for%} - get the block
+            //{%(?:[ ]|)for([\d]*|) (?:.*?) in (?:.*?)%}(?:\n){0,1}(?P<forblock>[^\x00]*?)(?:\n){0,1}{%end-for\1%} - get the block
             // get the if block content
-            preg_match('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?P<forblock>[^\\x00]*?){%end-for%}/', $output, $forBlocksContent);
+            preg_match('/{%(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:\\n){0,1}(?P<forblock>[^\\x00]*?)(?:\\n){0,1}{%end-for\\1%}/', $output, $forBlocksContent);
             $blockContent = $forBlocksContent['forblock'];
-            if (isset($php_vars[trim($bunch)]))
+
+            if (isset($php_vars[trim($bunch)]) || is_numeric(trim($bunch)))
             {
-                $type = gettype($php_vars[trim($bunch)]);
+                if (is_numeric(trim($bunch)))
+                    $type = "integer";
+                else
+                    $type = gettype($php_vars[trim($bunch)]);
                 if ($type=="array" || $type=="object" || $type=="string" || $type=="integer")
                 {
                     if ($type=="integer")
                     {
                         $pacient = array();
-                        for ($f=0;$f<=$php_vars[trim($bunch)];$f++)
+                        if (is_numeric(trim($bunch)))
+                            $upLimit = trim($bunch);
+                        else
+                            $upLimit =$php_vars[trim($bunch)];
+                        for ($f=0;$f<=$upLimit;$f++)
                             $pacient[$f] = $f;
                     }
                     else if ($type=="string")
@@ -248,18 +266,17 @@ class Template
                             $parts = preg_split('/\,/',$i_item);
                             $builtBlock = preg_replace('/{%(?:[ ]*|)cycle '.$i_item.'(?:[ ]*|)%}/',$parts[$pas_2%count($parts)],$builtBlock);
                         }
-
                         $builtBlock = $this->compileTemplate($builtBlock,$this->vars);
                         $newContent .= $builtBlock;
                         $pas_2 ++;
                     }
 //                     $blockContent = preg_replace('/([\\\\<{%}>*\/])/','\\\\\1',$blockContent);
                     //$this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}'.$blockContent.'{%end-for%}/',$newContent,$this->template);
-                    $output = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for%}/',$newContent,$output,1);
+                    $output = preg_replace('/{%(?:[ ]*|)for([\\d]*|) '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for\\1%}/',$newContent,$output,1);
                 }
             }
             else
-                $output = preg_replace ('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?:[\\s]*|.*)*{%end-for%}/','',$output,1);
+                $output = preg_replace ('/{%(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:[\\s]*|.*)*{%end-for\\1%}/','',$output,1);
             $pas++;
         }
         return $output;
