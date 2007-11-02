@@ -42,6 +42,7 @@ class Input
 	                if (isset($this->initial) && (($valType=='array' && $defVal[$f][0]==$this->initial) || ($valType!='array' && $defVal[$f]==$this->initial)) )
 	                {
 	                    unset($this->initial);
+	                    $isSelected = true;
 	                    if ($valType=="array")
 	                    {
 	                        $s_value = Utils::array_get(0,$defVal[$f],"");
@@ -51,8 +52,11 @@ class Input
 						else
 						    $defVal[$f] = array($defVal[$f],$defVal[$f],True);
 					}
-	                if (isset($defVal[$f][2]) && $defVal[$f][2])
-	                    $this->initial = $defVal[$f][0];
+	                elseif (isset($defVal[$f][2]) && $defVal[$f][2] && !$isSelected)
+	                    if ($valType=="array")
+	                    	$this->initial = $defVal[$f][0];
+						else
+						    $this->initial = $defVal[$f];
 				}
 			}
             $this->defaultValue = $defVal;
