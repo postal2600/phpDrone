@@ -1,15 +1,8 @@
 <?php
-
-class Meta
-{
-    //to be implemented
-}
-
 class Template
 {
     
-    private $buffer;
-    private $title;
+    private $buffer;    
     private $meta;
     public $vars;
     private $guard = "free";
@@ -24,7 +17,10 @@ class Template
             if (isset($templateDir) && file_exists($templateDir.substr($template,1)))
                 $filename = $templateDir.substr($template,1);
             else
-                $filename = "phpDrone/templates/".substr($template,1);
+                if (file_exists("templates/".substr($template,1)))
+                    $filename = "templates/".substr($template,1);
+                else
+                    $filename = "phpDrone/templates/".substr($template,1);
         }
         else
             if (isset($templateDir))
@@ -34,9 +30,7 @@ class Template
                 
                 
         $this->template = "";
-        $this->buildTemplate($filename);
-        
-        $this->title = "Untitled";
+        $this->buildTemplate($filename);                
         $this->vars = array();
     }
 
@@ -78,16 +72,6 @@ class Template
     function addMeta($meta)
     {
         $this->writeVar("meta",$meta."\n");
-    }
-
-    function setTitle($title)
-    {
-        $this->title = $title;
-    }
-
-    function getTitle()
-    {
-        return $this->title;
     }
 
     function setGuard($guard)
@@ -152,7 +136,7 @@ class Template
                         $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'(?:[ ]*|)%}/',$value,$blockContent);
                         $newContent .= $builtBlock;
                     }
-                    $blockContent = preg_replace('/([\\\\<>*\/])/','\\\1',$blockContent);
+                    $blockContent = preg_replace('/([\\\\<>*\/])/','\\\\\1',$blockContent);                    
                     $this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}'.$blockContent.'{%end-for%}/',$newContent,$this->template);
                 }
             }
@@ -169,8 +153,6 @@ class Template
         require ("_droneSettings.php");
         $this->compileTemplate();
         $output = $this->template;
-        //set the page title if one is defined in template
-        $output = preg_replace ('/{%(?:[ ]*|)title(?:[ ]*|)%}/',$this->title,$output);
         $output = $this->injectVars($output);
         //take out comments
         $output = preg_replace('/{%(?:[ ]*|)comment(?:[ ]*|)%}(?:[^\\x00]*){%(?:[ ]*|)end-comment(?:[ ]*|)%}/', '', $output);
@@ -197,7 +179,7 @@ class Template
                 $guarFailPage = new Template($guardFailPage);
             else
                 $guarFailPage = new Template("phpDrone/templates/gurd-failure.tmpl");
-            $guarFailPage->setTitle("Unauthorized - phpDrone");
+            $guarFailPage->write("title","Unauthorized - phpDrone");
             $guarFailPage->render();
         }
     }
