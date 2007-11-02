@@ -1,6 +1,6 @@
 {%block droneInput%}
     {%if inputLabel%}
-        <label for='{%inputName%}'>
+        <label for='{%inputId%}'>
             {%if2 mandatoryMarker%}
                 <span class='mandatoryMarker'>{%mandatoryMarker%}</span>
             {%end-if2%}
@@ -11,6 +11,6 @@
         <span class='inputError'><span>Error: </span>{%inputError%}</span>
     {%end-if%}
     {%for item in values%}
-        <input type="radio" class='{%inputName%}' name='{%inputName%}' value='{%item.key%}' {%if item.selected%}checked='checked'{%end-if%}><span class='checkboxValue'>{%item.value%}</span><span class="checkboxDelimiter">&nbsp;</span>
+        <input type="radio" {%if for_index==0%} id='{%attributes.id%}'{%end-if%} class='radioButton' name='{%attributes.name%}' value='{%item.key%}' {%if item.selected%}checked='checked'{%end-if%}><span class='checkboxValue'>{%item.value%}</span><span class="checkboxDelimiter">&nbsp;</span>
     {%end-for%}
 {%end-block%}

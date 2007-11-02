@@ -1,5 +1,5 @@
 {%block droneInput%}
-    <img id='captchaImage' src='phpDrone/Captcha.php?id={%captchaId%}' alt='Captcha' onclick='regenerate("{%captchaId%}")'/>
+    <img id='captchaImage' src='phpDrone/Captcha.php?id={%captchaId%}' alt='Captcha verification image' onclick='regenerate("{%captchaId%}")'/>
     {%if inputError%}
         <span class='inputError'><span>Error: </span>{%inputError%}</span>
     {%end-if%}

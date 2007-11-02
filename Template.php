@@ -16,7 +16,7 @@ class Template
     
     function __construct($template)
     {
-        set_error_handler("handleDroneErrors");
+        set_error_handler("Utils::handleDroneErrors");
         require("drone/settings.php");
         restore_error_handler();
         if ($debugMode)
@@ -45,7 +45,7 @@ class Template
                 if (file_exists("templates/".$template))
                     $filename = "templates/".$template;
                 else
-                    throwDroneError("Template file <b>templates/{$template}</b> was not be found.");
+                    Utils::throwDroneError("Template file <b>templates/{$template}</b> was not be found.");
                 
         $this->template = "";
         $this->buildTemplate($filename);                
@@ -62,7 +62,7 @@ class Template
     function solveInheritance($templateFile)
     {
         if (!file_exists($templateFile))
-            throwDroneError("Template file <b>{$templateFile}</b> needed to extend other template was not found.");
+            Utils::throwDroneError("Template file <b>{$templateFile}</b> needed to extend other template was not found.");
         $handle = fopen($templateFile, "r");
         $templateContent = fread($handle, filesize($templateFile));
         fclose($handle);
@@ -184,7 +184,7 @@ class Template
                         eval('$val=filter_'.$filterName.'(\''.addcslashes($val,"'").'\''.$filterArgs.');');
                     }
                     else
-                        throwDroneError("Unknown filter: <b>{$filterName}</b>.");
+                        Utils::throwDroneError("Unknown filter: <b>{$filterName}</b>.");
                 }
             $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|+*(.)").'(?:[ ]*|)%}/',$val,$output);
         }
@@ -260,14 +260,14 @@ class Template
             {
                 //{%(?:[ ]*|)if([\d]*|) .*%}(?P<ifBlock>[^\x00]*?)(?:(?:{%(?:[ ]*|)else\1(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?))?{%(?:[ ]*|)end-if\1(?:[ ]*|)%}
                 preg_match('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$output,$capt);
-                $output = preg_replace ('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$capt['elseBlock'],$output,1);
+                $output = preg_replace ('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',rtrim($capt['elseBlock']," "),$output,1);
             }
             else
             {
                 preg_match('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?P<ifCont>[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$output,$capt);
                 $ifContent = $capt['ifCont'];
                 $ifContent = preg_replace('/(?:(?:{%(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))[^\\x00].*/','',$ifContent);
-                $output = preg_replace ('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*\\").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$ifContent,$output,1);
+                $output = preg_replace ('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*\\").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',rtrim($ifContent," "),$output,1);
             }
 
         }
@@ -311,7 +311,7 @@ class Template
 
                     $newContent = "";
                     $pas_2 = 0;
-                    foreach ($pacient as $value)
+                    foreach ($pacient as $key=>$value)
                     {
                         if (gettype($value)=="array" || gettype($value)=="object")
                         {
@@ -336,6 +336,7 @@ class Template
 //                         $builtBlock = preg_replace ('/{%(?:[ ]*|)for-step(?:[ ]*|)%}/',$pas_2,$builtBlock);
                         $this->vars['for_step'] = $pas_2+1;
                         $this->vars['for_index'] = $pas_2;
+                        $this->vars['for_key'] = $key;
                         $this->vars['for_total'] = count($pacient);
                         if ($pas_2==0)
                             $this->vars['for_first'] = true;
@@ -355,7 +356,7 @@ class Template
                     }
 //                     $blockContent = preg_replace('/([\\\\<{%}>*\/])/','\\\\\1',$blockContent);
                     //$this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}'.$blockContent.'{%end-for%}/',$newContent,$this->template);
-                    $output = preg_replace('/{%(?:[ ]*|)for([\\d]*|) '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for\\1%}/',$newContent,$output,1);
+                    $output = preg_replace('/{%(?:[ ]*|)for([\\d]*|) '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for\\1%}/',rtrim($newContent," "),$output,1);
                 }
             }
             else
@@ -378,7 +379,7 @@ class Template
 
     function getBuffer()
     {
-        set_error_handler("handleDroneErrors");
+        set_error_handler("Utils::handleDroneErrors");
         require("drone/settings.php");
         restore_error_handler();
         $output = $this->compileTemplate($this->template,$this->vars);
@@ -394,7 +395,7 @@ class Template
 
     private function render_p($args)
     {
-        set_error_handler("handleDroneErrors");
+        set_error_handler("Utils::handleDroneErrors");
         require("drone/settings.php");
         restore_error_handler();
         $output = $this->getBuffer();
@@ -416,7 +417,7 @@ class Template
             if (count($args)==1)
                 $this->vars["body"] .= $args[0];
             else
-                throwDroneError("Function <b>Template->write()</b> takes at least one argument.");
+                Utils::throwDroneError("Function <b>Template->write()</b> takes at least one argument.");
     }
 
     private function __call($method, $args)
@@ -425,7 +426,7 @@ class Template
         if (method_exists($this,$method."_p"))
             eval("\$this->".$method."_p(\$args);");
         else
-            throwDroneError("Call to undefined method <b>Template->".$method."()</b>");
+            Utils::throwDroneError("Call to undefined method <b>Template->".$method."()</b>");
     }
 }
 

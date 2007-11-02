@@ -2,7 +2,6 @@
     <div class="pageNum">
         <div>
             {%itemCount%} {%itemLabel%}:
-
             {%for item in pages%}
                 {%if for_first%}
                     {%if2 item+1==currentPage%}
@@ -11,13 +10,11 @@
                         <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage-1%}" title="Go to page {%currentPage-1%}">&laquo;Prev</a>
                     {%end-if2%}
                 {%end-if%}
-
                 {%if item+1==currentPage%}
                     <span title="You are on page {%item+1%}">{%item+1%}</span>
                 {%else%}
                     <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%item+1%}" title="Go to page {%item+1%}">{%item+1%}</a>
                 {%end-if%}
-
                 {%if for_last%}
                     {%if2 item+1==currentPage%}
                         <span class="disabledPageNumBtn">Next&raquo;</span>

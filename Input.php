@@ -17,11 +17,11 @@ class Input
         }
         
         $this->type = $type;
-        $this->name = $name;
         $this->validator = null;
         $this->error = "";
         //used only for selects. determines what was the default value set, to check if changed in case of a mandatory field
         $this->initial = null;
+        $this->attributes = array("name"=>$name,"id"=>$name);
     }
 
     function setRequestData(&$reqData)
@@ -29,47 +29,63 @@ class Input
         $this->request = $reqData;
     }
 
-    function setMaxSize($size)
-    {
-        $this->maxSize = intval($size);
-    }
-
     function setDefault($defVal)
     {
         if (!isset($this->defaultValue))
         {
             if ($this->type=="select")
-                foreach ($defVal as $item)
-                    if (isset($item[2]) && $item[2])
-                        $this->initial = $item[0];
+            {
+                $isSelected = false;
+                for($f=0;$f<count($defVal);$f++)
+                {
+                    $valType = gettype($defVal[$f]);
+	                if (isset($this->initial) && (($valType=='array' && $defVal[$f][0]==$this->initial) || ($valType!='array' && $defVal[$f]==$this->initial)) )
+	                {
+	                    unset($this->initial);
+	                    if ($valType=="array")
+	                    {
+	                        $s_value = Utils::array_get(0,$defVal[$f],"");
+	                        $s_text = Utils::array_get(1,$defVal[$f],$s_value);
+                        	$defVal[$f] = array($s_value,$s_text,True);
+						}
+						else
+						    $defVal[$f] = array($defVal[$f],$defVal[$f],True);
+					}
+	                if (isset($defVal[$f][2]) && $defVal[$f][2])
+	                    $this->initial = $defVal[$f][0];
+				}
+			}
             $this->defaultValue = $defVal;
         }
     }
 
+    function setAttribute($attr,$value)
+    {
+        $this->attributes[$attr] = $value;
+    }
+
     function write_text($template)
     {
-        if (array_key_exists($this->name,$this->request))
-            $template->write("inputValue",$this->request[$this->name]);
+        if (array_key_exists($this->attributes['name'],$this->request))
+            $template->write("inputValue",$this->request[$this->attributes['name']]);
         else
             $template->write("inputValue",$this->defaultValue);
-        if (isset($this->maxSize))
-            $template->write("maxlength",$this->maxSize);
         return $template->getBuffer();
     }
 
     function write_password($template)
     {
-        if (array_key_exists($this->name,$this->request))
-            $template->write("inputValue",$this->request[$this->name]);
-        if (isset($this->maxSize))
-            $template->write("maxlength",$this->maxSize);
+        if (array_key_exists($this->attributes['name'],$this->request))
+            $template->write("inputValue",$this->request[$this->attributes['name']]);
+        else
+            $template->write("inputValue",$this->defaultValue);
         return $template->getBuffer();
     }
 
     function write_textarea($template)
     {
-        if (array_key_exists($this->name,$this->request))
-            $template->write("inputValue",$this->request[$this->name]);
+        if (array_key_exists($this->attributes['name'],$this->request))
+            $template->write("inputValue",$this->request[$this->attributes['name']]);
         else
             $template->write("inputValue",$this->defaultValue);
         return $template->getBuffer();
@@ -83,6 +99,7 @@ class Input
             $pas=0;
             $hasSelected = False;
             $safeChars = get_html_translation_table(HTML_ENTITIES);
+            
             foreach ($this->defaultValue as $item)
             {
                 $values[$pas] = array();
@@ -96,7 +113,7 @@ class Input
                     $values[$pas]["key"] = $item;
                     $values[$pas]["value"] = strtr($item,$safeChars);
                 }
-                if ((array_key_exists($this->name,$this->request) && ($values[$pas]["key"]==$this->request[$this->name])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
+                if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
                 {
                     $values[$pas]["selected"] = True;
                     $hasSelected = True;
@@ -106,7 +123,7 @@ class Input
 
             if (!$hasSelected)
                 $values[0]["selected"] = True;
-
+			
             $template->write("values",$values);
         }
         return $template->getBuffer();
@@ -131,7 +148,7 @@ class Input
                 $values[$pas] = array();
                 $values[$pas]["key"] = $item[0];
                 $values[$pas]["value"] = strtr($item[1],$safeChars);
-                if (array_key_exists($this->name,$this->request) && in_array($values[$pas]["key"],$this->request[$this->name]) || isset($item[2]) && $item[2])
+                if (array_key_exists($this->attributes['name'],$this->request) && in_array($values[$pas]["key"],$this->request[$this->attributes['name']]) || isset($item[2]) && $item[2])
                     $values[$pas]["selected"] = True;
                 $pas++;
             }
@@ -154,7 +171,7 @@ class Input
                 $values[$pas] = array();
                 $values[$pas]["key"] = $item[0];
                 $values[$pas]["value"] = strtr($item[1],$safeChars);
-                if ((array_key_exists($this->name,$this->request) && ($values[$pas]["key"]==$this->request[$this->name])) || (isset($item[2]) && $item[2]))
+                if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (isset($item[2]) && $item[2]))
                 {
                     $values[$pas]["selected"] = True;
                     $hasSelected = True;
@@ -169,13 +186,13 @@ class Input
 
     function write_hidden($template)
     {
-        $template->write("inputValue",$this->validator['regExp']);
+        $template->write("inputValue",$this->defaultValue);
         return $template->getBuffer();
     }
 
     function write_submit($template)
     {
-        $template->write("inputValue",$this->validator['regExp']);
+        $template->write("inputValue",$this->defaultValue);
         return $template->getBuffer();
     }
 
@@ -189,7 +206,7 @@ class Input
             $template->vars = $upperTemplate->vars;
             $safeChars = get_html_translation_table(HTML_ENTITIES);
             $template->write("inputLabel",strtr($this->label,$safeChars));
-            $template->write("inputName",$this->name);
+            $template->write("attributes",$this->attributes);
             if ($this->mandatory)
                 $template->write("mandatoryMarker",$this->mandatoryMarker);
             if ($this->error)
@@ -198,13 +215,13 @@ class Input
             eval("\$result .= \$this->write_{$this->type}(\$template);");
         }
         else
-            throwDroneError("Unknown form input type: {$this->type}.");
+            Utils::throwDroneError("Unknown form input type: {$this->type}.");
         return $result;
     }
 
     function writeValueless($upperTemplate="")
     {
-        $this->request[$this->name] = "";
+        $this->request[$this->attributes['name']] = "";
         return $this->write($upperTemplate);
     }
 
@@ -222,7 +239,7 @@ class Input
         {
 
             if ($this->type=="select")
-                if ($this->mandatory && $this->request[$this->name]==$this->initial)
+                if ($this->mandatory && $this->request[$this->attributes['name']]==$this->initial)
                 {
                     $this->error = "Choose one";
                     return false;
@@ -246,13 +263,13 @@ class Input
                     $key=$item[0];
                 else
                     $key = $item;
-                if (gettype($this->request[$this->name])=="array")
+                if (gettype($this->request[$this->attributes['name']])=="array")
                 {
-                    if (in_array($key,$this->request[$this->name]) && $validatorResult)
+                    if (in_array($key,$this->request[$this->attributes['name']]) && $validatorResult)
                         return true;
                 }
                 else
-                    if ($this->request[$this->name]==$key && $validatorResult)
+                    if ($this->request[$this->attributes['name']]==$key && $validatorResult)
                         return true;
             }
             
@@ -260,18 +277,18 @@ class Input
             return false;
         }
         
-        if ($this->mandatory && strlen($this->request[$this->name])==0)
+        if ($this->mandatory && strlen($this->request[$this->attributes['name']])==0)
         {
             $this->error = "Can't be empty";
             return false;
         }
-        if (!$this->mandatory && strlen($this->request[$this->name])==0)
+        if (!$this->mandatory && strlen($this->request[$this->attributes['name']])==0)
         {
             return true;
         }
-        if (isset($this->maxSize) && strlen($this->request[$this->name])>$this->maxSize)
+        if (isset($this->attributes['maxlength']) && strlen($this->request[$this->attributes['name']])>$this->attributes['maxlength'])
         {
-            $this->error = "Max length for input is {$this->maxSize}";
+            $this->error = "Max length for input is {$this->attributes['maxlength']}";
             return false;
         }
         $meth = $this->validator['regExp'];
@@ -287,7 +304,7 @@ class Input
         }
         else
         if ($this->validator!=null && $this->type!="hidden" && $this->type!="submit")
-            if (!preg_match ($this->validator['regExp'],$this->request[$this->name]))
+            if (!preg_match ($this->validator['regExp'],$this->request[$this->attributes['name']]))
             {
                 $this->error= $this->validator['message'];
                 return false;

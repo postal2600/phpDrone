@@ -15,17 +15,24 @@ class Form
         {
             case "post":
                 $this->request = $_POST;
+                $this->addFilesData($this->request);
                 break;
             case "get":
                 $this->request = $_GET;
                 break;
             default:
                 $this->request = array_merge_recursive($_GET,$_POST);
+                $this->addFilesData($this->request);
                 break;
         }
     }
-    
-    
+
+	private function addFilesData(&$requestObj)
+	{
+		foreach ($_FILES as $key=>$item)
+		    $requestObj[$key] = $item['name'];
+	}
+
     private function addInput_p($args)
     {
         if (count($args)>1)
@@ -43,7 +50,10 @@ class Form
                 $this->inputs[$name] = new Captcha($label,$name);
 
             if (isset($this->defaults[$name]))
-                $this->inputs[$name]->defaultValue = $this->defaults[$name];
+                if ($type!="select")
+                	$this->inputs[$name]->defaultValue = $this->defaults[$name];
+				else
+				    $this->inputs[$name]->initial = $this->defaults[$name];
 
             if ($validator!="")
                 if (is_array($validator))
@@ -55,11 +65,11 @@ class Form
                     
                     
             if ($maxLen)
-                $this->inputs[$name]->setMaxSize($maxLen);
+                $this->inputs[$name]->attributes['maxlength'] = intval($maxLen);
 
             $this->inputs[$name]->setRequestData($this->request);
             if  ($type=="submit")
-                $this->submitTriggers[$this->inputs[$name]->name]="";
+                $this->submitTriggers[$this->inputs[$name]->attributes['name']]="";
 //             return $len;
         }
         else
@@ -76,7 +86,7 @@ class Form
         else
         {
             //this wil be replaced later with a nicer error
-            throwDroneError("Method addInput takes at least one argument.");
+            Utils::throwDroneError("Method addInput takes at least one argument.");
         }
         
     }
@@ -87,7 +97,7 @@ class Form
             eval("\$this->".$method."_p(\$args);");
         else
             //this wil be replaced later with a nicer error
-            throwDroneError("Call to undefined method Form->".$method."()");
+            Utils::throwDroneError("Call to undefined method Form->".$method."()");
     }
     
     function validateForm()
@@ -148,9 +158,9 @@ class Form
         foreach ($this->inputs as $item)
             if (!$item->addedLater)
                 if (isset($this->valueFlag))
-                    $arrayResult[$item->name] = $item->writeValueless($upperTemplate);
+                    $arrayResult[$item->attributes['name']] = $item->writeValueless($upperTemplate);
                 else
-                    $arrayResult[$item->name] = $item->write($upperTemplate);
+                    $arrayResult[$item->attributes['name']] = $item->write($upperTemplate);
         return $arrayResult;
 
     }

@@ -1,6 +1,6 @@
 {%block droneInput%}
     {%if inputLabel%}
-        <label for='{%inputName%}'>
+        <label for='{%attributes.id%}'>
             {%if2 mandatoryMarker%}
                 <span class='mandatoryMarker'>{%mandatoryMarker%}</span>
             {%end-if2%}
@@ -10,7 +10,7 @@
     {%if inputError%}
         <span class='inputError'><span>Error: </span>{%inputError%}</span>
     {%end-if%}
-    <select id='{%inputName%}' name='{%inputName%}'>
+    <select {%for item in attributes%}{%for_key%}='{%item%}' {%end-for%}>
         {%for item in values%}
             <option value='{%item.key%}' {%if item.selected%}selected='selected'{%end-if%}>{%item.value%}</option>
         {%end-for%}

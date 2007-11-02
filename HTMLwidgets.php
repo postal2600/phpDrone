@@ -60,7 +60,7 @@ class PageNum extends HTMLWidgets
         $this->prefName = $prefName;
         $this->prefOptionList = $prefOptionList;
         $this->maxLinks = $maxLinks;
-        set_error_handler("handleDroneErrors");
+        set_error_handler("Utils::handleDroneErrors");
         require("drone/settings.php");
         restore_error_handler();
         $this->droneURL = $droneURL;
@@ -88,13 +88,13 @@ class PageNum extends HTMLWidgets
 
     function getCurrentPage()
     {
-        return array_get("page",$_GET,1);
+        return Utils::array_get("page",$_GET,1);
     }
 
     function getItemsPerPage()
     {
         session_start();
-        return array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0]);
+        return Utils::array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0]);
     }
     
 }
