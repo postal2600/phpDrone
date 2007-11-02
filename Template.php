@@ -79,51 +79,56 @@ class Template
         $this->guard = $guard;
     }
 
-    function injectVars($output)
-    {
-        $result = $output;
-        foreach($this->vars as $var => $value)
-            //this if is provisional. Will be fixed soon
-            if (gettype($value)!="array" && gettype($value)!="object")
-                $result = preg_replace ('/{%(?:[ ]*|)'.$var.'(?:[ ]*|)%}/',$value,$result);
-        return $result;
-    }
-
-    function deltaTime()
+    private function deltaTime()
     {
         $time = microtime();
         return $time-$this->startTime;
     }
 
-    private function solveIf($content,$php_vars)
+    private function solveVar($input,$php_vars)
     {
-        $ret_result = $content;
-        preg_match_all('/{%([ ]*|)if (?P<ifStatement>[^\\}]*)%}/', $ret_result, $ifs);
+        $output = $input;
+        //this will be improved by replacing this with a regExp. Maybe a generic one to solve even {%var.sub.sub2.sub3%}
+        foreach($php_vars as $key => $value)
+            if (gettype($value)!="array" && gettype($value)!="object")
+                $output = preg_replace ('/{%(?:[ ]*|)'.$key.'(?:[ ]*|)%}/',$value,$output);
+            else
+            {
+                preg_match_all('/{%(?:[ ]*|)'.$key.'.(?P<key>[^\\}|[\\ ]*)(?:[ ]*|)%}/',$output,$keys);
+                foreach($keys['key'] as $f_key)
+                    if (gettype($value[$f_key])!="array" && gettype($value[$f_key])!="object")
+                        $output = preg_replace('/{%(?:[ ]*|)'.$key.'.'.$f_key.'(?:[ ]*|)%}/',$value[$f_key],$output);
+            }
+        return $output;
+    }
+
+    private function solveIf($input,$php_vars)
+    {
+        $output = $input;
+        preg_match_all('/{%([ ]*|)if (?P<ifStatement>[^\\}]*)%}/', $output, $ifs);
         foreach($ifs['ifStatement'] as $ifStatement)
         {
             $statement = trim($ifStatement);
             $v = addslashes($php_vars[$statement]);
-            print "<br />".$php_vars[$statement]."<br />";
-
             eval("\$result='$v';");
             if (!$result)
                 //{%(?:[ ]*|)if inputError%}(?:[\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}
-                $ret_result = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\\\x00]*?){%(?:[ ]*|)end-if(?:[ ]*|)%}/','',$ret_result,1);
+                $output = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\\\x00]*?){%(?:[ ]*|)end-if(?:[ ]*|)%}/','',$output,1);
         }
-        return $ret_result;
+        return $output;
     }
 
-    private function solveFor($content,$php_vars)
+    private function solveFor($input,$php_vars)
     {
-        $ret_result = $content;
-        preg_match_all('/{%(?:[ ]|)for (?P<item>.*) in (?P<bunch>.*)%}/', $ret_result, $fors);
+        $output = $input;
+        preg_match_all('/{%(?:[ ]|)for (?P<item>.*) in (?P<bunch>.*)%}/', $output, $fors);
         $pas = 0;
         foreach($fors['bunch'] as $bunch)
         {
             $item = $fors['item'][$pas];
             //{%(?:[ ]|)for item in bunch%}(?P<ifblock>[^\x00]*){%end-for%} - get the block
             // get the if block content
-            preg_match('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?P<forblock>[^\\x00]*?){%end-for%}/', $ret_result, $forBlocksContent);
+            preg_match('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?P<forblock>[^\\x00]*?){%end-for%}/', $output, $forBlocksContent);
             $blockContent = $forBlocksContent['forblock'];
             if (isset($php_vars[trim($bunch)]))
             {
@@ -153,29 +158,30 @@ class Template
                     }
 //                     $blockContent = preg_replace('/([\\\\<{%}>*\/])/','\\\\\1',$blockContent);
                     //$this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}'.$blockContent.'{%end-for%}/',$newContent,$this->template);
-                    $ret_result = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for%}/',$newContent,$ret_result,1);
+                    $output = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for%}/',$newContent,$output,1);
                 }
             }
             else
-                $ret_result = preg_replace ('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?:[\\s]*|.*)*{%end-for%}/','',$ret_result,1);
+                $output = preg_replace ('/{%(?:[ ]|)for '.$item.' in '.$bunch.'%}(?:[\\s]*|.*)*{%end-for%}/','',$output,1);
             $pas++;
         }
-        return $ret_result;
+        return $output;
     }
     
-    function compileTemplate()
+    function compileTemplate($input,$phpVars)
     {
-        $this->template = $this->solveFor($this->template,$this->vars);
-        $this->template = $this->solveIf($this->template,$this->vars);
+        $output = $input;
+        $output = $this->solveFor($output,$phpVars);
+        $output = $this->solveIf($output,$phpVars);
+        $output = $this->solveVar($output,$phpVars);
+        return $output;
     }
 
     function getBuffer()
     {
         require ("_droneSettings.php");
-        $this->compileTemplate();
-        $output = $this->template;
-        $output = $this->injectVars($output);
-        //take out comments
+        $output = $this->compileTemplate($this->template,$this->vars);
+        //take out reminders
         $output = preg_replace('/{%(?:[ ]*|)rem(?:[ ]*|)%}(?:[^\\x00]*){%(?:[ ]*|)end-rem(?:[ ]*|)%}/', '', $output);
         //delete the rest of unused vars from template
         $output = preg_replace ('/{%[^\\}]*%}/',"",$output);
@@ -196,7 +202,10 @@ class Template
         {
             $output = $this->getBuffer();
             if ($debugMode)
-                $output .= "<!--This will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'>Built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v0.1 BETA</div>";
+            {
+                $codeSize = sprintf("%.2f", strlen($output)/1024);
+                $output .= "<!--This will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'><b>".$codeSize."</b> kb built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v0.1 BETA</div>";
+            }
             print $output;
         }
         else
