@@ -9,16 +9,19 @@ class Captcha extends Input
          parent::__construct("*Code from image above","text","captcha");
      }
     
-    function generate($size)
+    function generate($size,$id="")
     {
         session_start();
         $result = "";
         for ($f=0;$f<$size;$f++)
             $result=$result.chr(rand(65,90));
-        $tmp_id = "";
-        for ($f=0;$f<$size;$f++)
-            $tmp_id=$tmp_id.chr(rand(0,255));
-        $id = md5($tmp_id);
+        if ($id=="")
+        {
+            $tmp_id = "";
+            for ($f=0;$f<$size;$f++)
+                $tmp_id=$tmp_id.chr(rand(0,255));
+            $id = md5($tmp_id);
+        }
         $time = time();
         $_SESSION[$id]=$result;
         return $id;
@@ -34,7 +37,7 @@ class Captcha extends Input
             $im     = imagecreate(160,50);
             $bkgColor = imagecolorallocate($im, 255, 255, 255);
             $frgColor = imagecolorallocate($im, 35, 52, 29);
-            $font = realpath("res/captcha6.ttf");
+            $font = realpath("res/fonts/captcha6.ttf");
             $px=10;
             for ($f=0;$f<strlen($text);$f++)
             {
@@ -50,7 +53,7 @@ class Captcha extends Input
             imagedestroy($im);
         }
     }
-
+    
     function write()
     {
         $template = new Template("phpDrone/templates/form/input_captcha.tmpl");
@@ -69,13 +72,16 @@ class Captcha extends Input
         $captchaId = $_REQUEST['captchaId'];
         if (strtolower($_SESSION[$captchaId])==strtolower($value))
             return true;
-        $this->error = "The image is not good";
+        $this->error = "The text didn't match image";
         return false;
     }
 
 }
 
-$tmp_captcha = new Captcha("*Code from image above","text","captcha");
+
+$tmp_captcha = new Captcha();
+if ($_GET['action']=='regen' && $_GET['id']!="")
+    $tmp_captcha->generate(5,$_GET['id']);
 $tmp_captcha->draw($_GET['id']);
 
 ?>

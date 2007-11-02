@@ -110,7 +110,7 @@ class Input
         }
         if ($this->mandatory && strlen($_POST[$this->name])==0)
         {
-            $this->error = "Nu poate fi gol";
+            $this->error = "Can't be ampty";
             return false;
         }
         if (!$this->mandatory && strlen($_POST[$this->name])==0)
