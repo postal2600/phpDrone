@@ -107,7 +107,7 @@ class Template
             eval("\$result='$v';");
             if (!$result)
                 //{%(?:[ ]*|)if inputError%}(?:[\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}
-                $this->template = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[^\\x00]*){%(?:[ ]*|)end-if(?:[ ]*|)%}/','',$this->template);
+                $this->template = preg_replace ('/{%(?:[ ]*|)if '.$ifStatement.'%}(?:[\s]*|.*)*{%(?:[ ]*|)end-if(?:[ ]*|)%}/','',$this->template,1);
         }
         
         //now let's parse the fors
@@ -158,6 +158,11 @@ class Template
         $output = preg_replace('/{%(?:[ ]*|)comment(?:[ ]*|)%}(?:[^\\x00]*){%(?:[ ]*|)end-comment(?:[ ]*|)%}/', '', $output);
         //delete the rest of unused vars from template
         $output = preg_replace ('/{%[^\\}]*%}/',"",$output);
+        if (isset($compressHTML) && $compressHTML)
+        {
+            $output = preg_replace('/\n|\r\n|\t/', '', $output);
+            $output = preg_replace('/[\s]{2,}/', ' ', $output);
+        }
         return $output;
     }
 
@@ -170,7 +175,7 @@ class Template
         {
             $output = $this->getBuffer();
             if ($debugMode)
-                $output .= "<!--This will apear only in debug mode -->\n<div style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'>Built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v1.0 BETA</div>";
+                $output .= "<!--This will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'>Built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v1.0 BETA</div>";
             print $output;
         }
         else
