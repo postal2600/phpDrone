@@ -53,7 +53,7 @@ class Input
 					    $defaultSetValue = $defVal[$f][0];
 					else
 					    $defaultSetValue = $defVal[$f];
-	                if (isset($this->initial) && ($defaultSetValue==$this->initial) )
+	                if (isset($this->initial) && ($defaultSetValue==$this->initial))
 	                {
 	                    unset($this->initial);
 	                    $isSelected = true;
@@ -68,7 +68,7 @@ class Input
 						    $defVal[$f] = array($defVal[$f],$defVal[$f],True);
 	  					}
 					}
-					elseif (isset($defVal[$f][2]) && $defVal[$f][2] && !$isSelected)
+					elseif ($valType=="array" && isset($defVal[$f][2]) && $defVal[$f][2] && !$isSelected)
 					    $coderDefaultPos = $f;
 				}
 			}
@@ -80,7 +80,6 @@ class Input
 				else
 			    	$this->initial = $defVal[$coderDefaultPos];
 			}
-			
             $this->defaultValue = $defVal;
         }
     }
@@ -142,7 +141,8 @@ class Input
                 }
                 if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
                 {
-                    $values[$pas]["selected"] = True;
+                    if (!$hasSelected)
+                    	$values[$pas]["selected"] = True;
                     $hasSelected = True;
                 }
                 $pas++;

@@ -85,13 +85,16 @@ class PageNum extends HTMLWidgets
         $template->write("currentPerPage",$itemsPerPage);
         $template->write("prefs",$this->prefOptionList);
         $template->write("prefName",$this->prefName);
-        $totalPages = (int)ceil($this->itemCount/$itemsPerPage);
+        $totalPages = max(1,(int)ceil($this->itemCount/$itemsPerPage));
         $currentPage = $this->getCurrentPage();
         $allPages = range(1,$totalPages);
-        if ($totalPages<$maxLinks)
+        
+        if ($totalPages<=$this->maxLinks)
+        {
         	$pages = $allPages;
+		}
 		else
-		{
+  		{
 			$lowerLimit = max(1, $currentPage-round($this->maxLinks/2));
 			$upperLimit = min($totalPages, $currentPage + ($this->maxLinks-($currentPage-$lowerLimit)));
 			if ($upperLimit-$lowerLimit<$this->maxLinks)
