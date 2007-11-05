@@ -42,8 +42,9 @@ class Utils
 
     static function querySetVar($userUrl,$varName,$varValue)
     {
+        $wasThere = preg_match("/".$varName."=(?:.*?(&))|".$varName."=(?:.*?(\\z))/",$userUrl);
         $url = preg_replace("/".$varName."=(?:.*?(&))|".$varName."=(?:.*?(\\z))/",$varName."=".$varValue."\\1",$userUrl);
-        if ($url==$userUrl)
+        if (!$wasThere)
             $url .=(strpos($url,"?")?"&":"?")."{$varName}={$varValue}";
         return $url;
     }

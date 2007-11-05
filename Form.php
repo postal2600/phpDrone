@@ -21,6 +21,9 @@ class Form
         $this->defaults =$defaults;
         $this->madatoryMarker = "*";
         $this->submitTriggers = array();
+        $this->isValid = false;
+        $this->allowHtml = false;
+        
         switch ($method)
         {
             case "post":
@@ -37,6 +40,12 @@ class Form
         }
         $this->cleanData($this->request);
     }
+
+	function allowHTML($bool=True)
+	{
+		$this->allowHtml = $bool;
+	}
+
 
 	private function addFilesData(&$requestObj)
 	{
@@ -58,7 +67,7 @@ class Form
 		foreach ($data as $key=>$value)
 		    if (gettype($value)=="string")
 				if (!$this->inputs[$key]->allowHtml)
-				    $this->request[$key] = htmlspecialchars($this->request[$key],ENT_QUOTES);
+				    $this->request[$key] = strtr($this->request[$key],Input::$safeChars);
 			else if (gettype($value)=="array")
 				$this->clearHTML($data[$key]);
 	}
@@ -74,7 +83,6 @@ class Form
             $validator = $args[3];
             $maxLen = $args[4];
 
-//             $len = count($this->inputs);
             if ($type!="captcha")
                 $this->inputs[$name] = new Input($label,$type,$name,$this->madatoryMarker);
             else
@@ -101,18 +109,17 @@ class Form
             $this->inputs[$name]->setRequestData($this->request);
             if  ($type=="submit")
                 $this->submitTriggers[$this->inputs[$name]->attributes['name']]="";
-//             return $len;
+            $this->inputs[$name]->allowHTML($this->allowHtml);
         }
         else
         if (count($args)==1)
         {
             $input = $args[0];
 
-//             $len = count($this->inputs);
-            $this->inputs[$name] = $input;
             $input->addedLater = true;
             $input->setRequestData($this->request);
-//             return $len;
+            $this->inputs[$name] = $input;
+            $this->inputs[$name]->allowHTML($this->allowHtml);
         }
         else
         {
@@ -167,8 +174,13 @@ class Form
             $validate_trigger->setValidator("required","required");
             array_push($this->inputs,$validate_trigger);
         }
+        $this->isValid = $isValid;
     }
 
+	function isValid()
+	{
+		return $this->isValid;
+	}
 
     function getHTML($upperTemplate=False)
     {
