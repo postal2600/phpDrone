@@ -55,14 +55,12 @@ class PageNum extends HTMLWidgets
 {
     function __construct($itemCount,$itemLabel,$prefName,$prefOptionList,$maxLinks=9)
     {
+        global $droneURL;
         $this->itemCount = $itemCount;
         $this->itemLabel = $itemLabel;
         $this->prefName = $prefName;
         $this->prefOptionList = $prefOptionList;
         $this->maxLinks = $maxLinks;
-        set_error_handler("Utils::handleDroneErrors");
-        require("drone/settings.php");
-        restore_error_handler();
         $this->droneURL = $droneURL;
         $this->showPages = true;
         $this->showPrefs = true;

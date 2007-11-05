@@ -16,11 +16,9 @@ class Template
     
     function __construct($template)
     {
-        set_error_handler("Utils::handleDroneErrors");
-        require("drone/settings.php");
-        restore_error_handler();
+        global $debugMode;
         if ($debugMode)
-            $this->startTime = microtime();
+            $this->startTime = Utils::microTime();
         if ($template{0}=="?")
         {
             $droneDir = dirname(__FILE__);
@@ -51,7 +49,7 @@ class Template
         $this->buildTemplate($filename);                
         $this->vars = array();
     }
-
+    
     function buildTemplate($templateFile)
     {
         $this->solveInheritance($templateFile);
@@ -111,8 +109,7 @@ class Template
 
     private function deltaTime()
     {
-        $time = microtime();
-        return $time-$this->startTime;
+        return sprintf("%.4f",Utils::microTime()-$this->startTime);
     }
 
     private function solveVar($input,$php_vars)
@@ -382,9 +379,9 @@ class Template
 
     function getBuffer()
     {
-        set_error_handler("Utils::handleDroneErrors");
-        require("drone/settings.php");
-        restore_error_handler();
+        global $debugMode;
+        global $compressHTML;
+        
         $output = $this->compileTemplate($this->template,$this->vars);
         //take out reminders
         $output = preg_replace('/{%(?:[ ]*|)rem(?:[ ]*|)%}(?:[^\\x00]*){%(?:[ ]*|)end-rem(?:[ ]*|)%}/', '', $output);
@@ -398,9 +395,8 @@ class Template
 
     private function render_p($args)
     {
-        set_error_handler("Utils::handleDroneErrors");
-        require("drone/settings.php");
-        restore_error_handler();
+        global $debugMode;
+        
         $output = $this->getBuffer();
         if ($debugMode)
         {

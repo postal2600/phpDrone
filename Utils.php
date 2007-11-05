@@ -146,6 +146,8 @@ class Utils
 
     static function handleDroneErrors($errno, $errstr, $errfile, $errline)
     {
+        global $debugMode;
+    
         print "<b>phpDrone error:</b> <br />";
         if (preg_match_all('/require\(drone\/settings\.php\)/',$errstr,$some))
         {
@@ -155,10 +157,6 @@ class Utils
         else
             print $errstr."<br />";
 
-        set_error_handler("handleDroneErrors");
-        require("drone/settings.php");
-        restore_error_handler();
-
         if ($debugMode)
         {
             print "<br /><b>Traceback:</b><br />";
@@ -167,9 +165,16 @@ class Utils
         die();
     }
 
+	static function microTime()
+	{
+	    list($usec, $sec) = explode(" ", microtime());
+	    return ((float)$usec + (float)$sec);
+	}
+
+
     static function silentDeath()
     {
         return True;
     }
-}
+    }
 ?>

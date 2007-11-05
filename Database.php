@@ -89,9 +89,12 @@ class Database
 {
     function __construct($table="")
     {
-        set_error_handler("Utils::handleDroneErrors");
-        require("drone/settings.php");
-        restore_error_handler();
+        global $sqlEngine;
+        global $sqlServer;
+        global $sqlUser;
+        global $sqlPassword;
+        global $sqlDatabase;
+    
         if (isset($sqlEngine)&&$sqlEngine=="mysql")
         {
             set_error_handler("Utils::silentDeath");

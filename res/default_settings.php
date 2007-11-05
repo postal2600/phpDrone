@@ -1,15 +1,23 @@
 <?php
-//phpDrone settings
+
+
+//---- phpDrone SETTINGS ----
+//$droneURL = "http://example.com/phpDrone";
 // $debugMode = True;
 // $compressHTML = True;
 
-$droneURL = "http://yoursite.com/phpDrone/";
+//---- DATASE SETTINGS ----
+// $sqlEngine = "mysql";
+// $sqlServer="localhost";
+// $sqlUser="user";
+// $sqlPassword="password";
+// $sqlDatabase="databaseName";
 
-// Datase settings
-$sqlEngine = "mysql";
-$sqlServer="localhost";
-$sqlUser="root";
-$sqlPassword="";
-$sqlDatabase="nds1";
+//---- MODULES SETTINGS ----
+
+// excludeModule('database');
+// excludeModule('form');
+// excludeModule('template');
+// excludeModule('widgets');
 
 ?>
