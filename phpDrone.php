@@ -2,7 +2,8 @@
 	$modules = array('database'=>'Database.php',
 					 'form'=>'Form.php',
 					 'template'=>'Template.php',
-					 'widgets'=>'HTMLwidgets.php'
+					 'widgets'=>'HTMLwidgets.php',
+					 'i18n'=>'i18n.php',
 					);
 	$excludeModules = array();
 	
@@ -26,6 +27,6 @@
 	}
 	else
 	{
-	    die("<b>phpDrone error:</b> phpDrone runs only on php5 or above. Your php version is: ".phpversion());
+	    die("<b>"._("phpDrone error").":</b> "._("phpDrone runs only on php5 or above. Your php version is").": ".phpversion());
 	}
 ?>

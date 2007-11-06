@@ -6,7 +6,7 @@
 // $debugMode = True;
 // $compressHTML = True;
 
-//---- DATASE SETTINGS ----
+//---- DATABASE SETTINGS ----
 // $sqlEngine = "mysql";
 // $sqlServer="localhost";
 // $sqlUser="user";

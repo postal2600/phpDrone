@@ -43,7 +43,7 @@ class Template
                 if (file_exists("templates/".$template))
                     $filename = "templates/".$template;
                 else
-                    Utils::throwDroneError("Template file <b>templates/{$template}</b> was not be found.");
+                    Utils::throwDroneError(_("Template file was not be found").": <b>templates/{$template}</b>");
                 
         $this->template = "";
         $this->buildTemplate($filename);                
@@ -60,7 +60,7 @@ class Template
     function solveInheritance($templateFile)
     {
         if (!file_exists($templateFile))
-            Utils::throwDroneError("Template file <b>{$templateFile}</b> needed to extend other template was not found.");
+            Utils::throwDroneError(_("Template file needed to extend other template was not found").": <b>{$templateFile}</b>");
         $handle = fopen($templateFile, "r");
         $templateContent = fread($handle, filesize($templateFile));
         fclose($handle);
@@ -119,49 +119,56 @@ class Template
         foreach($vals['cont'] as $f_val)
         {
             $filterPieces = preg_split("/\|/",trim($f_val));
-            $opParts = preg_split('/(?:\\+)|(?:-)|(?:\\*)|(?:%)|(?:!)|(?:\/)/',trim($filterPieces[0]));
-            if (count($opParts)==1)
+            
+            //is a string?
+            if (!preg_match('/("|\')(?P<string>[^"\\\\]*(?:\\\\.[^"\\\\]*)*)\\1/', $filterPieces[0],$valCapt))
             {
+	            $opParts = preg_split('/(?:\\+)|(?:-)|(?:\\*)|(?:%)|(?:!)|(?:\/)/',trim($filterPieces[0]));
+	            if (count($opParts)==1)
+	            {
 
-                $subs = preg_split("/\./",trim($filterPieces[0]));
-                if (count($subs)==1)
-                {
-                    $ev = "\$php_vars['".$subs[0]."']";
-                    eval("\$val=$ev;");
-                }
-                else
-                {
-                    $ev = "\$php_vars";
-                    foreach ($subs as $item)
-                        $ev.= "['".$item."']";
-                    eval("\$val=$ev;");
-                }
+	                $subs = preg_split("/\./",trim($filterPieces[0]));
+	                if (count($subs)==1)
+	                {
+	                    $ev = "\$php_vars['".$subs[0]."']";
+	                    eval("\$val=$ev;");
+	                }
+	                else
+	                {
+	                    $ev = "\$php_vars";
+	                    foreach ($subs as $item)
+	                        $ev.= "['".$item."']";
+	                    eval("\$val=$ev;");
+	                }
+	            }
+	            else
+	            {
+	                $toEval = trim($filterPieces[0]);
+	                foreach ($opParts as $part)
+	                {
+	                    $subs = preg_split("/\./",$part);
+	                    if (count($subs)==1)
+	                    {
+	                        $ev = "\$php_vars['".$subs[0]."']";
+	                        eval("\$t_val=$ev;");
+	                    }
+	                    else
+	                    {
+	                        $ev = "\$php_vars";
+	                        foreach ($subs as $item)
+	                            $ev.= "['".$item."']";
+	                        eval("\$t_val=$ev;");
+	                    }
+	                    if ($t_val)
+	                        $toEval = preg_replace('/'.addslashes($part).'/',$t_val,$toEval);
+	                }
+	//                 print "TO EVAL::::::::{$toEval}<br />";
+	                eval("\$val=$toEval;");
+	            }
             }
             else
-            {
-                $toEval = trim($filterPieces[0]);
-                foreach ($opParts as $part)
-                {
-                    $subs = preg_split("/\./",$part);
-                    if (count($subs)==1)
-                    {
-                        $ev = "\$php_vars['".$subs[0]."']";
-                        eval("\$t_val=$ev;");
-                    }
-                    else
-                    {
-                        $ev = "\$php_vars";
-                        foreach ($subs as $item)
-                            $ev.= "['".$item."']";
-                        eval("\$t_val=$ev;");
-                    }
-                    if ($t_val)
-                        $toEval = preg_replace('/'.addslashes($part).'/',$t_val,$toEval);
-                }
-//                 print "TO EVAL::::::::{$toEval}<br />";
-                eval("\$val=$toEval;");
-            }
-            
+                $val = $valCapt['string'];
+                
             //apply filters
             if (count($filterPieces)>1)
                 for ($f=1;$f<count($filterPieces);$f++)
@@ -181,7 +188,7 @@ class Template
                         eval('$val=filter_'.$filterName.'(\''.addcslashes($val,"'").'\''.$filterArgs.');');
                     }
                     else
-                        Utils::throwDroneError("Unknown filter: <b>{$filterName}</b>.");
+                        Utils::throwDroneError(_("Unknown filter").": <b>{$filterName}</b>.");
                 }
             $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|+*(.)").'(?:[ ]*|)%}/',$val,$output);
         }
@@ -416,7 +423,7 @@ class Template
             if (count($args)==1)
                 $this->vars["body"] .= $args[0];
             else
-                Utils::throwDroneError("Function <b>Template->write()</b> takes at least one argument.");
+                Utils::throwDroneError(_("Function takes at least one argument").": <b>Template->write()</b>");
     }
 
     private function __call($method, $args)
@@ -425,7 +432,7 @@ class Template
         if (method_exists($this,$method."_p"))
             eval("\$this->".$method."_p(\$args);");
         else
-            Utils::throwDroneError("Call to undefined method <b>Template->".$method."()</b>");
+            Utils::throwDroneError(_("Call to undefined method").": <b>Template->".$method."()</b>");
     }
 }
 

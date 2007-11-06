@@ -138,12 +138,12 @@ class Input
                 if (gettype($item)=="array")
                 {
                     $values[$pas]["key"] = $item[0];
-                    $values[$pas]["value"] = strtr(htmlspecialchars($item[1],ENT_QUOTES),Input::$safeChars);
+                    $values[$pas]["value"] = htmlentities($item[1],ENT_QUOTES);
                 }
                 else
                 {
                     $values[$pas]["key"] = $item;
-                    $values[$pas]["value"] = strtr(htmlspecialchars($item,ENT_QUOTES),Input::$safeChars);
+                    $values[$pas]["value"] = htmlentities($item,ENT_QUOTES);
                 }
                 if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
                 {
@@ -181,12 +181,12 @@ class Input
                 if (gettype($item)=="array")
                 {
                     $values[$pas]["key"] = $item[0];
-                    $values[$pas]["value"] = strtr(htmlspecialchars($item[1],ENT_QUOTES),Input::$safeChars);
+                    $values[$pas]["value"] = htmlentities($item[1],ENT_QUOTES);
                 }
                 else
                 {
                     $values[$pas]["key"] = $item;
-                    $values[$pas]["value"] = strtr(htmlspecialchars($item,ENT_QUOTES),Input::$safeChars);
+                    $values[$pas]["value"] = htmlentities($item,ENT_QUOTES);
                 }
                 if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
                     $values[$pas]["selected"] = True;
@@ -211,12 +211,12 @@ class Input
                 if (gettype($item)=="array")
                 {
                     $values[$pas]["key"] = $item[0];
-                    $values[$pas]["value"] = strtr(htmlspecialchars($item[1],ENT_QUOTES),Input::$safeChars);
+                    $values[$pas]["value"] = htmlentities($item[1],ENT_QUOTES);
                 }
                 else
                 {
                     $values[$pas]["key"] = $item;
-                    $values[$pas]["value"] = strtr(htmlspecialchars($item,ENT_QUOTES),Input::$safeChars);
+                    $values[$pas]["value"] = htmlentities($item,ENT_QUOTES);
                 }
 
                 if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
@@ -252,7 +252,7 @@ class Input
         {
             $template = new Template("?form/input_{$this->type}.tmpl");
             $template->vars = $upperTemplate->vars;
-            $template->write("inputLabel",strtr($this->label,Input::$safeChars));
+            $template->write("inputLabel",htmlentities($this->label,ENT_QUOTES));
             $template->write("attributes",$this->attributes);
             if ($this->mandatory)
                 $template->write("mandatoryMarker",$this->mandatoryMarker);
@@ -262,7 +262,7 @@ class Input
             eval("\$result .= \$this->write_{$this->type}(\$template);");
         }
         else
-            Utils::throwDroneError("Unknown form input type: {$this->type}.");
+            Utils::throwDroneError(_("Unknown form input type").": {$this->type}.");
         return $result;
     }
 
@@ -288,7 +288,7 @@ class Input
             if ($this->type=="select" || $this->type=="radio")
                 if ($this->mandatory && $this->request[$this->attributes['name']]==$this->initial)
                 {
-                    $this->error = "Choose one";
+                    $this->error = _("Choose one");
                     return false;
                 }
 
@@ -320,13 +320,13 @@ class Input
                         return true;
             }
             
-            $this->error = "Invalid value";
+            $this->error = _("Invalid value");
             return false;
         }
         
         if ($this->mandatory && strlen($this->request[$this->attributes['name']])==0)
         {
-            $this->error = "Can't be empty";
+            $this->error = _("Can't be empty");
             return false;
         }
         if (!$this->mandatory && strlen($this->request[$this->attributes['name']])==0)
@@ -335,7 +335,7 @@ class Input
         }
         if (isset($this->attributes['maxlength']) && strlen($this->request[$this->attributes['name']])>$this->attributes['maxlength'])
         {
-            $this->error = "Max length for input is {$this->attributes['maxlength']}";
+            $this->error = _("Max length for input is")." {$this->attributes['maxlength']}";
             return false;
         }
         $meth = $this->validator['regExp'];

@@ -74,7 +74,7 @@ class Captcha extends Input
             unset($_SESSION[$captchaId]);
             return true;
         }
-        $this->error = "The text didn't match image";
+        $this->error = _("The text didn't match image");
         return false;
     }
 

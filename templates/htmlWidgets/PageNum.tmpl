@@ -9,7 +9,7 @@
                     {%if2 item==currentPage%}
                         <span class="disabledPageNumBtn">&laquo;Prev</span>
                     {%else2%}
-                        <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage-1%}" title="Go to page {%currentPage-1%}">&laquo;Prev</a>
+                        <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage-1%}" title="Go to page {%currentPage-1%}">&laquo;{%"Prev"|translate%}</a>
                     {%end-if2%}
                 {%end-if%}
                 
@@ -18,9 +18,9 @@
                 {%end-if8%}
                 
                 {%if item==currentPage%}
-                    <span title="You are on page {%item%}">{%item%}</span>
+                    <span title="{%"You are on page"|translate%} {%item%}">{%item%}</span>
                 {%else%}
-                    <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%item%}" title="Go to page {%item%}">{%item%}</a>
+                    <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%item%}" title="{%"Go to page"|translate%} {%item%}">{%item%}</a>
                 {%end-if%}
                 
                 {%if8 cutedHigh&&for_last%}
@@ -29,9 +29,9 @@
                 
                 {%if for_last%}
                     {%if2 item==currentPage%}
-                        <span class="disabledPageNumBtn">Next&raquo;</span>
+                        <span class="disabledPageNumBtn">{%"Next"|translate%}&raquo;</span>
                     {%else2%}
-                        <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage+1%}" title="Go to page {%currentPage+1%}">Next&raquo;</a>
+                        <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage+1%}" title="{%"Go to page"|translate%} {%currentPage+1%}">{%"Next"|translate%}&raquo;</a>
                     {%end-if2%}
                 {%end-if%}
 
@@ -44,9 +44,9 @@
             {%currentPerPage%} per page :
             {%for pref in prefs%}
                 {%if pref==currentPerPage%}
-                    <span title="Curently set at {%currentPerPage%} per page">{%currentPerPage%}</span>
+                    <span title="{%"Curently set at"|translate%} {%currentPerPage%} {%"per page"|translate%}">{%currentPerPage%}</span>
                 {%else%}
-                    <a title="Switch to {%pref%} per page" href="{%phpDroneURL%}/widgets/pageNum.php?action=setPref&amp;prefName={%prefName%}&amp;pref={%pref%}">{%pref%}</a>
+                    <a title="{%"Switch to"|translate%} {%pref%} {%"per page"|translate%}" href="{%phpDroneURL%}/widgets/pageNum.php?action=setPref&amp;prefName={%prefName%}&amp;pref={%pref%}">{%pref%}</a>
                 {%end-if%}
             {%end-for%}
         </div>
@@ -54,7 +54,7 @@
         
         {%if9 showQuickJump%}
         <div class="pageNumQUickJump">
-            Quick jump:{%quickJumpSelector%}
+            {%"Quick jump"|translate%}:{%quickJumpSelector%}
         </div>
         {%end-if9%}
         

@@ -53,4 +53,9 @@ function filter_stripTags($input)
     return strip_tags($input);
 }
 
+function filter_translate($input)
+{
+	return _($input);
+}
+
 ?>

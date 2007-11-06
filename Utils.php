@@ -151,7 +151,7 @@ class Utils
         print "<b>phpDrone error:</b> <br />";
         if (preg_match_all('/require\(drone\/settings\.php\)/',$errstr,$some))
         {
-            print "Your project does not have a <b>drone/settings.php</b> file.<br />";
+            print _("Your project does not have a configuration file in the drone environment").".<br />";
             die();
         }
         else
@@ -176,5 +176,5 @@ class Utils
     {
         return True;
     }
-    }
+}
 ?>
