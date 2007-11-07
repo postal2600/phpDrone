@@ -3,8 +3,9 @@
 
 //---- phpDrone SETTINGS ----
 //$droneURL = "http://example.com/phpDrone";
-// $debugMode = True;
-// $compressHTML = True;
+//$debugMode = True;
+//$compressHTML = True;
+//$droneLocale = 'en';
 
 //---- DATABASE SETTINGS ----
 // $sqlEngine = "mysql";

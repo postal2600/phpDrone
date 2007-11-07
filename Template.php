@@ -43,7 +43,7 @@ class Template
                 if (file_exists("templates/".$template))
                     $filename = "templates/".$template;
                 else
-                    Utils::throwDroneError(_("Template file was not be found").": <b>templates/{$template}</b>");
+                    Utils::throwDroneError("Template file was not be found: <b>templates/{$template}</b>");
                 
         $this->template = "";
         $this->buildTemplate($filename);                
@@ -60,7 +60,7 @@ class Template
     function solveInheritance($templateFile)
     {
         if (!file_exists($templateFile))
-            Utils::throwDroneError(_("Template file needed to extend other template was not found").": <b>{$templateFile}</b>");
+            Utils::throwDroneError("Template file needed to extend other template was not found: <b>{$templateFile}</b>");
         $handle = fopen($templateFile, "r");
         $templateContent = fread($handle, filesize($templateFile));
         fclose($handle);
@@ -188,7 +188,7 @@ class Template
                         eval('$val=filter_'.$filterName.'(\''.addcslashes($val,"'").'\''.$filterArgs.');');
                     }
                     else
-                        Utils::throwDroneError(_("Unknown filter").": <b>{$filterName}</b>.");
+                        Utils::throwDroneError("Unknown filter: <b>{$filterName}</b>.");
                 }
             $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|+*(.)").'(?:[ ]*|)%}/',$val,$output);
         }
@@ -423,7 +423,7 @@ class Template
             if (count($args)==1)
                 $this->vars["body"] .= $args[0];
             else
-                Utils::throwDroneError(_("Function takes at least one argument").": <b>Template->write()</b>");
+                Utils::throwDroneError("Function takes at least one argument: <b>Template->write()</b>");
     }
 
     private function __call($method, $args)
@@ -432,7 +432,7 @@ class Template
         if (method_exists($this,$method."_p"))
             eval("\$this->".$method."_p(\$args);");
         else
-            Utils::throwDroneError(_("Call to undefined method").": <b>Template->".$method."()</b>");
+            Utils::throwDroneError("Call to undefined method: <b>Template->".$method."()</b>");
     }
 }
 

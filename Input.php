@@ -262,7 +262,7 @@ class Input
             eval("\$result .= \$this->write_{$this->type}(\$template);");
         }
         else
-            Utils::throwDroneError(_("Unknown form input type").": {$this->type}.");
+            Utils::throwDroneError("Unknown form input type: {$this->type}.");
         return $result;
     }
 

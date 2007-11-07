@@ -18,7 +18,7 @@
     set_error_handler("Utils::handleDroneErrors");
 	require("drone/settings.php");
 	restore_error_handler();
-
+	
 	if (version_compare(phpversion(),"5")>-1)
 	{
 	    foreach ($modules as $key=>$module)
@@ -27,6 +27,6 @@
 	}
 	else
 	{
-	    die("<b>"._("phpDrone error").":</b> "._("phpDrone runs only on php5 or above. Your php version is").": ".phpversion());
+	    die("<b>phpDrone error:</b> phpDrone runs only on php5 or above. Your php version is: ".phpversion());
 	}
 ?>

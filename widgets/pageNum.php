@@ -13,6 +13,7 @@
     switch ($_GET['action'])
     {
         case "setPage":
+//             print "###".$_SERVER['HTTP_REFERER'];
             $url = querySetVar($_SERVER['HTTP_REFERER'],"page",$_GET['page']);
             header("Location: {$url}");
             break;

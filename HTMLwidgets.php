@@ -78,36 +78,38 @@ class PageNum extends HTMLWidgets
         $template = new Template("?htmlWidgets/PageNum.tmpl");
         $template->write("itemCount",$this->itemCount);
         $template->write("itemLabel",$this->itemLabel);
-        $template->write("currentPage",$this->getCurrentPage());
+        
         $itemsPerPage = $this->getItemsPerPage();
         $template->write("currentPerPage",$itemsPerPage);
         $template->write("prefs",$this->prefOptionList);
         $template->write("prefName",$this->prefName);
-        $totalPages = max(1,(int)ceil($this->itemCount/$itemsPerPage));
+        $this->totalPages = max(1,(int)ceil($this->itemCount/$itemsPerPage));
         $currentPage = $this->getCurrentPage();
-        $allPages = range(1,$totalPages);
+        $allPages = range(1,$this->totalPages);
         
-        if ($totalPages<=$this->maxLinks)
+        if ($this->totalPages<=$this->maxLinks)
         {
         	$pages = $allPages;
 		}
 		else
   		{
 			$lowerLimit = max(1, $currentPage-round($this->maxLinks/2));
-			$upperLimit = min($totalPages, $currentPage + ($this->maxLinks-($currentPage-$lowerLimit)));
+			$upperLimit = min($this->totalPages, $currentPage + ($this->maxLinks-($currentPage-$lowerLimit)));
 			if ($upperLimit-$lowerLimit<$this->maxLinks)
 			    $lowerLimit -= $this->maxLinks - ($upperLimit-$lowerLimit);
             $pages = range($lowerLimit,$upperLimit);
             if ($lowerLimit!=1)
                 $template->write("cutedLow","1");
-            if ($upperLimit!=$totalPages)
+            if ($upperLimit!=$this->totalPages)
                 $template->write("cutedHigh","1");
 		}
+		
+        $template->write("currentPage",$this->getCurrentPage());
 
 		$form = new Form(do_success);
 		$form->addInput("","select","page");
 		$form->inputs['page']->setDefault($allPages);
-		$form->inputs['page']->setAttribute("onchange","location=\"{$this->droneURL}/widgets/pageNum.php?action=setPage&amp;page=\"+this.value");
+		$form->inputs['page']->setAttribute("onchange","window.location=\"{$this->droneURL}/widgets/pageNum.php?action=setPage&amp;page=\"+this.value");
 
         $template->write("quickJumpSelector",$form->getHTML());
         $template->write("pages",$pages);
@@ -120,7 +122,7 @@ class PageNum extends HTMLWidgets
 
     function getCurrentPage()
     {
-        return Utils::array_get("page",$_GET,1);
+        return max(1,min($this->totalPages,Utils::array_get("page",$_GET,1)));
     }
 
     function getItemsPerPage()

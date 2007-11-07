@@ -7,7 +7,7 @@
             
                 {%if for_first%}
                     {%if2 item==currentPage%}
-                        <span class="disabledPageNumBtn">&laquo;Prev</span>
+                        <span class="disabledPageNumBtn">&laquo;{%"Prev"|translate%}</span>
                     {%else2%}
                         <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage-1%}" title="Go to page {%currentPage-1%}">&laquo;{%"Prev"|translate%}</a>
                     {%end-if2%}
@@ -41,7 +41,7 @@
         
         {%if9 showPrefs%}
         <div  class="pageNumPrefs">
-            {%currentPerPage%} per page :
+            {%currentPerPage%} {%"per page"|translate%} :
             {%for pref in prefs%}
                 {%if pref==currentPerPage%}
                     <span title="{%"Curently set at"|translate%} {%currentPerPage%} {%"per page"|translate%}">{%currentPerPage%}</span>

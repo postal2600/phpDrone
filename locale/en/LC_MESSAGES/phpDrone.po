@@ -2,46 +2,45 @@ msgid ""
 msgstr ""
 "Project-Id-Version: phpDrone\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2007-05-07 10:37+0200\n"
+"PO-Revision-Date: 2007-05-07 10:36+0200\n"
 "Last-Translator: Surdu Nicolae <postal2600@yahoo.com>\n"
 "Language-Team: Cybog Vision Digital Studios <contact@cvds.ro>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-2\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: Romanian\n"
-"X-Poedit-Country: ROMANIA\n"
-"X-Poedit-SourceCharset: iso-8859-2\n"
+"X-Poedit-Language: English\n"
+"X-Poedit-Country: UNITED STATES\n"
+"X-Poedit-SourceCharset: utf-8\n"
 "X-Poedit-Basepath: c:\\xampp\\htdocs\\nds\\phpDrone\\\n"
 "X-Poedit-SearchPath-0: .\n"
 
 #: Captcha.php:77
-#, fuzzy
 msgid "The text didn't match image"
-msgstr "Text introdus incorect"
+msgstr ""
 
 #: HTMLwidgets.php:34
 msgid "User"
-msgstr "Utilizator"
+msgstr ""
 
 #: HTMLwidgets.php:35
 msgid "Password"
-msgstr "Parolã"
+msgstr ""
 
 #: Input.php:291
 msgid "Choose one"
-msgstr "Alege unul"
+msgstr ""
 
 #: Input.php:323
 msgid "Invalid value"
-msgstr "Valoare invalidã"
+msgstr ""
 
 #: Input.php:329
 msgid "Can't be empty"
-msgstr "Nu poate fi gol"
+msgstr ""
 
 #: Input.php:338
 msgid "Max length for input is"
-msgstr "Mãrimea maximã este"
+msgstr ""
 
 #: _temp.php:2
 #: _temp.php:5
@@ -52,48 +51,48 @@ msgstr "Mãrimea maximã este"
 #: _temp.php:10
 #: _temp.php:11
 msgid "Error"
-msgstr "Eroare"
+msgstr ""
 
 #: _temp.php:3
 msgid "Note"
-msgstr "Notã"
+msgstr ""
 
 #: _temp.php:4
 msgid "Click image to regenerate"
-msgstr "Clik pe imagine pt. regenerare"
+msgstr ""
 
 #: _temp.php:12
 msgid "Prev"
-msgstr "Înapoi"
+msgstr ""
 
 #: _temp.php:13
 msgid "You are on page"
-msgstr "Eºti pe pagina"
+msgstr ""
 
 #: _temp.php:14
 #: _temp.php:16
 msgid "Go to page"
-msgstr "Salt la pagina"
+msgstr ""
 
 #: _temp.php:15
 #: _temp.php:17
 msgid "Next"
-msgstr "Înainte"
+msgstr ""
 
 #: _temp.php:18
 msgid "Curently set at"
-msgstr "Setat la"
+msgstr ""
 
 #: _temp.php:19
 #: _temp.php:21
 msgid "per page"
-msgstr "pe paginã"
+msgstr ""
 
 #: _temp.php:20
 msgid "Switch to"
-msgstr "Schimbã la"
+msgstr ""
 
 #: _temp.php:22
 msgid "Quick jump"
-msgstr "Salt rapid"
+msgstr ""
 
