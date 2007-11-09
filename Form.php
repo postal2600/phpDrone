@@ -100,7 +100,7 @@ class Form
                     $this->inputs[$name]->setValidator($validator[0],$validator[1]);
                 }
                 else
-                    $this->inputs[$name]->setValidator($validator,"Invalid ".strtolower($label));
+                    $this->inputs[$name]->setValidator($validator,_("Invalid value"));
                     
                     
             if ($maxLen)

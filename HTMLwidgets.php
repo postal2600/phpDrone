@@ -53,7 +53,7 @@ class LoginWidget extends HTMLWidgets
 
 class PageNum extends HTMLWidgets
 {
-    function __construct($itemCount,$itemLabel,$prefName,$prefOptionList,$maxLinks=9)
+    function __construct($itemCount,$itemLabel,$prefName,$prefOptionList,$maxLinks=NULL)
     {
         global $droneURL;
         $this->itemCount = $itemCount;
@@ -65,7 +65,7 @@ class PageNum extends HTMLWidgets
         $this->showPages = true;
         $this->showPrefs = true;
         $this->showQuickJump = true;
-
+        $this->totalPages = max(1,(int)ceil($this->itemCount/$this->getItemsPerPage()));
     }
 
     function setCount($count)
@@ -83,26 +83,23 @@ class PageNum extends HTMLWidgets
         $template->write("currentPerPage",$itemsPerPage);
         $template->write("prefs",$this->prefOptionList);
         $template->write("prefName",$this->prefName);
-        $this->totalPages = max(1,(int)ceil($this->itemCount/$itemsPerPage));
         $currentPage = $this->getCurrentPage();
         $allPages = range(1,$this->totalPages);
+    	$pages = $allPages;
         
-        if ($this->totalPages<=$this->maxLinks)
-        {
-        	$pages = $allPages;
-		}
-		else
-  		{
-			$lowerLimit = max(1, $currentPage-round($this->maxLinks/2));
-			$upperLimit = min($this->totalPages, $currentPage + ($this->maxLinks-($currentPage-$lowerLimit)));
-			if ($upperLimit-$lowerLimit<$this->maxLinks)
-			    $lowerLimit -= $this->maxLinks - ($upperLimit-$lowerLimit);
-            $pages = range($lowerLimit,$upperLimit);
-            if ($lowerLimit!=1)
-                $template->write("cutedLow","1");
-            if ($upperLimit!=$this->totalPages)
-                $template->write("cutedHigh","1");
-		}
+        if (isset($this->maxLinks))
+	        if ($this->totalPages>$this->maxLinks)
+	  		{
+				$lowerLimit = max(1, $currentPage-round($this->maxLinks/2));
+				$upperLimit = min($this->totalPages, $currentPage + ($this->maxLinks-($currentPage-$lowerLimit)));
+				if ($upperLimit-$lowerLimit<$this->maxLinks)
+				    $lowerLimit -= $this->maxLinks - ($upperLimit-$lowerLimit);
+	            $pages = range($lowerLimit,$upperLimit);
+	            if ($lowerLimit!=1)
+	                $template->write("cutedLow","1");
+	            if ($upperLimit!=$this->totalPages)
+	                $template->write("cutedHigh","1");
+			}
 		
         $template->write("currentPage",$this->getCurrentPage());
 
@@ -122,13 +119,13 @@ class PageNum extends HTMLWidgets
 
     function getCurrentPage()
     {
-        return max(1,min($this->totalPages,Utils::array_get("page",$_GET,1)));
+        return max(1,min($this->totalPages,intval(Utils::array_get("page",$_GET,1))));
     }
 
     function getItemsPerPage()
     {
         session_start();
-        return Utils::array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0]);
+        return in_array(intval(Utils::array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0])),$this->prefOptionList)?intval(Utils::array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0])):$this->prefOptionList[0];
     }
 
 	function hidePages($bool=true)

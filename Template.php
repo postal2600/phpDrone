@@ -266,15 +266,15 @@ class Template
             if (!$result)
             {
                 //{%(?:[ ]*|)if([\d]*|) .*%}(?P<ifBlock>[^\x00]*?)(?:(?:{%(?:[ ]*|)else\1(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?))?{%(?:[ ]*|)end-if\1(?:[ ]*|)%}
-                preg_match('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$output,$capt);
-                $output = preg_replace ('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',rtrim($capt['elseBlock']," "),$output,1);
+                preg_match('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)%})(?:[\\n]|)(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$output,$capt);
+                $output = preg_replace ('/(?:[ ]{2,}|){%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}(?:[\\n]|)/',rtrim($capt['elseBlock']," "),$output,1);
             }
             else
             {
-                preg_match('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?P<ifCont>[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$output,$capt);
+                preg_match('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?:[\\n]|)(?P<ifCont>[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$output,$capt);
                 $ifContent = $capt['ifCont'];
-                $ifContent = preg_replace('/(?:(?:{%(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))[^\\x00].*/','',$ifContent);
-                $output = preg_replace ('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*\\").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',rtrim($ifContent," "),$output,1);
+                $ifContent = preg_replace('/(?:{%(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)%})(?:[^\\x00]*)/','',$ifContent);
+                $output = preg_replace ('/(?:[ ]{2,}|){%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*\\").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}(?:[\\n]|)/',rtrim($ifContent," "),$output,1);
             }
 
         }
@@ -289,10 +289,11 @@ class Template
         foreach($fors['bunch'] as $bunch)
         {
             $item = $fors['item'][$pas];
-            //{%(?:[ ]|)for([\d]*|) (?:.*?) in (?:.*?)%}(?:\n){0,1}(?P<forblock>[^\x00]*?)(?:\n){0,1}{%end-for\1%} - get the block
+            //{%(?:[ ]|)for([\d]*|) (?:.*?) in (?:.*?)%}(?:[\\n]|)(?P<forblock>[^\x00]*?)(?:[ ]*|){%end-for\1%} - get the block
             // get the if block content
-            preg_match('/{%(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:\\n){0,1}(?P<forblock>[^\\x00]*?)(?:\\n){0,1}{%end-for\\1%}/', $output, $forBlocksContent);
+            preg_match('/{%(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:[\\n]|)(?P<forblock>[^\\x00]*?)(?:[ ]*|){%end-for\\1%}/', $output, $forBlocksContent);
             $blockContent = $forBlocksContent['forblock'];
+
             if (isset($php_vars[trim($bunch)]) || is_numeric(trim($bunch)))
             {
                 if (is_numeric(trim($bunch)))
@@ -356,18 +357,17 @@ class Template
                             $this->vars['for_last'] = false;
 
 
-                        
                         $builtBlock = $this->compileTemplate($builtBlock,$this->vars);
                         $newContent .= $builtBlock;
                         $pas_2 ++;
                     }
 //                     $blockContent = preg_replace('/([\\\\<{%}>*\/])/','\\\\\1',$blockContent);
                     //$this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}'.$blockContent.'{%end-for%}/',$newContent,$this->template);
-                    $output = preg_replace('/{%(?:[ ]*|)for([\\d]*|) '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for\\1%}/',rtrim($newContent," "),$output,1);
+                    $output = preg_replace('/(?:[ ]{2,}|){%(?:[ ]*|)for([\\d]*|) '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for\\1%}/',rtrim($newContent," "),$output,1);
                 }
             }
             else
-                $output = preg_replace ('/{%(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:[\\s]*|.*)*{%end-for\\1%}/','',$output,1);
+                $output = preg_replace ('/(?:[ ]{2,}|){%(?:[ ]*|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:[\\s]*|.*)*{%end-for\\1%}/','',$output,1);
             $pas++;
         }
         return $output;

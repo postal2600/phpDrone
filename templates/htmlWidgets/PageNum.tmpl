@@ -4,7 +4,6 @@
         <div class="pageNumPages">
             {%itemCount%} {%itemLabel%}:
             {%for item in pages%}
-            
                 {%if for_first%}
                     {%if2 item==currentPage%}
                         <span class="disabledPageNumBtn">&laquo;{%"Prev"|translate%}</span>
@@ -12,21 +11,17 @@
                         <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage-1%}" title="Go to page {%currentPage-1%}">&laquo;{%"Prev"|translate%}</a>
                     {%end-if2%}
                 {%end-if%}
-                
                 {%if8 cutedLow&&for_first%}
                     <span class="andSoOn">...</span>
                 {%end-if8%}
-                
                 {%if item==currentPage%}
                     <span title="{%"You are on page"|translate%} {%item%}">{%item%}</span>
                 {%else%}
                     <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%item%}" title="{%"Go to page"|translate%} {%item%}">{%item%}</a>
                 {%end-if%}
-                
                 {%if8 cutedHigh&&for_last%}
                     <span class="andSoOn">...</span>
                 {%end-if8%}
-                
                 {%if for_last%}
                     {%if2 item==currentPage%}
                         <span class="disabledPageNumBtn">{%"Next"|translate%}&raquo;</span>
@@ -34,11 +29,9 @@
                         <a href="{%phpDroneURL%}/widgets/pageNum.php?action=setPage&amp;page={%currentPage+1%}" title="{%"Go to page"|translate%} {%currentPage+1%}">{%"Next"|translate%}&raquo;</a>
                     {%end-if2%}
                 {%end-if%}
-
             {%end-for%}
         </div>
         {%end-if9%}
-        
         {%if9 showPrefs%}
         <div  class="pageNumPrefs">
             {%currentPerPage%} {%"per page"|translate%} :
@@ -51,12 +44,10 @@
             {%end-for%}
         </div>
         {%end-if9%}
-        
         {%if9 showQuickJump%}
         <div class="pageNumQUickJump">
             {%"Quick jump"|translate%}:{%quickJumpSelector%}
         </div>
         {%end-if9%}
-        
     </div>
 {%end-block%}
