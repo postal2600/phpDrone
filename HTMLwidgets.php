@@ -124,7 +124,6 @@ class PageNum extends HTMLWidgets
 
     function getItemsPerPage()
     {
-        session_start();
         return in_array(intval(Utils::array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0])),$this->prefOptionList)?intval(Utils::array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0])):$this->prefOptionList[0];
     }
 

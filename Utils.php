@@ -171,10 +171,40 @@ class Utils
 	    return ((float)$usec + (float)$sec);
 	}
 
-
     static function silentDeath()
     {
         return True;
     }
+    
+    static function getLanguage($localeDir)
+    {
+        global $droneLanguage;
+        if (isset($droneLanguage))
+            return $droneLanguage;
+        elseif (isset($_SESSION['drone_language']))
+            return $_SESSION['drone_language'];
+        elseif (isset($_COOKIE['drone_language']))
+            return $_COOKIE['drone_language'];
+        elseif (isset($_SERVER['HTTP_ACCEPT_LANGUAGE']))
+        {
+            $userLanguages = array();
+            $langs = preg_split('/,/',$_SERVER['HTTP_ACCEPT_LANGUAGE']);
+            foreach($langs as $lang)
+            {
+                $quality = preg_split('/;(?:[ ]*|)q=/',$lang);
+                if (count($quality)==1)
+                    $userLanguages[trim($quality[0])] = 1.0;
+                else
+                    $userLanguages[trim($quality[0])] = floatval($quality[1]);
+            }
+            arsort($userLanguages);
+            foreach($userLanguages as $language=>$quality)
+                if (is_dir("$localeDir/{$language}"))
+                    return $language;
+        }
+
+        return False;
+    }
+
 }
 ?>

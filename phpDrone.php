@@ -1,4 +1,5 @@
 <?php
+    session_start();
 	$modules = array('database'=>'Database.php',
 					 'form'=>'Form.php',
 					 'template'=>'Template.php',

@@ -10,7 +10,6 @@ class Captcha extends Input
     
     function generate($size,$id="")
     {
-        session_start();
         $result = "";
         for ($f=0;$f<$size;$f++)
             $result=$result.chr(rand(65,90));
@@ -22,14 +21,13 @@ class Captcha extends Input
             $id = md5($tmp_id);
         }
         $time = time();
-        $_SESSION[$id]=$result;
+        $_SESSION['done_captcha'][$id]=$result;
         return $id;
     }
 
     function draw($id)
     {
-        session_start();
-        $text = $_SESSION[$id];
+        $text = $_SESSION['done_captcha'][$id];
         if ($text!="")
         {
             header("Content-type: image/gif");
@@ -66,12 +64,11 @@ class Captcha extends Input
 
     function validate()
     {
-        session_start();
-        $value = $_REQUEST[$this->name];
+        $value = $this->request[$this->attributes['name']];
         $captchaId = $_REQUEST['captchaId'];
-        if (strtolower($_SESSION[$captchaId])==strtolower($value))
+        if (strtolower($_SESSION['done_captcha'][$captchaId])==strtolower($value))
         {
-            unset($_SESSION[$captchaId]);
+            unset($_SESSION['done_captcha'][$captchaId]);
             return true;
         }
         $this->error = _("The text didn't match image");
@@ -80,7 +77,7 @@ class Captcha extends Input
 
 }
 
-
+session_start();
 $tmp_captcha = new Captcha("not set","not set");
 if ($_GET['action']=='regen' && $_GET['id']!="")
     $tmp_captcha->generate(5,$_GET['id']);

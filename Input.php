@@ -43,7 +43,13 @@ class Input
         $this->request = $reqData;
     }
 
+    //DEPRECATED
     function setDefault($defVal)
+    {
+        $this->setValue($defVal);
+    }
+
+    function setValue($defVal)
     {
         if (!isset($this->defaultValue))
         {
@@ -240,7 +246,10 @@ class Input
 
     function write_submit($template)
     {
-        $template->write("inputValue",htmlspecialchars($this->defaultValue,ENT_QUOTES));
+        $template->write("inputValue",htmlspecialchars($this->label,ENT_QUOTES));
+        //DEPRECATED
+        if (isset($this->defaultValue))
+            $template->write("inputValue",htmlspecialchars($this->defaultValue,ENT_QUOTES));
         return $template->getBuffer();
     }
 
