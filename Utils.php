@@ -128,7 +128,7 @@ class Utils
 
     static function throwDroneError($msg)
     {
-        set_error_handler("handleDroneErrors");
+        set_error_handler("Utils::handleDroneErrors");
         trigger_error($msg,E_USER_ERROR);
         restore_error_handler();
     }

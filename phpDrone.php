@@ -3,6 +3,7 @@
 	$modules = array('database'=>'Database.php',
 					 'form'=>'Form.php',
 					 'template'=>'Template.php',
+					 'mail'=>'DroneMail.php',
 					 'widgets'=>'HTMLwidgets.php',
 					 'i18n'=>'i18n.php',
 					);
