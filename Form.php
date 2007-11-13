@@ -23,6 +23,7 @@ class Form
         $this->submitTriggers = array();
         $this->isValid = false;
         $this->allowHtml = false;
+        $this->filter = array();
         
         switch ($method)
         {
@@ -41,11 +42,21 @@ class Form
         $this->cleanData($this->request);
     }
 
+    //DEPRECATED
 	function allowHTML($bool=True)
 	{
 		$this->allowHtml = $bool;
 	}
 
+    function addFilter($filter)
+    {
+        $this->filter[$filter] = "";
+    }
+    
+    function removeFilter($filter)
+    {
+        unset($this->filter[$filter]);
+    }
 
 	private function addFilesData(&$requestObj)
 	{
@@ -110,6 +121,8 @@ class Form
             if  ($type=="submit")
                 $this->submitTriggers[$this->inputs[$name]->attributes['name']]="";
             $this->inputs[$name]->allowHTML($this->allowHtml);
+            foreach ($this->filter as $filter=>$data)
+                $this->inputs[$name]->addFilter($filter);
         }
         else
         if (count($args)==1)
@@ -120,6 +133,8 @@ class Form
             $input->setRequestData($this->request);
             $this->inputs[$name] = $input;
             $this->inputs[$name]->allowHTML($this->allowHtml);
+            foreach ($this->filter as $filter=>$data)
+                $this->inputs[$name]->addFilter($filter);
         }
         else
         {
@@ -152,6 +167,7 @@ class Form
             foreach ($this->inputs as $item)
             {
                 $result = $item->validate();
+                $item->filterInput();
                 if (!$result)
                     $isValid = false;
             }

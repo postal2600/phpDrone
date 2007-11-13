@@ -21,6 +21,7 @@ class Input
         
         $this->type = $type;
         $this->validator = null;
+        $this->filter = array();
         $this->error = "";
         $this->initial = null;
         
@@ -130,6 +131,10 @@ class Input
         return $this->write_text($template);
     }
 
+    function write_date($template)
+    {
+        return $this->write_text($template);
+    }
 
     function write_select($template)
     {
@@ -262,6 +267,8 @@ class Input
             $template = new Template("?form/input_{$this->type}.tmpl");
             $template->vars = $upperTemplate->vars;
             $template->write("inputLabel",htmlentities($this->label,ENT_QUOTES));
+            if ($this->type=='date')
+                unset($this->attributes['format']);
             $template->write("attributes",$this->attributes);
             if ($this->mandatory)
                 $template->write("mandatoryMarker",$this->mandatoryMarker);
@@ -289,8 +296,37 @@ class Input
         $this->validator=array('regExp'=>$validator,'message'=>$msg);
     }
 
+    function addFilter($filter)
+    {
+        $this->filter[$filter] = "";
+    }
+
+    function removeFilter($filter)
+    {
+        unset($this->filter[$filter]);
+    }
+
+    function filterInput()
+    {
+        foreach ($this->filter as $filter=>$data)
+            if (function_exists($filter))
+                $this->request[$this->attributes['name']] = $filter($this->request[$this->attributes['name']]);
+    }
+
     function validate()
     {
+        if ($this->type=='date')
+        {
+            $dateInfo=date_parse($this->request[$this->attributes['name']]);
+            if ($dateInfo && !$dateInfo[errors])
+            {
+                $dateFormat = Utils::array_get('format',$this->attributes,'%Y-%m-%d %H:%M:%S');
+                $this->request[$this->attributes['name']] = strftime($dateFormat,mktime($dateInfo["hour"],$dateInfo["minute"],$dateInfo["second"],$dateInfo["month"],$dateInfo["day"],$dateInfo["year"]));
+                return true;
+            }
+            $this->error = _("Invalid value");
+            return false;
+        }
         if ($this->type=="select" || $this->type=="checkbox" || $this->type=="radio")
         {
 
@@ -306,7 +342,7 @@ class Input
             
             if (function_exists($meth))
             {
-                if ($meth($this->request)!=True)
+                if ($meth($this->request,$this->attributes['name'])!=True)
                 {
                     $this->error = $this->validator['message'];
                     $validatorResult = false;
