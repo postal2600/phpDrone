@@ -50,12 +50,32 @@ class Form
 
     function addFilter($filter)
     {
-        $this->filter[$filter] = "";
+        array_push($this->filter,$filter);
+    }
+
+    function setFilter($filter)
+    {
+        $this->filter = $filter;
+    }
+
+    function removeFilterRev($filter)
+    {
+        for ($f=count($this->filter)-1;$f>=0;$f--)
+            if ($this->filter[$f]==$filter)
+            {
+                array_splice($this->filter,$f,1);
+                return;
+            }
     }
     
     function removeFilter($filter)
     {
-        unset($this->filter[$filter]);
+        foreach($this->filter as $key=>$item)
+            if ($item==$filter)
+            {
+                array_splice($this->filter,$key,1);
+                return;
+            }
     }
 
 	private function addFilesData(&$requestObj)
@@ -121,8 +141,7 @@ class Form
             if  ($type=="submit")
                 $this->submitTriggers[$this->inputs[$name]->attributes['name']]="";
             $this->inputs[$name]->allowHTML($this->allowHtml);
-            foreach ($this->filter as $filter=>$data)
-                $this->inputs[$name]->addFilter($filter);
+            $this->inputs[$name]->setFilter($this->filter);
         }
         else
         if (count($args)==1)
@@ -133,8 +152,7 @@ class Form
             $input->setRequestData($this->request);
             $this->inputs[$name] = $input;
             $this->inputs[$name]->allowHTML($this->allowHtml);
-            foreach ($this->filter as $filter=>$data)
-                $this->inputs[$name]->addFilter($filter);
+            $this->inputs[$name]->setFilter($this->filter);
         }
         else
         {

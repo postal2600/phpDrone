@@ -3,12 +3,12 @@ class Utils
 {
 	static function getVideoData($videourl)
 	{
-		//http://(?:www.|)(?<site>youtube)\.com/watch\?v=(?<vid>[^&]*)|http://(?:www.|)(?<site>metacafe)\.com/watch/(?<vid>\d*)/
+		//http://(?:www\.|\w{2}\.)(?<site>youtube)\.com/watch\?v=(?<vid>[^&]*)|http://(?:www.|)(?<site>metacafe)\.com/watch/(?<vid>\d*)/
 		//youtube: http://img.youtube.com/vi/####/default.jpg
 		//metacafe: http://metacafe.com/thumb/embed/####.jpg
 		//daily motion: http://limelight-689.static.dailymotion.com/dyn/preview/320x240/####.jpg
 		
-		$sitePatterns = array("youtube"=>'/http:\/\/(?:www.|)(?P<site>youtube)\\.com\/watch\\?v=(?P<vid>[^&]*)/',
+		$sitePatterns = array("youtube"=>'/http:\/\/(?:www\\.|\\w{2}\\.)(?P<site>youtube)\\.com\/watch\\?v=(?P<vid>[^&]*)/',
 							  "metacafe"=>'/http:\/\/(?:www.|)(?P<site>metacafe)\\.com\/watch\/(?P<vid>\\d*)\/(?P<vid_a>.*)\//',
 							  "dailymotion"=>'/http:\/\/www\\.dailymotion\\.com\//'
 							 );

@@ -41,7 +41,7 @@ class Input
 
     function setRequestData(&$reqData)
     {
-        $this->request = $reqData;
+        $this->request = &$reqData;
     }
 
     //DEPRECATED
@@ -298,35 +298,44 @@ class Input
 
     function addFilter($filter)
     {
-        $this->filter[$filter] = "";
+        array_push($this->filter,$filter);
+    }
+
+    function setFilter($filter)
+    {
+        $this->filter = $filter;
+    }
+
+    function removeFilterRev($filter)
+    {
+        for ($f=count($this->filter)-1;$f>=0;$f--)
+            if ($this->filter[$f]==$filter)
+            {
+                array_splice($this->filter,$f,1);
+                return;
+            }
     }
 
     function removeFilter($filter)
     {
-        unset($this->filter[$filter]);
+        foreach($this->filter as $key=>$item)
+            if ($item==$filter)
+            {
+                array_splice($this->filter,$key,1);
+                return;
+            }
     }
+
 
     function filterInput()
     {
-        foreach ($this->filter as $filter=>$data)
+        foreach ($this->filter as $filter)
             if (function_exists($filter))
                 $this->request[$this->attributes['name']] = $filter($this->request[$this->attributes['name']]);
     }
 
     function validate()
     {
-        if ($this->type=='date')
-        {
-            $dateInfo=date_parse($this->request[$this->attributes['name']]);
-            if ($dateInfo && !$dateInfo[errors])
-            {
-                $dateFormat = Utils::array_get('format',$this->attributes,'%Y-%m-%d %H:%M:%S');
-                $this->request[$this->attributes['name']] = strftime($dateFormat,mktime($dateInfo["hour"],$dateInfo["minute"],$dateInfo["second"],$dateInfo["month"],$dateInfo["day"],$dateInfo["year"]));
-                return true;
-            }
-            $this->error = _("Invalid value");
-            return false;
-        }
         if ($this->type=="select" || $this->type=="checkbox" || $this->type=="radio")
         {
 
@@ -383,6 +392,20 @@ class Input
             $this->error = _("Max length for input is")." {$this->attributes['maxlength']}";
             return false;
         }
+        
+        if ($this->type=='date')
+        {
+            $dateInfo=date_parse($this->request[$this->attributes['name']]);
+            if ($dateInfo && !$dateInfo[errors])
+            {
+                $dateFormat = Utils::array_get('format',$this->attributes,'%Y-%m-%d %H:%M:%S');
+                $this->request[$this->attributes['name']] = strftime($dateFormat,mktime($dateInfo["hour"],$dateInfo["minute"],$dateInfo["second"],$dateInfo["month"],$dateInfo["day"],$dateInfo["year"]));
+                return true;
+            }
+            $this->error = _("Invalid value");
+            return false;
+        }
+        
         $meth = $this->validator['regExp'];
 
         if (function_exists($meth))
