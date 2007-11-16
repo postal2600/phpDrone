@@ -410,7 +410,7 @@ class Input
 
         if (function_exists($meth))
         {
-            if ($meth($this->request)!=True)
+            if ($meth($this->request,$this->attributes['name'])!=True)
             {
                 $this->error = $this->validator['message'];
                 return false;
