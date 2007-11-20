@@ -206,5 +206,22 @@ class Utils
         return False;
     }
 
+    static function getTempDir() //from http://www.phpit.net
+    {
+        if (!empty($_ENV['TMP']))
+            return $_ENV['TMP'];
+            
+        elseif (!empty($_ENV['TMPDIR']))
+            return  $_ENV['TMPDIR'];
+            
+        elseif (!empty($_ENV['TEMP']))
+            return  $_ENV['TEMP'];
+            
+        else
+            return  dirname(tempnam('', 'na'));
+            
+        return false;
+    }
+
 }
 ?>
