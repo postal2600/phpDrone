@@ -89,11 +89,11 @@ class Database
 {
     function __construct($table="")
     {
-        global $sqlEngine;
-        global $sqlServer;
-        global $sqlUser;
-        global $sqlPassword;
-        global $sqlDatabase;
+        $sqlEngine = DroneConfig::get('Database.sqlEngine');
+        $sqlServer = DroneConfig::get('Database.sqlServer');
+        $sqlUser = DroneConfig::get('Database.sqlUser');
+        $sqlPassword = DroneConfig::get('Database.sqlPassword');
+        $sqlDatabase = DroneConfig::get('Database.sqlDatabase');
     
         if (isset($sqlEngine)&&$sqlEngine=="mysql")
         {

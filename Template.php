@@ -16,7 +16,7 @@ class Template
     
     function __construct($template)
     {
-        global $debugMode;
+        $debugMode = DroneConfig::get('Main.debugMode');
         if ($debugMode)
             $this->startTime = Utils::microTime();
         if ($template{0}=="?")
@@ -386,8 +386,8 @@ class Template
 
     function getBuffer()
     {
-        global $debugMode;
-        global $compressHTML;
+        $debugMode = DroneConfig::get('Main.debugMode');
+        $compressHTML = DroneConfig::get('Main.compressHTML');
         
         $output = $this->compileTemplate($this->template,$this->vars);
         //take out reminders
@@ -402,7 +402,7 @@ class Template
 
     private function render_p($args)
     {
-        global $debugMode;
+        $debugMode = DroneConfig::get('Main.debugMode');
         
         $output = $this->getBuffer();
         if ($debugMode)

@@ -55,13 +55,14 @@ class PageNum extends HTMLWidgets
 {
     function __construct($itemCount,$itemLabel,$prefName,$prefOptionList,$maxLinks=NULL)
     {
-        global $droneURL;
+        if (isset($_GET['action']))
+            $this->handleAction();
         $this->itemCount = $itemCount;
         $this->itemLabel = $itemLabel;
         $this->prefName = $prefName;
         $this->prefOptionList = $prefOptionList;
         $this->maxLinks = $maxLinks;
-        $this->droneURL = $droneURL;
+        $this->droneURL = DroneConfig::get('Main.droneURL');
         $this->showPages = true;
         $this->showPrefs = true;
         $this->showQuickJump = true;
@@ -71,6 +72,23 @@ class PageNum extends HTMLWidgets
     function setCount($count)
     {
         $this->itemCount = $count;
+    }
+
+    function handleAction()
+    {
+        switch ($_GET['action'])
+        {
+            case "setPage":
+                $url = Utils::querySetVar($_SERVER['HTTP_REFERER'],"page",$_GET['page']);
+                header("Location: {$url}");
+                break;
+            case "setPref":
+                session_start();
+                $_SESSION["drone_pn_{$_GET['prefName']}"] = $_GET['pref'];
+                $url = Utils::querySetVar($_SERVER['HTTP_REFERER'],"page",1);
+                header("Location: {$url}");
+                break;
+        }
     }
 
     function getHTML()
@@ -106,7 +124,7 @@ class PageNum extends HTMLWidgets
 		$form = new Form(do_success);
 		$form->addInput("","select","page");
 		$form->inputs['page']->setDefault($allPages);
-		$form->inputs['page']->setAttribute("onchange","window.location=\"{$this->droneURL}/widgets/pageNum.php?action=setPage&amp;page=\"+this.value");
+		$form->inputs['page']->setAttribute("onchange","window.location=\"?action=setPage&amp;page=\"+this.value");
 
         $template->write("quickJumpSelector",$form->getHTML());
         $template->write("pages",$pages);

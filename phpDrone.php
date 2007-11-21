@@ -1,32 +1,26 @@
 <?php
-    session_start();
-	$modules = array('database'=>'Database.php',
-					 'form'=>'Form.php',
-					 'template'=>'Template.php',
-					 'mail'=>'DroneMail.php',
-					 'widgets'=>'HTMLwidgets.php',
-					 'i18n'=>'i18n.php',
-					 'config'=>'DroneConfig.php',
-					);
-	$excludeModules = array();
-	
-	// TODO: if in debug mode, check if the excluded module is valid
-	function excludeModule($module)
-	{
-	    global $excludeModules;
-	    array_push($excludeModules,$module);
-	}
-	
-	require_once('Utils.php');
-    set_error_handler("Utils::handleDroneErrors");
-	require("drone/settings.php");
-	restore_error_handler();
-	
 	if (version_compare(phpversion(),"5")>-1)
-	{
-	    foreach ($modules as $key=>$module)
-	        if (!in_array($key,$excludeModules))
-	    		require $module;
+    {
+    	$validModules = array('database'=>'Database.php',
+    					      'form'=>'Form.php',
+                              'template'=>'Template_new.php',
+                              'mail'=>'DroneMail.php',
+                              'widgets'=>'HTMLwidgets.php',
+                              'utils'=>'Utils.php',
+                              'i18n'=>'i18n.php',
+                              'config'=>'DroneConfig.php',
+    					);
+        session_start();
+        ob_start();
+        
+        require("DroneConfig.php");
+        
+        $loadModules = DroneConfig::getSection('Modules');
+	    foreach ($loadModules as $key=>$loadIt)
+	        if (array_key_exists($key,$validModules) && $loadIt)
+	    		require $validModules[$key];
+	    		
+        @include 'droneEnv/drone.php';
 	}
 	else
 	{

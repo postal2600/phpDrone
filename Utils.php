@@ -146,7 +146,7 @@ class Utils
 
     static function handleDroneErrors($errno, $errstr, $errfile, $errline)
     {
-        global $debugMode;
+        $debugMode = DroneConfig::get('Main.debugMode');
     
         print "<b>phpDrone error:</b> <br />";
         if (preg_match_all('/require\(drone\/settings\.php\)/',$errstr,$some))
@@ -178,7 +178,7 @@ class Utils
     
     static function getLanguage($localeDir)
     {
-        global $droneLanguage;
+        $droneLanguage = DroneConfig::get('Main.droneLanguage');
         if (isset($droneLanguage))
             return $droneLanguage;
         elseif (isset($_SESSION['drone_language']))
