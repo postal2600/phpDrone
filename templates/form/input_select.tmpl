@@ -10,9 +10,9 @@
     {%if inputError%}
         <span class='inputError'><span>{%"Error"|translate%}: </span>{%inputError%}</span>
     {%end-if%}
-    <select {%for item in attributes%}{%for_key%}='{%item%}' {%end-for%}>
+    <select {%for key,item in attributes%} {%key%}='{%item%}'{%end-for%}>
         {%for item in values%}
-            <option value='{%item.key%}' {%if item.selected%}selected='selected'{%end-if%}>{%item.value%}</option>
+            <option value='{%item.key%}'{%if item.selected%} selected='selected'{%end-if%}>{%item.value%}</option>
         {%end-for%}
     </select>
 {%end-block%}

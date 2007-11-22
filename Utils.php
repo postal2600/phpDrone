@@ -1,6 +1,7 @@
 <?php
 class Utils
 {
+    // get the preview image and the embed value for a internet movie (will be used in MovieWidget)
 	static function getVideoData($videourl)
 	{
 		//http://(?:www\.|\w{2}\.|)(?<site>youtube)\.com/watch\?v=(?<vid>[^&]*)|http://(?:www.|)(?<site>metacafe)\.com/watch/(?<vid>\d*)/
@@ -40,6 +41,7 @@ class Utils
 		return false;
 	}
 
+    // set/overwrite a variable in the query string
     static function querySetVar($userUrl,$varName,$varValue)
     {
         $wasThere = preg_match("/".$varName."=(?:.*?(&))|".$varName."=(?:.*?(\\z))/",$userUrl);
@@ -50,13 +52,14 @@ class Utils
     }
 
     //generates a hexadecimal random string
-    static function genRandomHex($len){
-            $rhex="";
-            for ($i = 1; $i <= $len/2; $i++) {
-                $rhex=$rhex.chr(mt_rand(0, 255));
-            }
-            return bin2hex($rhex);
+    static function genRandomHex($len)
+    {
+        $rhex="";
+        for ($i = 1; $i <= $len/2; $i++) {
+            $rhex=$rhex.chr(mt_rand(0, 255));
         }
+        return bin2hex($rhex);
+    }
 
     //generates a $size length random string
     static function genRandomString($size)
@@ -107,75 +110,14 @@ class Utils
                 return $default;
     }
 
-    static function advHttpQuery($r_query="")
-    {
-        if ($r_query=="")
-            $r_query = $_SERVER['QUERY_STRING'];
-
-        $result = array();
-        $query = $r_query."&";
-
-        preg_match_all('/(?P<key>.*?)=(?P<value>.*?)&/', $query, $capt);
-        $count = count($capt['key']);
-        for ($f=0;$f<$count;$f++)
-        {
-            if (!isset($result[$capt['key'][$f]]))
-                $result[$capt['key'][$f]] = array();
-            $result[$capt['key'][$f]][count($result[$capt['key'][$f]])] = $capt['value'][$f];
-        }
-        return $result;
-    }
-
-    static function throwDroneError($msg)
-    {
-        set_error_handler("Utils::handleDroneErrors");
-        trigger_error($msg,E_USER_ERROR);
-        restore_error_handler();
-    }
-
-    static function printStackTrace()
-    {
-        $stack = debug_backtrace();
-        foreach($stack as $item)
-    //         if ($item['static function']!="printStackTrace" &&
-    //             $item['static function']!="handleDroneErrors" &&
-    //             $item['static function']!="trigger_error" &&
-    //             $item['static function']!="throwDroneError")
-                print "<b>File:</b> {$item['file']}, <b>line</b> {$item['line']}, <b>in</b> {$item['static function']}<br />";
-    }
-
-    static function handleDroneErrors($errno, $errstr, $errfile, $errline)
-    {
-        $debugMode = DroneConfig::get('Main.debugMode');
-    
-        print "<b>phpDrone error:</b> <br />";
-        if (preg_match_all('/require\(drone\/settings\.php\)/',$errstr,$some))
-        {
-            print "Your project does not have a configuration file in the drone environment.<br />";
-            die();
-        }
-        else
-            print $errstr."<br />";
-
-        if ($debugMode)
-        {
-            print "<br /><b>Traceback:</b><br />";
-            printStackTrace();
-        }
-        die();
-    }
-
+    // get UNIX timestamp in microseconds
 	static function microTime()
 	{
 	    list($usec, $sec) = explode(" ", microtime());
 	    return ((float)$usec + (float)$sec);
 	}
 
-    static function silentDeath()
-    {
-        return True;
-    }
-    
+    //get the language currently used by phpDrone
     static function getLanguage($localeDir)
     {
         $droneLanguage = DroneConfig::get('Main.droneLanguage');
@@ -221,6 +163,12 @@ class Utils
             return  dirname(tempnam('', 'na'));
             
         return false;
+    }
+
+
+    static function getDronePath()
+    {
+        return dirname(__FILE__);
     }
 
 }

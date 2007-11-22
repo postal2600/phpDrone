@@ -157,7 +157,7 @@ class Form
         else
         {
             //this wil be replaced later with a nicer error
-            Utils::throwDroneError("Method addInput takes at least one argument.");
+            DroneCore::throwDroneError("Method addInput takes at least one argument.");
         }
         
     }
@@ -168,7 +168,7 @@ class Form
             eval("\$this->".$method."_p(\$args);");
         else
             //this wil be replaced later with a nicer error
-            Utils::throwDroneError("Call to undefined method: Form->".$method."()");
+            DroneCore::throwDroneError("Call to undefined method: Form->".$method."()");
     }
     
     function validateForm()

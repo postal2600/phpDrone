@@ -278,7 +278,7 @@ class Input
             eval("\$result .= \$this->write_{$this->type}(\$template);");
         }
         else
-            Utils::throwDroneError("Unknown form input type: {$this->type}.");
+            DroneCore::throwDroneError("Unknown form input type: {$this->type}.");
         return $result;
     }
 

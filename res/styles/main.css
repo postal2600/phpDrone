@@ -1,0 +1,236 @@
+*
+{
+    padding:0px;
+    margin:0px;
+    font-family:"Trebuchet MS",sans-serif;
+}
+
+body
+{
+    background:url("?phpDroneRequestResource=images/pattern.gif") left top;
+    background-color:#292929;
+    font-family:Tahoma;
+    font-size:12px;
+    overflow:auto;
+    color:white;
+}
+
+a
+{
+    color:#ff9a15;
+    text-decoration:none;
+    border-bottom:1px dashed #ff9a15;
+}
+
+a img,a.imgLink
+{
+    border:none !important;
+}
+
+h2
+{
+    margin-top:50px;
+    font-size:18px;
+}
+
+a:hover
+{
+    border-bottom:1px solid #ff9a15;
+}
+
+#header
+{
+    height:90px;
+    background:url("?phpDroneRequestResource=images/top_bkg.gif") left top repeat-x;
+    background-color:#ff9a15;
+    border-bottom:1px solid white;
+}
+
+#logo
+{
+    background:url("?phpDroneRequestResource=images/logo.png") left top no-repeat;
+    width:170px;
+    height:50px;
+    margin-top:25px;
+    margin-left:20px;
+    position:absolute;
+}
+
+#topMenu
+{
+    position:absolute;
+    right:0px;
+    margin-right:50px;
+}
+
+
+#topMenu div
+{
+    float:left;
+    background:url("?phpDroneRequestResource=images/menu_bkg.png") left top;
+    margin-left:5px;
+    padding:5px;
+    padding-bottom:0px;
+    border:1px solid white;
+    border-top:0px;
+    height:10px;
+    width:70px;
+    position:relative;
+    cursor:pointer;
+    
+}
+
+#topMenu div:hover a
+{
+    color:white;
+}
+
+#topMenu #selectedMenu
+{
+    height:70px;
+}
+
+#topMenu #selectedMenu a
+{
+    color:white;
+}
+
+#topMenu a
+{
+    color:black;
+    border:none;
+    font-size:10px;
+    position:absolute;
+    bottom:4px;
+    text-align:center;
+}
+
+#topMenu a:hover
+{
+    color:black;
+}
+
+#container
+{
+    color:white;
+    padding-left:10px;
+    width:98%;
+    font-size:14px;
+    position:relative;
+    padding-top:20px;
+    padding-bottom:20px;
+}
+
+#container h3
+{
+    padding-top:50px;
+}
+
+#container p
+{
+    line-height: 15px;
+    padding-left:10px;
+    margin-top:10px;
+    font-size:14px;
+}
+
+
+
+#powered
+{
+    margin-left:10px;
+    color:white;
+    font-size:10px;
+    float:left;
+    text-align:center;
+    padding-left:10px;
+    opacity:0.5;
+}
+
+
+#power
+{
+
+    background:url("?phpDroneRequestResource=images/powered.png") left top no-repeat;
+    width:70px;
+    height:19px;
+    margin-right:4px;
+}
+
+#footer
+{
+    text-align:right;
+    float:right;
+    padding-bottom:5px;
+    padding-right:10px;
+    padding-top:5px;
+    position:fixed;
+    bottom:0px;
+    right:0px;
+    width:100%;
+    background:url("?phpDroneRequestResource=images/footer_bkg.png") left top;
+    border-top:1px solid black;
+    margin-top:10px;
+}
+
+#footer #subMenu li
+{
+    display:inline;
+    font-size:12px;
+}
+
+#footer #copyright
+{
+    font-size:9px;
+    margin-top:5px;
+}
+
+.sideSubtitle
+{
+	color:white;
+}
+
+
+form
+{
+    padding:10px;
+    margin-top:20px;
+}
+
+    form label
+    {
+        display:block;
+        font-weight:bold;
+        margin-top:10px;
+    }
+
+    form .textInput
+    {
+        width:200px;
+    }
+
+    form textarea
+    {
+        width:500px !important;
+    }
+    
+    form #captchaImage
+    {
+        display:block;
+        border:1px solid black;
+        margin-top:10px;
+    }
+    
+    form .inputError
+    {
+        font-weight:bold;
+        display:block;
+        color:red;
+    }
+    
+    form .buttonInput
+    {
+        display:block;
+        margin-top:10px;
+    }
+    

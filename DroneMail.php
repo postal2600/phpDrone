@@ -10,7 +10,7 @@ class DroneAttach
             fclose($handle);
         }
         else
-            Utils::throwDroneError(_("Can't attach file").": {$file}");
+            DroneCore::throwDroneError(_("Can't attach file").": {$file}");
     }
     
     function getContent()
@@ -77,7 +77,7 @@ class DroneMail
         $res = fgets($this->con,256);
         preg_match('/(?P<code>\\d{3})[ -](?P<text>.*)/', $res, $capt);
         if ($capt['code']!=$okCode)
-             Utils::throwDroneError("SMTP error: {$error}<br />Server responded: {$capt['text']}");
+             DroneCore::throwDroneError("SMTP error: {$error}<br />Server responded: {$capt['text']}");
     }
 
     function setFrom($email,$name="")

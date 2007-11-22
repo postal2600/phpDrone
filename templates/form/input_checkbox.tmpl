@@ -11,6 +11,6 @@
         <span class='inputError'><span>{%"Error"|translate%}: </span>{%inputError%}</span>
     {%end-if%}
     {%for item in values%}
-        <input type="checkbox" {%if for_index==0%}id='{%attributes.id%}'{%end-if%} name='{%attributes.name%}[]' value='{%item.key%}' {%if item.selected%}checked='checked'{%end-if%}  /><span class='checkboxValue'>{%item.value%}</span><span class="checkboxDelimiter">&nbsp;</span>
+        <input type="checkbox" {%if for_index==0%} id='{%attributes.id%}'{%end-if%} name='{%attributes.name%}[]' value='{%item.key%}' {%if item.selected%}checked='checked'{%end-if%}  /><span class='checkboxValue'>{%item.value%}</span><span class="checkboxDelimiter">&nbsp;</span>
     {%end-for%}
 {%end-block%}

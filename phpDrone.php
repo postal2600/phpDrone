@@ -3,13 +3,13 @@
     {
     	$validModules = array('database'=>'Database.php',
     					      'form'=>'Form.php',
-                              'template'=>'Template_new.php',
+                              'template'=>'Template.php',
                               'mail'=>'DroneMail.php',
                               'widgets'=>'HTMLwidgets.php',
                               'utils'=>'Utils.php',
                               'i18n'=>'i18n.php',
                               'config'=>'DroneConfig.php',
-    					);
+    					     );
         session_start();
         ob_start();
         
@@ -21,6 +21,7 @@
 	    		require $validModules[$key];
 	    		
         @include 'droneEnv/drone.php';
+        require("DroneCore.php");
 	}
 	else
 	{

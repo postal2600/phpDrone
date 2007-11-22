@@ -8,7 +8,7 @@ class Captcha extends Input
        parent::__construct($label,"text",$name);
     }
     
-    function generate($size,$id="")
+    static function generate($size,$id="")
     {
         $result = "";
         for ($f=0;$f<$size;$f++)
@@ -25,7 +25,7 @@ class Captcha extends Input
         return $id;
     }
 
-    function draw($id)
+    static function draw($id)
     {
         $text = $_SESSION['done_captcha'][$id];
         if ($text!="")
@@ -34,7 +34,7 @@ class Captcha extends Input
             $im     = imagecreate(160,50);
             $bkgColor = imagecolorallocate($im, 255, 255, 255);
             $frgColor = imagecolorallocate($im, 35, 52, 29);
-            $font = realpath("res/fonts/captcha6.ttf");
+            $font = realpath(Utils::getDronePath()."/res/fonts/captcha6.ttf");
             $px=10;
             for ($f=0;$f<strlen($text);$f++)
             {
@@ -49,6 +49,7 @@ class Captcha extends Input
             imagegif($im);
             imagedestroy($im);
         }
+        die();
     }
     
     function write()
@@ -74,13 +75,5 @@ class Captcha extends Input
         $this->error = _("The text didn't match image");
         return false;
     }
-
 }
-
-session_start();
-$tmp_captcha = new Captcha("not set","not set");
-if ($_GET['action']=='regen' && $_GET['id']!="")
-    $tmp_captcha->generate(5,$_GET['id']);
-$tmp_captcha->draw($_GET['id']);
-
 ?>

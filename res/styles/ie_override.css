@@ -1,0 +1,38 @@
+#logo, #topMenu div,#footer, #power
+{
+    background:none !important;
+}
+
+#logo
+{
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='?phpDroneResourceRequest=images/logo.png', sizingMethod='scale');
+}
+
+#topMenu div
+{
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='?phpDroneResourceRequest=images/menu_bkg.png', sizingMethod='scale');
+    width:85px;
+}
+
+#footer
+{
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='?phpDroneResourceRequest=images/footer_bkg.png', sizingMethod='scale');
+    border-top:1px solid #5b5b5b;
+    position:absolute;
+}
+
+#powered
+{
+    margin-left:0px;
+}
+
+#power
+{
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='?phpDroneResourceRequest=images/powered.png', sizingMethod='scale');
+}
+
+#topMenu div
+{
+    height:17px;
+}
+

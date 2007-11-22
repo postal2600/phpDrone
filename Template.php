@@ -21,46 +21,41 @@ class Template
             $this->startTime = Utils::microTime();
         if ($template{0}=="?")
         {
-            $droneDir = dirname(__FILE__);
+            $droneDir = Utils::getDronePath();
             if (file_exists(substr($template,1)))
-                $filename = substr($template,1);
+                $templateFilename = substr($template,1);
             else
             if (isset($templateDir) && file_exists($templateDir.substr($template,1)))
-                $filename = $templateDir.substr($template,1);
+                $templateFilename = $templateDir.substr($template,1);
             else
                 if (file_exists("templates/".substr($template,1)))
-                    $filename = "templates/".substr($template,1);
+                    $templateFilename = "templates/".substr($template,1);
                 else
-                    $filename = "{$droneDir}/templates/".substr($template,1);
+                    $templateFilename = "{$droneDir}/templates/".substr($template,1);
         }
         else
             if (file_exists($template))
-                $filename = $template;
+                $templateFilename = $template;
             else
             if (isset($templateDir))
-                $filename = $templateDir.$template;
+                $templateFilename = $templateDir.$template;
             else
                 if (file_exists("templates/".$template))
-                    $filename = "templates/".$template;
+                    $templateFilename = "templates/".$template;
                 else
-                    Utils::throwDroneError("Template file was not be found: <b>templates/{$template}</b>");
-                
-        $this->template = "";
-        $this->buildTemplate($filename);                
+                    DroneCore::throwDroneError("Template file was not be found: <b>templates/{$template}</b>");
+
+        $this->templateContent = "";
+        $this->userTemplateFilename = $template;
+        $this->templateFilename = $templateFilename;
         $this->vars = array();
     }
     
-    function buildTemplate($templateFile)
-    {
-        $this->solveInheritance($templateFile);
-        //clear the block-related tags
-        $this->template = preg_replace('/{%block([\\d]*|) .*?%}|{%end-block([\\d]*|)%}/',"",$this->template);
-    }
 
     function solveInheritance($templateFile)
     {
         if (!file_exists($templateFile))
-            Utils::throwDroneError("Template file needed to extend other template was not found: <b>{$templateFile}</b>");
+             DroneCore::throwDroneError("Template file needed to extend other template was not found: <b>{$templateFile}</b>");
         $handle = fopen($templateFile, "r");
         $templateContent = fread($handle, filesize($templateFile));
         fclose($handle);
@@ -77,14 +72,13 @@ class Template
             {
                 $item = trim($item);
                 //get the content of the found block
-                //note to self: ATENTIE!!!!! AM PUS AICI UN "?" DUPA ".*" FARA SA VERIFIC DACA MERE
                 preg_match('/(?:\\{%(?:\s|)block([\\d]*|) '.$item.'(?:\s|)%\\})(?P<blockContent>.*?)\\{%(?:\s|)end-block\\1(?:\s|)%\\}/s', $templateContent, $blocksContent);
                 //replace the block content in the base template with the one from the child template
-                $this->template = preg_replace ('/(.*){%(?:\s|)block([\\d]*|) '.$item.'(?:\s|)%}.*?{%(?:\s|)end-block\\2(?:\s|)%}(.*)/s','\\1{%block '.$item.'%}'.$blocksContent['blockContent'].'{%end-block%}\\3',$this->template);
+                $this->templateContent = preg_replace ('/(.*){%(?:\s|)block([\\d]*|) '.$item.'(?:\s|)%}.*?{%(?:\s|)end-block\\2(?:\s|)%}(.*)/s','\\1{%block '.$item.'%}'.$blocksContent['blockContent'].'{%end-block%}\\3',$this->templateContent);
             }
         }
         else
-            $this->template = $templateContent;
+            $this->templateContent = $templateContent;
     }
     
     function addMeta($meta)
@@ -112,90 +106,115 @@ class Template
         return sprintf("%.4f",Utils::microTime()-$this->startTime);
     }
 
-    private function solveVar($input,$php_vars)
+    private function parseVars($input,$forVar=null,$forId=null)
+    {
+        $filterPieces = preg_split("/\|/",trim($input));
+        $reservedVars = array('drone_for_step'=>"\$drone_for_index_{$forId}+1",
+                              'drone_for_index'=>"\$drone_for_index_{$forId}",
+                              'drone_for_total'=>"\$drone_for_total_{$forId}",
+                              'drone_for_first'=>"\$drone_for_index_{$forId}==0",
+                              'drone_for_last'=>"\$drone_for_index_{$forId}==\$drone_for_total_{$forId}-1"
+                             );
+
+        //is a string?
+        if (!preg_match('/("|\')(?P<string>[^"\\\\]*(?:\\\\.[^"\\\\]*)*)\\1/', $filterPieces[0],$valCapt))
+        {
+            $opParts = preg_split('/(?:\\+)|(?:-)|(?:\\*)|(?:%)|(?:!)|(?:\/)/',trim($filterPieces[0]));
+            if (count($opParts)==1)
+            {
+
+                  $subs = preg_split("/\./",trim($filterPieces[0]));
+                  if (count($subs)==1)
+
+                        //detect if it's a number or a var name (TODO: I should check if string)
+                        if (!intval($subs[0]))
+                            $ev = array_key_exists($subs[0],$reservedVars)?$reservedVars[$subs[0]]:"\${$subs[0]}";
+                        else
+                            $ev = $subs[0];
+                  else
+                  {
+
+                    $skipOne = true;
+                    $ev = "\${$subs[0]}";
+                        
+                    foreach ($subs as $item)
+                        if ($skipOne)
+                            $skipOne = false;
+                        else
+                            $ev .= "['".$item."']";
+                  }
+            }
+            else
+            {
+                $toEval = trim($filterPieces[0]);
+                foreach ($opParts as $part)
+                {
+                    $subs = preg_split("/\./",$part);
+                    if (count($subs)==1)
+                        //detect if it's a number or a var name (TODO: I should check if string)
+                        if (!intval($subs[0]))
+                            $ev = array_key_exists($subs[0],$reservedVars)?$reservedVars[$subs[0]]:"\${$subs[0]}";
+                        else
+                            $ev = $subs[0];
+                    else
+                    {
+
+                        $skipOne = true;
+                        $ev = "\${$subs[0]}";
+
+                        foreach ($subs as $item)
+                            if ($skipOne)
+                                $skipOne = false;
+                            else
+                                $ev .= "['".$item."']";
+                    }
+                    $toEval = preg_replace('/'.addslashes($part).'/',$ev,$toEval);
+                }
+                  $ev = $toEval;
+            }
+        }
+        else
+            $ev = "'{$valCapt['string']}'";
+
+        //apply filters
+        if (count($filterPieces)>1)
+            for ($f=1;$f<count($filterPieces);$f++)
+            {
+                if (preg_match('/(?P<filterName>.*)\\((?P<filterArgs>.+)\\)/',$filterPieces[$f],$capt))
+                {
+                    $filterName = $capt['filterName'];
+                    $filterArgs = ",".$capt['filterArgs'];
+                }
+                else
+                {
+                    $filterName = str_replace(array("(",")"),"",$filterPieces[$f]);
+                    $filterArgs = "";
+                }
+                if (function_exists("filter_".$filterName))
+                {
+                    $ev = "filter_{$filterName}({$ev}{$filterArgs})";
+                }
+                else
+                    DroneCore::throwDroneError("Unknown filter: <b>{$filterName}</b>.");
+            }
+
+        return $ev;
+    }
+
+    private function solveVar($input,$forVar,$forId)
     {
         $output = $input;
         preg_match_all('/{%(?P<cont>[^\\}]*)%}/',$output,$vals);
         foreach($vals['cont'] as $f_val)
         {
-            $filterPieces = preg_split("/\|/",trim($f_val));
-            
-            //is a string?
-            if (!preg_match('/("|\')(?P<string>[^"\\\\]*(?:\\\\.[^"\\\\]*)*)\\1/', $filterPieces[0],$valCapt))
-            {
-	            $opParts = preg_split('/(?:\\+)|(?:-)|(?:\\*)|(?:%)|(?:!)|(?:\/)/',trim($filterPieces[0]));
-	            if (count($opParts)==1)
-	            {
-
-	                $subs = preg_split("/\./",trim($filterPieces[0]));
-	                if (count($subs)==1)
-	                {
-	                    $ev = "\$php_vars['".$subs[0]."']";
-	                    eval("\$val=$ev;");
-	                }
-	                else
-	                {
-	                    $ev = "\$php_vars";
-	                    foreach ($subs as $item)
-	                        $ev.= "['".$item."']";
-	                    eval("\$val=$ev;");
-	                }
-	            }
-	            else
-	            {
-	                $toEval = trim($filterPieces[0]);
-	                foreach ($opParts as $part)
-	                {
-	                    $subs = preg_split("/\./",$part);
-	                    if (count($subs)==1)
-	                    {
-	                        $ev = "\$php_vars['".$subs[0]."']";
-	                        eval("\$t_val=$ev;");
-	                    }
-	                    else
-	                    {
-	                        $ev = "\$php_vars";
-	                        foreach ($subs as $item)
-	                            $ev.= "['".$item."']";
-	                        eval("\$t_val=$ev;");
-	                    }
-	                    if ($t_val)
-	                        $toEval = preg_replace('/'.addslashes($part).'/',$t_val,$toEval);
-	                }
-	//                 print "TO EVAL::::::::{$toEval}<br />";
-	                eval("\$val=$toEval;");
-	            }
-            }
-            else
-                $val = $valCapt['string'];
-                
-            //apply filters
-            if (count($filterPieces)>1)
-                for ($f=1;$f<count($filterPieces);$f++)
-                {
-                    if (preg_match('/(?P<filterName>.*)\\((?P<filterArgs>.+)\\)/',$filterPieces[$f],$capt))
-                    {
-                        $filterName = $capt['filterName'];
-                        $filterArgs = ",".$capt['filterArgs'];
-                    }
-                    else
-                    {
-                        $filterName = str_replace(array("(",")"),"",$filterPieces[$f]);
-                        $filterArgs = "";
-                    }
-                    if (function_exists("filter_".$filterName))
-                    {
-                        eval('$val=filter_'.$filterName.'(\''.addcslashes($val,"'").'\''.$filterArgs.');');
-                    }
-                    else
-                        Utils::throwDroneError("Unknown filter: <b>{$filterName}</b>.");
-                }
-            $output = preg_replace ('/{%(?:[ ]*|)'.addcslashes(addslashes($f_val),"|+*(.)").'(?:[ ]*|)%}/',$val,$output);
+            $ev = $this->parseVars($f_val,$forVar,$forId);
+            //TODO: ailing \n-s are not preserved.
+            $output = preg_replace ('/{%(?:[ ]*|)'.preg_quote($f_val).'(?:[ ]*|)%}/',"<?php echo {$ev}; ?>",$output);
         }
         return $output;
     }
 
-    private function solveIf($input,$php_vars)
+    private function solveIf($input,$forVar,$forId)
     {
         $output = $input;
 //                        {%(?:[ ]*|)if([\d]*|) (?P<ifStatement>[^\}]*)%}(?P<ifCont>[^\x00]*?){%(?:[ ]*|)end-if\1(?:[ ]*|)%}
@@ -212,204 +231,133 @@ class Template
             {
                 foreach ($parts as $part)
                 {
-                    $val_parts = preg_split("/\./",trim($part));
-                    if (count($val_parts)==1)
-                    {
-                        $ev = "\$php_vars['".$val_parts[0]."']";
-                    }
-                    else
-                    {
-                        $ev = "\$php_vars";
-                        foreach ($val_parts as $item)
-                            $ev.= "['".$item."']";
-                    }
-                    eval("\$isSet = isset($ev);");
-                    eval("\$val =$ev;");
-                    eval("\$type = gettype($ev);");
-
-                    if ($isSet && $val)
-                    {
-                        if ($type=="string" && $val!="")
-                            $val = "'".$val."'";
-                        $toEval = preg_replace('/'.addslashes($part).'/',$val,$toEval);
-                        if ($toEval=="")
-                            $toEval = "False";
-                    }
-                    else
-                        $toEval = preg_replace('/'.addslashes($part).'/',"False",$toEval);
+                    $ev = $this->parseVars($part,$forVar,$forId);
+                    $toEval = preg_replace('/'.addslashes($part).'/',$ev,$toEval);
                 }
             }
             else
-            {
-                $val_parts = preg_split("/\./",trim($toEval));
-                if (count($val_parts)==1)
-                {
-                    if (isset($php_vars[$toEval]))
-                    {
-                        $toEval = '"'.$php_vars[$toEval].'"';
-                        if ($toEval=="")
-                            $toEval = "False";
-                    }
-                    else
-                        $toEval = "False";
-                }
-                else
-                {
-                    $toEval = "\$php_vars";
-                    foreach ($val_parts as $item)
-                        $toEval.= "['".$item."']";
-                }
-            }
-             
-            eval("\$result=$toEval;");
+                $toEval = $this->parseVars(trim($toEval),$forVar,$forId);
 
-            if (!$result)
-            {
-                //{%(?:[ ]*|)if([\d]*|) .*%}(?P<ifBlock>[^\x00]*?)(?:(?:{%(?:[ ]*|)else\1(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?))?{%(?:[ ]*|)end-if\1(?:[ ]*|)%}
-                preg_match('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?P<ifBlock>[^\\x00]*?)(?:(?:{%(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)%})(?:[\\n]|)(?P<elseBlock>[^\\x00]*?))?{%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$output,$capt);
-                $output = preg_replace ('/(?:[ ]{2,}|){%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}(?:[\\n]|)/',rtrim($capt['elseBlock']," "),$output,1);
-            }
-            else
-            {
-                preg_match('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?:[\\n]|)(?P<ifCont>[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$output,$capt);
-                $ifContent = $capt['ifCont'];
-                $ifContent = preg_replace('/(?:{%(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)%})(?:[^\\x00]*)/','',$ifContent);
-                $output = preg_replace ('/(?:[ ]{2,}|){%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*\\").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}(?:[\\n]|)/',rtrim($ifContent," "),$output,1);
-            }
+            //{%(?:[ ]*|)if([\d]*|) .*%}(?P<ifBlock>[^\x00]*?)(?:(?:{%(?:[ ]*|)else\1(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?))?{%(?:[ ]*|)end-if\1(?:[ ]*|)%}
+            preg_match('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?P<ifBlock>[^\\x00]*?)(?:(?:(?:[ ]*|){%(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?(?:[ ]*|){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$output,$capt);
+            $output = preg_replace ('/(?:[ ]{2,}|){%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}(?:[\\n]|)/',"<?php if ({$toEval}){?>".$capt['ifBlock']."<?php }else{ ?>".rtrim($capt['elseBlock']," ")."<?php } ?>",$output,1);
 
         }
         return $output;
     }
 
-    private function solveFor($input,$php_vars)
+    private function solveFor($input,$forVar,$forId)
     {
         $output = $input;
         preg_match_all('/{%(?:[ ]|)for([\\d]*|) (?P<item>.*) in (?P<bunch>.*?)%}/', $output, $fors);
         $pas = 0;
         foreach($fors['bunch'] as $bunch)
         {
+            $forId = md5(uniqid());
             $item = $fors['item'][$pas];
             //{%(?:[ ]|)for([\d]*|) (?:.*?) in (?:.*?)%}(?:[\\n]|)(?P<forblock>[^\x00]*?)(?:[ ]*|){%end-for\1%} - get the block
             // get the if block content
             preg_match('/{%(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:[\\n]|)(?P<forblock>[^\\x00]*?)(?:[ ]*|){%end-for\\1%}/', $output, $forBlocksContent);
             $blockContent = $forBlocksContent['forblock'];
+            
+            $builtBlock = $blockContent;
+            $f_vars = preg_match_all('/{%(?:[ ]*|)(?P<cont>'.$item.'[^\\x00]*?)%}/',$builtBlock,$varCapt);
 
-            if (isset($php_vars[trim($bunch)]) || is_numeric(trim($bunch)))
-            {
-                if (is_numeric(trim($bunch)))
-                    $type = "integer";
-                else
-                    $type = gettype($php_vars[trim($bunch)]);
-                if ($type=="array" || $type=="object" || $type=="string" || $type=="integer")
-                {
-                    if ($type=="integer")
-                    {
-                        $pacient = array();
-                        if (is_numeric(trim($bunch)))
-                            $upLimit = trim($bunch);
-                        else
-                            $upLimit =$php_vars[trim($bunch)];
-                        for ($f=0;$f<=$upLimit;$f++)
-                            $pacient[$f] = $f;
-                    }
-                    else if ($type=="string")
-                        $pacient = preg_split('//', $php_vars[trim($bunch)], -1, PREG_SPLIT_NO_EMPTY);
-                    else
-                        $pacient = $php_vars[trim($bunch)];
+            $builtBlock = $this->compileTemplate($builtBlock,$item,$forId);
+            $droneBunch = $this->parseVars($bunch,$forVar,$forId);
 
-                    $newContent = "";
-                    $pas_2 = 0;
-                    foreach ($pacient as $key=>$value)
-                    {
-                        if (gettype($value)=="array" || gettype($value)=="object")
-                        {
-                            preg_match_all('/{%(?:[ ]*|)'.$item.'.(?P<key>[^\\}|[\\ ]*)(?:[ ]*|)%}/',$blockContent,$keys);
-                            $builtBlock = $blockContent;
-                            foreach($keys['key'] as $f_key)
-                                $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'.'.$f_key.'(?:[ ]*|)%}/',$value[$f_key],$builtBlock);
-                        }
-                        else
-                            $builtBlock = preg_replace('/{%(?:[ ]*|)'.$item.'(?:[ ]*|)%}/',$value,$blockContent);
-                        $this->vars[$item] = $value;
+            $droneItem = implode('=>$',preg_split('/,/',$item));
 
-                        // process cycles
-                        preg_match_all('/{%(?:[ ]*|)cycle (?P<elems>.*?)(?:[ ]*|)%}/', $builtBlock, $capt);
-                        foreach ($capt['elems'] as $i_item)
-                        {
-                            $parts = preg_split('/\,/',$i_item);
-                            $builtBlock = preg_replace('/{%(?:[ ]*|)cycle '.$i_item.'(?:[ ]*|)%}/',$parts[$pas_2%count($parts)],$builtBlock);
-                        }
+            $forSet = "\$drone_for_total_{$forId}=count({$droneBunch});".
+                      "\$drone_for_index_{$forId}=0;";
 
-                        //process for variables
-//                         $builtBlock = preg_replace ('/{%(?:[ ]*|)for-step(?:[ ]*|)%}/',$pas_2,$builtBlock);
-                        $this->vars['for_step'] = $pas_2+1;
-                        $this->vars['for_index'] = $pas_2;
-                        $this->vars['for_key'] = $key;
-                        $this->vars['for_total'] = count($pacient);
-                        if ($pas_2==0)
-                            $this->vars['for_first'] = true;
-                        else
-                            $this->vars['for_first'] = false;
+            $forUnSet = "unset(\$drone_for_total_{$forId});".
+                        "unset(\$drone_for_index_{$forId});";
 
-                        if ($pas_2==$this->vars['for_total']-1)
-                            $this->vars['for_last'] = true;
-                        else
-                            $this->vars['for_last'] = false;
+            $forIncrement = "\$drone_for_index_{$forId}++;";
 
-
-                        $builtBlock = $this->compileTemplate($builtBlock,$this->vars);
-                        $newContent .= $builtBlock;
-                        $pas_2 ++;
-                    }
-//                     $blockContent = preg_replace('/([\\\\<{%}>*\/])/','\\\\\1',$blockContent);
-                    //$this->template = preg_replace('/{%(?:[ ]*|)for '.$item.' in '.$bunch.'%}'.$blockContent.'{%end-for%}/',$newContent,$this->template);
-                    $output = preg_replace('/(?:[ ]{2,}|){%(?:[ ]*|)for([\\d]*|) '.$item.' in '.$bunch.'%}([^\\x00]*?){%end-for\\1%}/',rtrim($newContent," "),$output,1);
-                }
-            }
-            else
-                $output = preg_replace ('/(?:[ ]{2,}|){%(?:[ ]*|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:[\\s]*|.*)*{%end-for\\1%}/','',$output,1);
+            $output = preg_replace('/(?:[ ]{2,}|){%(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:[\\n]|)'.preg_quote($blockContent,'/').'(?:[ ]*|){%end-for\\1%}/',"<?php {$droneBunch}=is_array({$droneBunch})||is_object({$droneBunch})?{$droneBunch}:array(); {$forSet} foreach({$droneBunch} as \${$droneItem}) {?>{$builtBlock}<?php {$forIncrement}} {$forUnSet} ?>",$output);
             $pas++;
         }
         return $output;
     }
     
-    function compileTemplate($input,$phpVars)
+    function compileTemplate($input,$forVar=null,$forId=null)
     {
         $output = $input;
-        $output = $this->solveFor($output,$phpVars);
-        $output = $this->solveIf($output,$phpVars);
-        $output = $this->solveVar($output,$phpVars);
+        $output = preg_replace('/(<\\?[^\\x00]*?\\?>)/',"<?php echo addcslashes('$1',\"'\"); ?>\n",$output);
+        $output = $this->solveFor($output,$forVar,$forId);
+        $output = $this->solveIf($output,$forVar,$forId);
+        $output = $this->solveVar($output,$forVar,$forId);
         //delete the rest of unused vars from template
         $output = preg_replace ('/{%[^\\}]*%}/',"",$output);
         return $output;
     }
 
+    function prepareTemplate()
+    {
+        $cacheDir = DroneConfig::get('Main.cacheDir');
+        if (isset($cacheDir) && is_dir($cacheDir))
+            $cDir = realpath($cacheDir);
+        elseif (is_dir(Utils::getTempDir()."/phpDroneCache") || mkdir(Utils::getTempDir()."/phpDroneCache"))
+            $cDir = Utils::getTempDir()."/phpDroneCache";
+        else
+            DroneCore::throwDroneError("Could not create the cache directory.");
+
+        $debugMode = DroneConfig::get('Main.debugMode');
+        $dbgInfo = $debugMode?basename($this->userTemplateFilename)."_":"";
+        $outFilename = "{$cDir}/".$dbgInfo.md5($this->templateContent).md5($this->templateFilename).".php";
+        
+        // if file is cached and not in debug mode, no need to rebuild
+        if (file_exists($outFilename) && !$debugMode)
+            return $outFilename;
+
+        $handler = fopen($outFilename,'w');
+        if (!$handler)
+            DroneCore::throwDroneError("Could not write file in the cache directory. Please change the write persission to <b>{$cDir}</b>");
+
+        $this->solveInheritance($this->templateFilename);
+        //clear the block-related tags
+        $this->templateContent = preg_replace('/{%block([\\d]*|) .*?%}|{%end-block([\\d]*|)%}/',"",$this->templateContent);
+        $output = $this->compileTemplate($this->templateContent);
+        require("ver.php");
+        $output = "<?php \n\n /* Compiled with phpDrone v{$phpDroneVersion} from {$this->userTemplateFilename} */ \n\n ?>\n{$output}";
+        fwrite($handler,$output);
+        fclose($handler);
+        
+        return $outFilename;
+    }
+
     function getBuffer()
     {
-        $debugMode = DroneConfig::get('Main.debugMode');
-        $compressHTML = DroneConfig::get('Main.compressHTML');
-        
-        $output = $this->compileTemplate($this->template,$this->vars);
-        //take out reminders
-        $output = preg_replace('/{%(?:[ ]*|)rem(?:[ ]*|)%}(?:[^\\x00]*){%(?:[ ]*|)end-rem(?:[ ]*|)%}/', '', $output);
-        if (isset($compressHTML) && $compressHTML)
+        $templateFile = $this->prepareTemplate();
+        if (is_file($templateFile))
         {
-            $output = preg_replace('/\n|\r\n|\t/', '', $output);
-            $output = preg_replace('/[\s]{2,}/', ' ', $output);
+            ob_start();
+            extract($this->vars);
+            include $templateFile;
+            $content = ob_get_contents();
+            ob_end_clean();
         }
-        return $output;
+        else
+            DroneCore::throwDroneError("Error reading cache!");
+        return $content;
     }
 
     private function render_p($args)
     {
-        $debugMode = DroneConfig::get('Main.debugMode');
-        
         $output = $this->getBuffer();
+
+        $compressHTML = DroneConfig::get('Main.compressHTML');
+        if ($compressHTML)
+            $output = preg_replace('/[\s]{2,}/', ' ',preg_replace('/\n|\r\n|\t/', '', $output));
+
+        $debugMode = DroneConfig::get('Main.debugMode');
         if ($debugMode)
         {
             require_once("ver.php");
             $codeSize = sprintf("%.2f", strlen($output)/1024);
-            $output .= "<!--This will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:100%;border-top:1px solid silver;padding-left:4px;'><b>".$codeSize."</b> kb built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v{$phpDroneVersion}</div>";
+            $output .= "\n<!--The following will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:90%;border-top:1px solid silver;padding-left:4px;'><b>".$codeSize."</b> kb built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v{$phpDroneVersion}</div>";
         }
         print $output;
 
@@ -423,7 +371,7 @@ class Template
             if (count($args)==1)
                 $this->vars["body"] .= $args[0];
             else
-                Utils::throwDroneError("Function takes at least one argument: <b>Template->write()</b>");
+                DroneCore::throwDroneError("Function takes at least one argument: <b>Template->write()</b>");
     }
 
     private function __call($method, $args)
@@ -432,7 +380,7 @@ class Template
         if (method_exists($this,$method."_p"))
             eval("\$this->".$method."_p(\$args);");
         else
-            Utils::throwDroneError("Call to undefined method: <b>Template->".$method."()</b>");
+            DroneCore::throwDroneError("Call to undefined method: <b>Template->".$method."()</b>");
     }
 }
 

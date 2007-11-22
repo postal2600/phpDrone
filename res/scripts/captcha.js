@@ -1,7 +1,6 @@
 function regenerate(captchaId)
 {
-//     if (navigator.appName!="Microsoft Internet Explorer")
-        captchaImage = document.getElementById("captchaImage")
-    // the random at the end is to skip the cache issue
-    captchaImage.src = "phpDrone/Captcha.php?action=regen&id="+captchaId+"&stuff="+Math.floor(Math.random()*999999)
+    captchaImage = document.getElementById("captchaImage")
+    // the random at the end is to skip the cacheing the captcha
+    captchaImage.src = "?phpDrone_captcha_action=regen&phpDrone_captcha_id="+captchaId+"&anti_cache="+Math.floor(Math.random()*999999)
 }

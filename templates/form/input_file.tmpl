@@ -10,5 +10,5 @@
     {%if inputError%}
         <span class='inputError'><span>{%"Error"|translate%}: </span>{%inputError%}</span>
     {%end-if%}
-    <input type='file' {%for item in attributes%}{%for_key%}='{%item%}' {%end-for%}/>
+    <input type='file' {%for key,item in attributes%} {%key%}='{%item%}'{%end-for%}/>
 {%end-block%}
