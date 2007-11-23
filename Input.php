@@ -383,10 +383,10 @@ class Input
             $this->error = _("Can't be empty");
             return false;
         }
-        if (!$this->mandatory && strlen($this->request[$this->attributes['name']])==0)
-        {
-            return true;
-        }
+//         if (!$this->mandatory && strlen($this->request[$this->attributes['name']])==0)
+//         {
+//             return true;
+//         }
         if (isset($this->attributes['maxlength']) && strlen($this->request[$this->attributes['name']])>$this->attributes['maxlength'])
         {
             $this->error = _("Max length for input is")." {$this->attributes['maxlength']}";

@@ -1,9 +1,7 @@
-{%block droneInput%}
-    <img id='captchaImage' src='?phpDrone_draw_captchaid={%captchaId%}' alt='Captcha verification image' onclick='regenerate("{%captchaId%}")'/>
-    {%if inputError%}
-        <span class='inputError'><span>{%"Error"|translate%}: </span>{%inputError%}</span>
-    {%end-if%}
-    <span class="captchaNote"><b>{%"Note"|translate%}:</b>&nbsp;{%"Click image to regenerate"|translate%}</span>
+    <img id='captchaImage' src='?phpDrone_draw_captchaid=<!--captchaId-->' alt='Captcha verification image' onclick='regenerate("<!--captchaId-->")'/>
+    <!--if inputError-->
+        <span class='inputError'><span><!--"Error"|translate-->: </span><!--inputError--></span>
+    <!--/if-->
+    <span class="captchaNote"><b><!--"Note"|translate-->:</b>&nbsp;<!--"Click image to regenerate"|translate--></span>
     <script type='text/javascript' src='?phpDroneRequestResource=scripts/captcha.js'></script>
-    <input type='hidden' name='captchaId' value='{%captchaId%}'/>
-{%end-block%}
+    <input type='hidden' name='captchaId' value='<!--captchaId-->'/>

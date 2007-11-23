@@ -1,53 +1,53 @@
-{%block htmlWidget%}
+<!--block htmlWidget-->
     <div class="pageNum">
-        {%if9 showPages%}
+        <!--if9 showPages-->
         <div class="pageNumPages">
-            {%itemCount%} {%itemLabel%}:
-            {%for item in pages%}
-                {%if for_first%}
-                    {%if2 item==currentPage%}
-                        <span class="disabledPageNumBtn">&laquo;{%"Prev"|translate%}</span>
-                    {%else2%}
-                        <a href="?action=setPage&amp;page={%currentPage-1%}" title="Go to page {%currentPage-1%}">&laquo;{%"Prev"|translate%}</a>
-                    {%end-if2%}
-                {%end-if%}
-                {%if8 cutedLow&&for_first%}
+            <!--itemCount--> <!--itemLabel-->:
+            <!--for item in pages-->
+                <!--if for_first-->
+                    <!--if2 item==currentPage-->
+                        <span class="disabledPageNumBtn">&laquo;<!--"Prev"|translate--></span>
+                    <!--else2-->
+                        <a href="?action=setPage&amp;page=<!--currentPage-1-->" title="Go to page <!--currentPage-1-->">&laquo;<!--"Prev"|translate--></a>
+                    <!--/if2-->
+                <!--/if-->
+                <!--if8 cutedLow&&for_first-->
                     <span class="andSoOn">...</span>
-                {%end-if8%}
-                {%if item==currentPage%}
-                    <span title="{%"You are on page"|translate%} {%item%}">{%item%}</span>
-                {%else%}
-                    <a href="?action=setPage&amp;page={%item%}" title="{%"Go to page"|translate%} {%item%}">{%item%}</a>
-                {%end-if%}
-                {%if8 cutedHigh&&for_last%}
+                <!--/if8-->
+                <!--if item==currentPage-->
+                    <span title="<!--"You are on page"|translate--> <!--item-->"><!--item--></span>
+                <!--else-->
+                    <a href="?action=setPage&amp;page=<!--item-->" title="<!--"Go to page"|translate--> <!--item-->"><!--item--></a>
+                <!--/if-->
+                <!--if8 cutedHigh&&for_last-->
                     <span class="andSoOn">...</span>
-                {%end-if8%}
-                {%if for_last%}
-                    {%if2 item==currentPage%}
-                        <span class="disabledPageNumBtn">{%"Next"|translate%}&raquo;</span>
-                    {%else2%}
-                        <a href="?action=setPage&amp;page={%currentPage+1%}" title="{%"Go to page"|translate%} {%currentPage+1%}">{%"Next"|translate%}&raquo;</a>
-                    {%end-if2%}
-                {%end-if%}
-            {%end-for%}
+                <!--/if8-->
+                <!--if for_last-->
+                    <!--if2 item==currentPage-->
+                        <span class="disabledPageNumBtn"><!--"Next"|translate-->&raquo;</span>
+                    <!--else2-->
+                        <a href="?action=setPage&amp;page=<!--currentPage+1-->" title="<!--"Go to page"|translate--> <!--currentPage+1-->"><!--"Next"|translate-->&raquo;</a>
+                    <!--/if2-->
+                <!--/if-->
+            <!--/for-->
         </div>
-        {%end-if9%}
-        {%if9 showPrefs%}
+        <!--/if9-->
+        <!--if9 showPrefs-->
         <div  class="pageNumPrefs">
-            {%currentPerPage%} {%"per page"|translate%} :
-            {%for pref in prefs%}
-                {%if pref==currentPerPage%}
-                    <span title="{%"Curently set at"|translate%} {%currentPerPage%} {%"per page"|translate%}">{%currentPerPage%}</span>
-                {%else%}
-                    <a title="{%"Switch to"|translate%} {%pref%} {%"per page"|translate%}" href="?action=setPref&amp;prefName={%prefName%}&amp;pref={%pref%}">{%pref%}</a>
-                {%end-if%}
-            {%end-for%}
+            <!--currentPerPage--> <!--"per page"|translate--> :
+            <!--for pref in prefs-->
+                <!--if pref==currentPerPage-->
+                    <span title="<!--"Curently set at"|translate--> <!--currentPerPage--> <!--"per page"|translate-->"><!--currentPerPage--></span>
+                <!--else-->
+                    <a title="<!--"Switch to"|translate--> <!--pref--> <!--"per page"|translate-->" href="?action=setPref&amp;prefName=<!--prefName-->&amp;pref=<!--pref-->"><!--pref--></a>
+                <!--/if-->
+            <!--/for-->
         </div>
-        {%end-if9%}
-        {%if9 showQuickJump%}
+        <!--/if9-->
+        <!--if9 showQuickJump-->
         <div class="pageNumQUickJump">
-            {%"Quick jump"|translate%}:{%quickJumpSelector%}
+            <!--"Quick jump"|translate-->:<!--quickJumpSelector-->
         </div>
-        {%end-if9%}
+        <!--/if9-->
     </div>
-{%end-block%}
+<!--/block-->

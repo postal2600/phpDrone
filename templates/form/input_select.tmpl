@@ -1,18 +1,16 @@
-{%block droneInput%}
-    {%if inputLabel%}
-        <label for='{%attributes.id%}' id='{%attributes.id%}_label'>
-            {%if2 mandatoryMarker%}
-                <span class='mandatoryMarker'>{%mandatoryMarker%}</span>
-            {%end-if2%}
-            {%inputLabel%}:
-        </label>
-    {%end-if%}
-    {%if inputError%}
-        <span class='inputError'><span>{%"Error"|translate%}: </span>{%inputError%}</span>
-    {%end-if%}
-    <select {%for key,item in attributes%} {%key%}='{%item%}'{%end-for%}>
-        {%for item in values%}
-            <option value='{%item.key%}'{%if item.selected%} selected='selected'{%end-if%}>{%item.value%}</option>
-        {%end-for%}
-    </select>
-{%end-block%}
+<!--if inputLabel-->
+    <label for='<!--attributes.id-->' id='<!--attributes.id-->_label'>
+        <!--if2 mandatoryMarker-->
+            <span class='mandatoryMarker'><!--mandatoryMarker--></span>
+        <!--/if2-->
+        <!--inputLabel-->:
+    </label>
+<!--/if-->
+<!--if inputError-->
+    <span class='inputError'><span><!--"Error"|translate-->: </span><!--inputError--></span>
+<!--/if-->
+<select <!--for key,item in attributes--> <!--key-->='<!--item-->'<!--/for-->>
+    <!--for item in values-->
+        <option value='<!--item.key-->'<!--if item.selected--> selected='selected'<!--/if-->><!--item.value--></option>
+    <!--/for-->
+</select>

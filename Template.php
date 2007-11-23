@@ -61,20 +61,21 @@ class Template
         fclose($handle);
 
         //see if the templates extends another and if so, recursivly call the solveInheritance
-        if (preg_match('/{%(?:\\s|)extends (?P<baseTemplate>.*)(?:\\s|)%}/', $templateContent, $result))
+        if (preg_match('/<!--(?:\\s|)extends (?P<baseTemplate>.*)(?:\\s|)-->/', $templateContent, $result))
         {
             $baseTemplate = $result['baseTemplate'];
             $this->solveInheritance(dirname($templateFile)."/".$baseTemplate);
 
             //get the names of all the blocks in the template.
-            preg_match_all('/\\{%(?:\s|)block([\\d]*|) (?P<blocName>[\\w]*)(?:\s|)%\\}/', $templateContent, $blocks);
+            preg_match_all('/<!--(?:\\s*|)block([\\d]*|) (?P<blocName>[\\w]*)(?:\\s*|)-->/', $templateContent, $blocks);
             foreach($blocks['blocName'] as $item)
             {
                 $item = trim($item);
                 //get the content of the found block
-                preg_match('/(?:\\{%(?:\s|)block([\\d]*|) '.$item.'(?:\s|)%\\})(?P<blockContent>.*?)\\{%(?:\s|)end-block\\1(?:\s|)%\\}/s', $templateContent, $blocksContent);
+                //<!--(?:\s|)block([\d]*|) .*?(?:\s|)-->(?P<blockContent>.*?)<!--(?:\s|)/block\1(?:\s|)-->
+                preg_match('/<!--(?:\\s|)block([\\d]*|) '.$item.'(?:\\s|)-->(?P<blockContent>.*?)<!--(?:\\s|)\/block\\1(?:\\s|)-->/s', $templateContent, $blocksContent);
                 //replace the block content in the base template with the one from the child template
-                $this->templateContent = preg_replace ('/(.*){%(?:\s|)block([\\d]*|) '.$item.'(?:\s|)%}.*?{%(?:\s|)end-block\\2(?:\s|)%}(.*)/s','\\1{%block '.$item.'%}'.$blocksContent['blockContent'].'{%end-block%}\\3',$this->templateContent);
+                $this->templateContent = preg_replace ('/(.*)<!--(?:\\s|)block([\\d]*|) '.$item.'(?:\\s|)-->.*?<!--(?:\\s|)\/block\\2(?:\\s|)-->(.*)/s','\\1<!--block '.$item.'-->'.$blocksContent['blockContent'].'<!--/block-->\\3',$this->templateContent);
             }
         }
         else
@@ -197,19 +198,19 @@ class Template
                 else
                     DroneCore::throwDroneError("Unknown filter: <b>{$filterName}</b>.");
             }
-
+        
         return $ev;
     }
 
     private function solveVar($input,$forVar,$forId)
     {
         $output = $input;
-        preg_match_all('/{%(?P<cont>[^\\}]*)%}/',$output,$vals);
+        preg_match_all('/<!--(?P<cont>[\\w-\/"| \\.\'\\n]*?)-->/s',$output,$vals);
         foreach($vals['cont'] as $f_val)
         {
             $ev = $this->parseVars($f_val,$forVar,$forId);
-            //TODO: ailing \n-s are not preserved.
-            $output = preg_replace ('/{%(?:[ ]*|)'.preg_quote($f_val).'(?:[ ]*|)%}/',"<?php echo {$ev}; ?>",$output);
+            //TODO: tailing \n-s are not preserved.
+            $output = preg_replace ('/<!--(?:[ ]*|)'.preg_quote($f_val,'/').'(?:[ ]*|)-->/',"<?php echo {$ev}; ?>",$output);
         }
         return $output;
     }
@@ -217,8 +218,8 @@ class Template
     private function solveIf($input,$forVar,$forId)
     {
         $output = $input;
-//                        {%(?:[ ]*|)if([\d]*|) (?P<ifStatement>[^\}]*)%}(?P<ifCont>[^\x00]*?){%(?:[ ]*|)end-if\1(?:[ ]*|)%}
-        preg_match_all('/{%(?:[ ]*|)if([\\d]*|) (?P<ifStatement>[^\\}]*)%}/', $output, $ifs);
+        //<!--(?:[ ]*|)if([\d]*|) (?P<ifStatement>.*?)-->(?P<ifCont>.*?)<!--(?:[ ]*|)/if\1(?:[ ]*|)-->
+        preg_match_all('/<!--(?:[ ]*|)if([\\d]*|) (?P<ifStatement>.*?)-->/s', $output, $ifs);
         
         for($f=0;$f<count($ifs['ifStatement']);$f++)
         {
@@ -238,9 +239,9 @@ class Template
             else
                 $toEval = $this->parseVars(trim($toEval),$forVar,$forId);
 
-            //{%(?:[ ]*|)if([\d]*|) .*%}(?P<ifBlock>[^\x00]*?)(?:(?:{%(?:[ ]*|)else\1(?:[ ]*|)%})(?P<elseBlock>[^\x00]*?))?{%(?:[ ]*|)end-if\1(?:[ ]*|)%}
-            preg_match('/{%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?P<ifBlock>[^\\x00]*?)(?:(?:(?:[ ]*|){%(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)%})(?P<elseBlock>[^\\x00]*?))?(?:[ ]*|){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}/',$output,$capt);
-            $output = preg_replace ('/(?:[ ]{2,}|){%(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'%}(?:[^\\x00]*?){%(?:[ ]*|)end-if'.$innerIfNumber.'(?:[ ]*|)%}(?:[\\n]|)/',"<?php if ({$toEval}){?>".$capt['ifBlock']."<?php }else{ ?>".rtrim($capt['elseBlock']," ")."<?php } ?>",$output,1);
+            //<!--(?:[ ]*|)if([\d]*|) .*-->(?P<ifBlock>.*?)(?:(?:<!--(?:[ ]*|)else\1(?:[ ]*|)-->)(?P<elseBlock>.*?))?<!--(?:[ ]*|)/if\1(?:[ ]*|)-->
+            preg_match('/<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'-->(?P<ifBlock>.*?)(?:(?:(?:[ ]*|)<!--(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)-->)(?P<elseBlock>.*?))?(?:[ ]*|)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->/s',$output,$capt);
+            $output = preg_replace ('/(?:[ ]{2,}|)<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'-->(?:.*?)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->(?:[\\n]|)/s',"<?php if ({$toEval}){?>".$capt['ifBlock']."<?php }else{ ?>".rtrim($capt['elseBlock']," ")."<?php } ?>",$output,1);
 
         }
         return $output;
@@ -249,34 +250,37 @@ class Template
     private function solveFor($input,$forVar,$forId)
     {
         $output = $input;
-        preg_match_all('/{%(?:[ ]|)for([\\d]*|) (?P<item>.*) in (?P<bunch>.*?)%}/', $output, $fors);
+        preg_match_all('/<!--(?:[ ]|)for([\\d]*|) (?P<item>.*) in (?P<bunch>.*?)-->/', $output, $fors);
         $pas = 0;
         foreach($fors['bunch'] as $bunch)
         {
             $forId = md5(uniqid());
             $item = $fors['item'][$pas];
-            //{%(?:[ ]|)for([\d]*|) (?:.*?) in (?:.*?)%}(?:[\\n]|)(?P<forblock>[^\x00]*?)(?:[ ]*|){%end-for\1%} - get the block
+            //<!--(?:[ ]|)for([\d]*|) (?:.*?) in (?:.*?)-->(?:[\\n]|)(?P<forblock>.*?)(?:[ ]*|)<!--/for\1-->
             // get the if block content
-            preg_match('/{%(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:[\\n]|)(?P<forblock>[^\\x00]*?)(?:[ ]*|){%end-for\\1%}/', $output, $forBlocksContent);
+            preg_match('/<!--(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'-->(?:[\\n]|)(?P<forblock>.*?)(?:[ ]*|)<!--\/for\\1-->/s', $output, $forBlocksContent);
             $blockContent = $forBlocksContent['forblock'];
             
             $builtBlock = $blockContent;
-            $f_vars = preg_match_all('/{%(?:[ ]*|)(?P<cont>'.$item.'[^\\x00]*?)%}/',$builtBlock,$varCapt);
+            $f_vars = preg_match_all('/<!--(?:[ ]*|)(?P<cont>'.$item.'.*?)-->/s',$builtBlock,$varCapt);
 
             $builtBlock = $this->compileTemplate($builtBlock,$item,$forId);
             $droneBunch = $this->parseVars($bunch,$forVar,$forId);
 
             $droneItem = implode('=>$',preg_split('/,/',$item));
 
-            $forSet = "\$drone_for_total_{$forId}=count({$droneBunch});".
-                      "\$drone_for_index_{$forId}=0;";
+            if ( preg_match('/\\$drone_for_step|\\$drone_for_index|\\$drone_for_total|\\$drone_for_first|\\$drone_for_last/',$builtBlock) )
+            {
+                $forSet = "\$drone_for_total_{$forId}=count({$droneBunch});".
+                          "\$drone_for_index_{$forId}=0;";
 
-            $forUnSet = "unset(\$drone_for_total_{$forId});".
-                        "unset(\$drone_for_index_{$forId});";
+                $forUnSet = "unset(\$drone_for_total_{$forId});".
+                            "unset(\$drone_for_index_{$forId});";
 
-            $forIncrement = "\$drone_for_index_{$forId}++;";
+                $forIncrement = "\$drone_for_index_{$forId}++;";
+            }
 
-            $output = preg_replace('/(?:[ ]{2,}|){%(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'%}(?:[\\n]|)'.preg_quote($blockContent,'/').'(?:[ ]*|){%end-for\\1%}/',"<?php {$droneBunch}=is_array({$droneBunch})||is_object({$droneBunch})?{$droneBunch}:array(); {$forSet} foreach({$droneBunch} as \${$droneItem}) {?>{$builtBlock}<?php {$forIncrement}} {$forUnSet} ?>",$output);
+            $output = preg_replace('/(?:[ ]{2,}|)<!--(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'-->(?:[\\n]|)'.preg_quote($blockContent,'/').'(?:[ ]*|)<!--\/for\\1-->/',"<?php {$droneBunch}=is_array({$droneBunch})||is_object({$droneBunch})?{$droneBunch}:array(); {$forSet} foreach({$droneBunch} as \${$droneItem}) {?>{$builtBlock}<?php {$forIncrement}} {$forUnSet} ?>",$output);
             $pas++;
         }
         return $output;
@@ -285,45 +289,54 @@ class Template
     function compileTemplate($input,$forVar=null,$forId=null)
     {
         $output = $input;
-        $output = preg_replace('/(<\\?[^\\x00]*?\\?>)/',"<?php echo addcslashes('$1',\"'\"); ?>\n",$output);
+        //process reminders
+        $output = preg_replace('/<!--(?:\\s*)REM (.*?)(?:\\s*)-->/s', "<!-- <!-- '$1' --> -->", $output);
+        $output = preg_replace('/(<\\?.*?\\?>)/s',"<?php echo addcslashes('$1',\"'\"); ?>\n",$output);
         $output = $this->solveFor($output,$forVar,$forId);
         $output = $this->solveIf($output,$forVar,$forId);
         $output = $this->solveVar($output,$forVar,$forId);
         //delete the rest of unused vars from template
-        $output = preg_replace ('/{%[^\\}]*%}/',"",$output);
+//         $output = preg_replace ('/<!--[^\\}]*-->/',"",$output);
         return $output;
     }
 
     function prepareTemplate()
     {
-        $cacheDir = DroneConfig::get('Main.cacheDir');
-        if (isset($cacheDir) && is_dir($cacheDir))
-            $cDir = realpath($cacheDir);
-        elseif (is_dir(Utils::getTempDir()."/phpDroneCache") || mkdir(Utils::getTempDir()."/phpDroneCache"))
-            $cDir = Utils::getTempDir()."/phpDroneCache";
+        $fileInfo = pathinfo($this->templateFilename);
+        if (strtolower($fileInfo['extension'])!='php')
+        {
+            $this->solveInheritance($this->templateFilename);
+
+            $cacheDir = DroneConfig::get('Main.cacheDir');
+            if (isset($cacheDir) && is_dir($cacheDir))
+                $cDir = realpath($cacheDir);
+            elseif (is_dir(Utils::getTempDir()."/phpDroneCache") || mkdir(Utils::getTempDir()."/phpDroneCache"))
+                $cDir = Utils::getTempDir()."/phpDroneCache";
+            else
+                DroneCore::throwDroneError("Could not create the cache directory.");
+
+            $debugMode = DroneConfig::get('Main.debugMode');
+            $dbgInfo = $debugMode?basename($this->userTemplateFilename)."_":"";
+            $outFilename = "{$cDir}/".$dbgInfo.md5($this->templateContent).".php";
+
+            // if file is cached and not in debug mode, no need to rebuild
+            if (file_exists($outFilename) && !$debugMode)
+                return $outFilename;
+
+            $handler = fopen($outFilename,'w');
+            if (!$handler)
+                DroneCore::throwDroneError("Could not write file in the cache directory. Please change the write persission to <b>{$cDir}</b>");
+
+            //clear the block-related tags
+            $this->templateContent = preg_replace('/<!--block([\\d]*|) .*?-->|<!--\/block([\\d]*|)-->/',"",$this->templateContent);
+            $output = $this->compileTemplate($this->templateContent);
+            require("ver.php");
+            $output = "<?php \n\n /* Compiled with phpDrone v{$phpDroneVersion} from {$this->userTemplateFilename} */ \n\n ?>\n{$output}";
+            fwrite($handler,$output);
+            fclose($handler);
+        }
         else
-            DroneCore::throwDroneError("Could not create the cache directory.");
-
-        $debugMode = DroneConfig::get('Main.debugMode');
-        $dbgInfo = $debugMode?basename($this->userTemplateFilename)."_":"";
-        $outFilename = "{$cDir}/".$dbgInfo.md5($this->templateContent).md5($this->templateFilename).".php";
-        
-        // if file is cached and not in debug mode, no need to rebuild
-        if (file_exists($outFilename) && !$debugMode)
-            return $outFilename;
-
-        $handler = fopen($outFilename,'w');
-        if (!$handler)
-            DroneCore::throwDroneError("Could not write file in the cache directory. Please change the write persission to <b>{$cDir}</b>");
-
-        $this->solveInheritance($this->templateFilename);
-        //clear the block-related tags
-        $this->templateContent = preg_replace('/{%block([\\d]*|) .*?%}|{%end-block([\\d]*|)%}/',"",$this->templateContent);
-        $output = $this->compileTemplate($this->templateContent);
-        require("ver.php");
-        $output = "<?php \n\n /* Compiled with phpDrone v{$phpDroneVersion} from {$this->userTemplateFilename} */ \n\n ?>\n{$output}";
-        fwrite($handler,$output);
-        fclose($handler);
+            $outFilename = $this->templateFilename;
         
         return $outFilename;
     }

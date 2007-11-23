@@ -1,10 +1,10 @@
-{%block droneDBField%}
-{%fieldName%} INT
-{% if fieldSize%}
-({%fieldSize%})
-{%end-if%}
-{%fieldUnsigned%} {%fieldNull%} {%fieldAutoIncrement%} {%primary%}
-{% if fieldDefault%}
- DEFAULT '{%fieldDefault%}'
-{%end-if%}
-{%end-block%}
+<!--block droneDBField-->
+<!--fieldName--> INT
+<!-- if fieldSize-->
+(<!--fieldSize-->)
+<!--/if-->
+<!--fieldUnsigned--> <!--fieldNull--> <!--fieldAutoIncrement--> <!--primary-->
+<!-- if fieldDefault-->
+ DEFAULT '<!--fieldDefault-->'
+<!--/if-->
+<!--/block-->

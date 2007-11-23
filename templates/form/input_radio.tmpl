@@ -1,16 +1,14 @@
-{%block droneInput%}
-    {%if inputLabel%}
-        <label for='{%inputId%}' id='{%attributes.id%}_label'>
-            {%if2 mandatoryMarker%}
-                <span class='mandatoryMarker'>{%mandatoryMarker%}</span>
-            {%end-if2%}
-            {%inputLabel%}:
-        </label>
-    {%end-if%}
-    {%if inputError%}
-        <span class='inputError'><span>{%"Error"|translate%}: </span>{%inputError%}</span>
-    {%end-if%}
-    {%for item in values%}
-        <input type="radio" {%if for_index==0%} id='{%attributes.id%}'{%end-if%} name='{%attributes.name%}' value='{%item.key%}' {%if item.selected%}checked='checked'{%end-if%}><span class='checkboxValue'>{%item.value%}</span><span class="checkboxDelimiter">&nbsp;</span>
-    {%end-for%}
-{%end-block%}
+<!--if inputLabel-->
+    <label for='<!--inputId-->' id='<!--attributes.id-->_label'>
+        <!--if2 mandatoryMarker-->
+            <span class='mandatoryMarker'><!--mandatoryMarker--></span>
+        <!--/if2-->
+        <!--inputLabel-->:
+    </label>
+<!--/if-->
+<!--if inputError-->
+    <span class='inputError'><span><!--"Error"|translate-->: </span><!--inputError--></span>
+<!--/if-->
+<!--for item in values-->
+    <input type="radio" <!--if drone_for_first--> id='<!--attributes.id-->'<!--/if--> name='<!--attributes.name-->' value='<!--item.key-->' <!--if item.selected-->checked='checked'<!--/if-->><span class='checkboxValue'><!--item.value--></span><span class="checkboxDelimiter">&nbsp;</span>
+<!--/for-->

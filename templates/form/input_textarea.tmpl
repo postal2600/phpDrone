@@ -1,14 +1,14 @@
-{%block droneInput%}
-    {%if inputLabel%}
-        <label for='{%attributes.id%}' id='{%attributes.id%}_label'>
-            {%if2 mandatoryMarker%}
-                <span class='mandatoryMarker'>{%mandatoryMarker%}</span>
-            {%end-if2%}
-            {%inputLabel%}:
+<!--block droneInput-->
+    <!--if inputLabel-->
+        <label for='<!--attributes.id-->' id='<!--attributes.id-->_label'>
+            <!--if2 mandatoryMarker-->
+                <span class='mandatoryMarker'><!--mandatoryMarker--></span>
+            <!--/if2-->
+            <!--inputLabel-->:
         </label>
-    {%end-if%}
-    {%if inputError%}
-        <span class='inputError'><span>{%"Error"|translate%}: </span>{%inputError%}</span>
-    {%end-if%}
-    <textarea rows='5' cols='9' {%for key,item in attributes%} {%key%}='{%item%}'{%end-for%}>{%inputValue%}</textarea>
-{%end-block%}
+    <!--/if-->
+    <!--if inputError-->
+        <span class='inputError'><span><!--"Error"|translate-->: </span><!--inputError--></span>
+    <!--/if-->
+    <textarea rows='5' cols='9' <!--for key,item in attributes--> <!--key-->='<!--item-->'<!--/for-->><!--inputValue--></textarea>
+<!--/block-->

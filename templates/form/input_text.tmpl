@@ -1,15 +1,13 @@
-{%block droneInput%}
-    {%if inputLabel%}
-        <label for='{%attributes.id%}' id='{%attributes.id%}_label'>
-            {%if2 mandatoryMarker%}
-                <span class='mandatoryMarker'>{%mandatoryMarker%}</span>
-            {%end-if2%}
-            {%inputLabel%}:
-        </label>
-    {%end-if%}
-    
-    {%if inputError%}
-        <span class='inputError'><span>{%"Error"|translate%}: </span>{%inputError%}</span>
-    {%end-if%}
-    <input type='text' value='{%inputValue%}' {%for key,item in attributes%} {%key%}='{%item%}'{%end-for%}/>
-{%end-block%}
+<!--if inputLabel-->
+    <label for='<!--attributes.id-->' id='<!--attributes.id-->_label'>
+        <!--if2 mandatoryMarker-->
+            <span class='mandatoryMarker'><!--mandatoryMarker--></span>
+        <!--/if2-->
+        <!--inputLabel-->:
+    </label>
+<!--/if-->
+
+<!--if inputError-->
+    <span class='inputError'><span><!--"Error"|translate-->: </span><!--inputError--></span>
+<!--/if-->
+<input type='text' value='<!--inputValue-->' <!--for key,item in attributes--> <!--key-->='<!--item-->'<!--/for-->/>
