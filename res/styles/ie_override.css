@@ -5,7 +5,7 @@
 
 #logo
 {
-    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='?phpDroneResourceRequest=images/logo.png', sizingMethod='scale');
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='?=phpDroneLogo2600&logo_size=large', sizingMethod='scale');
 }
 
 #topMenu div
@@ -28,7 +28,7 @@
 
 #power
 {
-    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='?phpDroneResourceRequest=images/powered.png', sizingMethod='scale');
+    filter:progid:DXImageTransform.Microsoft.AlphaImageLoader(src='?=phpDroneLogo2600', sizingMethod='scale');
 }
 
 #topMenu div

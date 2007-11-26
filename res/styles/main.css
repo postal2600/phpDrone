@@ -48,7 +48,7 @@ a:hover
 
 #logo
 {
-    background:url("?phpDroneRequestResource=images/logo.png") left top no-repeat;
+    background:url("?=phpDroneLogo2600&logo_size=large") left top no-repeat;
     width:170px;
     height:50px;
     margin-top:25px;
@@ -145,13 +145,14 @@ a:hover
     text-align:center;
     padding-left:10px;
     opacity:0.5;
+    display:block !important;
 }
 
 
 #power
 {
 
-    background:url("?phpDroneRequestResource=images/powered.png") left top no-repeat;
+    background:url("?=phpDroneLogo2600") left top no-repeat;
     width:70px;
     height:19px;
     margin-right:4px;

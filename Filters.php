@@ -11,10 +11,22 @@ function filter_toLower($input)
     return strtolower($input);
 }
 
+function filter_toUpper($input)
+{
+    return strtolower($input);
+}
+
+
 function filter_inc($input)
 {
     return $input+=1;
 }
+
+function filter_dec($input)
+{
+    return $input+=1;
+}
+
 
 function filter_obfuscate($input)
 {

@@ -6,21 +6,18 @@ class DroneCore
         if (preg_match('/(?:&|\\A)=phpDroneLogo2600/',$_SERVER['QUERY_STRING']))
         {
 
-            http_send_content_disposition("logo.png", true);
             http_send_content_type('image/x-png');
             if ($_GET['logo_size']=='large')
-                http_send_file(Utils::getDronePath()."/res/images/logo.png");
+                self::serveDroneResources("images/logo.png");
             else
-                http_send_file(Utils::getDronePath()."/res/images/powered.png");
-            die();
+                self::serveDroneResources("images/powered.png");
         }
     }
     
-    static function serveDroneResources()
+    static function serveDroneResources($resource=null)
     {
-        $resource = $_GET['phpDroneRequestResource'];
-        self::sendLogo();
-        if ($resource && !preg_match('/\\.\\.(?:\/|\\\\)/',$resource))
+        $resource = isset($resource)?$resource:$_GET['phpDroneRequestResource'];
+        if ($resource && !preg_match('/\\.\\.(?:\/|\\\\)/',$resource) && is_file(Utils::getDronePath()."/res/{$resource}"))
         {
             $mimes = array('gif'=>'image/gif',
                            'png'=>'image/x-png',
@@ -28,13 +25,20 @@ class DroneCore
                            'js'=>'text/javascript'
                           );
             $fileInfo = pathinfo($resource);
-            http_send_content_disposition("logo.png", true);
-            http_send_content_type(Utils::array_get($fileInfo['extension'],$mimes,'text/plain'));
-            http_send_file(Utils::getDronePath()."/res/{$resource}");
-            die();
-        }
+            $contentType = Utils::array_get($fileInfo['extension'],$mimes,'text/plain');
 
-        return preg_match('/\\.\\.(?:\/|\\\\)/',$resource)?die('Invalid resource file'):false;
+            $filename = Utils::getDronePath()."/res/{$resource}";
+            $handle = fopen($filename,'r+');
+            $content = fread($handle, filesize($filename));
+            fclose($handle);
+
+            header("Content-type: {$contentType}");
+            die($content);
+        }
+        elseif (isset($resource) && !is_file(Utils::getDronePath())."/res/{$resource}")
+            die('Resource not found.');
+        
+        return preg_match('/\\.\\.(?:\/|\\\\)/',$resource)?die('Invalid resource path.'):false;
     }
     
     static function throwDroneError($msg)
@@ -72,6 +76,7 @@ class DroneCore
     }
 }
 
+DroneCore::sendLogo();
 DroneCore::serveDroneResources();
 if ($_GET['phpDrone_captcha_action']=='regen' && $_GET['phpDrone_captcha_id']!="")
     {

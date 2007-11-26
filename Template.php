@@ -1,9 +1,9 @@
 <?php
 require_once('Filters.php');
 
-if (file_exists('drone/Filters.php'))
+if (file_exists('droneEnv/filters.php'))
 {
-    include('drone/Filters.php');
+    include('droneEnv/filters.php');
 }
 
 class Template
@@ -17,6 +17,7 @@ class Template
     function __construct($template)
     {
         $debugMode = DroneConfig::get('Main.debugMode');
+        $templateDir = DroneConfig::get('Main.templateDir');
         if ($debugMode)
             $this->startTime = Utils::microTime();
         if ($template{0}=="?")
@@ -37,13 +38,13 @@ class Template
             if (file_exists($template))
                 $templateFilename = $template;
             else
-            if (isset($templateDir))
+            if (isset($templateDir) && file_exists($templateDir.$template))
                 $templateFilename = $templateDir.$template;
             else
                 if (file_exists("templates/".$template))
                     $templateFilename = "templates/".$template;
                 else
-                    DroneCore::throwDroneError("Template file was not be found: <b>templates/{$template}</b>");
+                    DroneCore::throwDroneError("Template file was not found: <b>{$template}</b>");
 
         $this->templateContent = "";
         $this->userTemplateFilename = $template;
@@ -82,26 +83,6 @@ class Template
             $this->templateContent = $templateContent;
     }
     
-    function addMeta($meta)
-    {
-        $this->writeVar("meta",$meta."\n");
-    }
-
-    function setGuard($guard)
-    {
-        require_once($guard);
-        if (!__guard__())
-        {
-            if (isset($guardFailPage))
-                $guarFailPage = new Template($guardFailPage);
-            else
-                $guarFailPage = new Template("?gurd-failure.tmpl");
-            $guarFailPage->write("title","Unauthorized - phpDrone");
-            $guarFailPage->render();
-            die();
-        }
-    }
-
     private function deltaTime()
     {
         return sprintf("%.4f",Utils::microTime()-$this->startTime);
@@ -254,7 +235,7 @@ class Template
         $pas = 0;
         foreach($fors['bunch'] as $bunch)
         {
-            $forId = md5(uniqid());
+            $forId = md5(microtime());
             $item = $fors['item'][$pas];
             //<!--(?:[ ]|)for([\d]*|) (?:.*?) in (?:.*?)-->(?:[\\n]|)(?P<forblock>.*?)(?:[ ]*|)<!--/for\1-->
             // get the if block content
@@ -354,16 +335,17 @@ class Template
         }
         else
             DroneCore::throwDroneError("Error reading cache!");
+
+        $compressHTML = DroneConfig::get('Main.compressHTML');
+        if ($compressHTML)
+            $content = preg_replace('/[\s]{2,}/', ' ',preg_replace('/\n|\r\n|\t/', '', $content));
+
         return $content;
     }
 
     private function render_p($args)
     {
         $output = $this->getBuffer();
-
-        $compressHTML = DroneConfig::get('Main.compressHTML');
-        if ($compressHTML)
-            $output = preg_replace('/[\s]{2,}/', ' ',preg_replace('/\n|\r\n|\t/', '', $output));
 
         $debugMode = DroneConfig::get('Main.debugMode');
         if ($debugMode)
@@ -376,7 +358,14 @@ class Template
 
     }
 
+    //deprecated
     private function write_p($args)
+    {
+        $this->set_p($args);
+    }
+
+
+    private function set_p($args)
     {
         if (count($args)>1)
             $this->vars[$args[0]] = $args[1];
