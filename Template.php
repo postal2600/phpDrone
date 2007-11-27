@@ -231,7 +231,7 @@ class Template
     private function solveFor($input,$forVar,$forId)
     {
         $output = $input;
-        preg_match_all('/<!--(?:[ ]|)for([\\d]*|) (?P<item>.*) in (?P<bunch>.*?)-->/', $output, $fors);
+        preg_match_all('/<!--(?:\\s*)for([\\d]*|) (?P<item>.*) in (?P<bunch>.*?)-->/', $output, $fors);
         $pas = 0;
         foreach($fors['bunch'] as $bunch)
         {
@@ -239,9 +239,10 @@ class Template
             $item = $fors['item'][$pas];
             //<!--(?:[ ]|)for([\d]*|) (?:.*?) in (?:.*?)-->(?:[\\n]|)(?P<forblock>.*?)(?:[ ]*|)<!--/for\1-->
             // get the if block content
-            preg_match('/<!--(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'-->(?:[\\n]|)(?P<forblock>.*?)(?:[ ]*|)<!--\/for\\1-->/s', $output, $forBlocksContent);
+            preg_match('/<!--(?:\\s*)for([\\d]*|) '.$item.' in '.$bunch.'-->(?:[\\n]|)(?P<forblock>.*?)(?:\\s*)<!--(?:\\s*)\/for\\1(?:\\s*)-->/s', $output, $forBlocksContent);
             $blockContent = $forBlocksContent['forblock'];
-            
+
+
             $builtBlock = $blockContent;
             $f_vars = preg_match_all('/<!--(?:[ ]*|)(?P<cont>'.$item.'.*?)-->/s',$builtBlock,$varCapt);
 
@@ -260,8 +261,8 @@ class Template
 
                 $forIncrement = "\$drone_for_index_{$forId}++;";
             }
-
-            $output = preg_replace('/(?:[ ]{2,}|)<!--(?:[ ]|)for([\\d]*|) '.$item.' in '.$bunch.'-->(?:[\\n]|)'.preg_quote($blockContent,'/').'(?:[ ]*|)<!--\/for\\1-->/',"<?php {$droneBunch}=is_array({$droneBunch})||is_object({$droneBunch})?{$droneBunch}:array(); {$forSet} foreach({$droneBunch} as \${$droneItem}) {?>{$builtBlock}<?php {$forIncrement}} {$forUnSet} ?>",$output);
+            
+            $output = preg_replace('/(?:[ ]{2,}|)<!--(?:\\s*)for([\\d]*|) '.$item.' in '.$bunch.'-->(?:[\\n]|)'.preg_quote($blockContent,'/').'(?:\\s*)<!--(?:\\s*)\/for\\1(?:\\s*)-->/',"<?php {$droneBunch}=is_array({$droneBunch})||is_object({$droneBunch})?{$droneBunch}:array(); {$forSet} foreach({$droneBunch} as \${$droneItem}) {?>{$builtBlock}<?php {$forIncrement}} {$forUnSet} ?>",$output);
             $pas++;
         }
         return $output;
@@ -350,7 +351,7 @@ class Template
         $debugMode = DroneConfig::get('Main.debugMode');
         if ($debugMode)
         {
-            require_once("ver.php");
+            require("ver.php");
             $codeSize = sprintf("%.2f", strlen($output)/1024);
             $output .= "\n<!--The following will apear only in debug mode -->\n<div id='droneDebugArea' style='font-size:0.8em;width:90%;border-top:1px solid silver;padding-left:4px;'><b>".$codeSize."</b> kb built in <b>".$this->deltaTime()."</b> seconds.<br />___________<br /><b>phpDrone</b> v{$phpDroneVersion}</div>";
         }
