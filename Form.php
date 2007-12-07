@@ -131,7 +131,7 @@ class Form
                     $this->inputs[$name]->setValidator($validator[0],$validator[1]);
                 }
                 else
-                    $this->inputs[$name]->setValidator($validator,_("Invalid value"));
+                    $this->inputs[$name]->setValidator($validator,dgettext("phpDrone","Invalid value"));
                     
                     
             if ($maxLen)
@@ -196,8 +196,21 @@ class Form
                 {
                     $this->clearHTML($this->request);
                     $this->valueFlag = true;
-                    $meth = $this->onSuccess;
-                    $txtresult .= $meth($this->request);
+                    $meth = preg_split('/::/',$this->onSuccess);
+                    if (count($meth)==1)
+                    {
+                        if (function_exists($meth[0]))
+                            $txtresult .= $meth[0]($this->request);
+                        else
+                            DroneCore::throwDroneError("Form success method does not exist: <b>{$this->onSuccess}</b>");
+                    }
+                    else
+                    {
+                        if (method_exists($meth[0],$meth[1]))
+                            eval("\$txtresult .= {$meth[0]}::{$meth[1]}(\$this->request);");
+                        else
+                            DroneCore::throwDroneError("Form success method does not exist: <b>{$this->onSuccess}</b>");
+                    }
                 }
             }
         }

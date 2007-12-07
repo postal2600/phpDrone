@@ -67,6 +67,8 @@ function filter_stripTags($input)
 
 function filter_translate($input)
 {
+    if (!isset($input))
+        $input = " ";
 	return _($input);
 }
 

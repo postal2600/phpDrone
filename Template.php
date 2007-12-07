@@ -14,44 +14,49 @@ class Template
     public $vars;
     private $guard = "free";
     
-    function __construct($template)
+    function __construct($template=null)
     {
         $debugMode = DroneConfig::get('Main.debugMode');
         $templateDir = DroneConfig::get('Main.templateDir');
         if ($debugMode)
             $this->startTime = Utils::microTime();
-        if ($template{0}=="?")
-        {
-            $droneDir = Utils::getDronePath();
-            if (file_exists(substr($template,1)))
-                $templateFilename = substr($template,1);
-            else
-            if (isset($templateDir) && file_exists($templateDir.substr($template,1)))
-                $templateFilename = $templateDir.substr($template,1);
-            else
-                if (file_exists("templates/".substr($template,1)))
-                    $templateFilename = "templates/".substr($template,1);
-                else
-                    $templateFilename = "{$droneDir}/templates/".substr($template,1);
-        }
-        else
-            if (file_exists($template))
-                $templateFilename = $template;
-            else
-            if (isset($templateDir) && file_exists($templateDir.$template))
-                $templateFilename = $templateDir.$template;
-            else
-                if (file_exists("templates/".$template))
-                    $templateFilename = "templates/".$template;
-                else
-                    DroneCore::throwDroneError("Template file was not found: <b>{$template}</b>");
 
+        $this->templateFilename = $this->setTemplateFilename($template);
         $this->templateContent = "";
         $this->userTemplateFilename = $template;
-        $this->templateFilename = $templateFilename;
         $this->vars = array();
     }
     
+    private function setTemplateFilename($template)
+    {
+        if (isset($template))
+        {
+            if ($template{0}=="?")
+            {
+                $droneDir = Utils::getDronePath();
+                if (file_exists(substr($template,1)))
+                    $templateFilename = substr($template,1);
+                elseif (isset($templateDir) && file_exists($templateDir.substr($template,1)))
+                    $templateFilename = $templateDir.substr($template,1);
+                elseif (file_exists("templates/".substr($template,1)))
+                    $templateFilename = "templates/".substr($template,1);
+                else
+                    $templateFilename = "{$droneDir}/templates/".substr($template,1);
+            }
+            else
+                if (file_exists($template))
+                    $templateFilename = $template;
+                elseif (isset($templateDir) && file_exists($templateDir.$template))
+                    $templateFilename = $templateDir.$template;
+                elseif (file_exists("templates/".$template))
+                    $templateFilename = "templates/".$template;
+                else
+                    DroneCore::throwDroneError("Template file was not found: <b>{$template}</b>");
+            return $templateFilename;
+        }
+        else
+            return null;
+    }
 
     function solveInheritance($templateFile)
     {
@@ -282,8 +287,11 @@ class Template
         return $output;
     }
 
-    function prepareTemplate()
+    function prepareTemplate($templateName)
     {
+        if (!isset($this->templateFilename) && !$this->templateFilename = $this->setTemplateFilename($templateName))
+            DroneCore::throwDroneError("You must set the template you want to render.");
+            
         $fileInfo = pathinfo($this->templateFilename);
         if (strtolower($fileInfo['extension'])!='php')
         {
@@ -323,9 +331,9 @@ class Template
         return $outFilename;
     }
 
-    function getBuffer()
+    function getBuffer($templateName=null)
     {
-        $templateFile = $this->prepareTemplate();
+        $templateFile = $this->prepareTemplate($templateName);
         if (is_file($templateFile))
         {
             ob_start();
@@ -346,7 +354,7 @@ class Template
 
     private function render_p($args)
     {
-        $output = $this->getBuffer();
+        $output = $this->getBuffer($args[0]);
 
         $debugMode = DroneConfig::get('Main.debugMode');
         if ($debugMode)

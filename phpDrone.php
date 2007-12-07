@@ -2,12 +2,13 @@
 	if (version_compare(phpversion(),"5")>-1)
     {
     	$validModules = array('database'=>'Database.php',
-    					      'form'=>'Form.php',
+                              'form'=>'Form.php',
                               'template'=>'Template.php',
                               'mail'=>'DroneMail.php',
                               'widgets'=>'HTMLwidgets.php',
                               'utils'=>'Utils.php',
-                              'i18n'=>'i18n.php'
+                              'i18n'=>'i18n.php',
+                              'admin'=>'DroneAdmin.php'
     					     );
         session_start();
         ob_start();
@@ -24,8 +25,9 @@
         else
     	    foreach ($validModules as $module)
     	    		require $module;
-	    		
-        @include 'droneEnv/drone.php';
+        
+        if (is_file('droneEnv/drone.php'))
+            include 'droneEnv/drone.php';
         require("DroneCore.php");
 	}
 	else

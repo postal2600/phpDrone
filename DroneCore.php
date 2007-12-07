@@ -1,16 +1,21 @@
 <?php
 class DroneCore
 {
-    static function sendLogo()
+    static function handleSpecialURL()
     {
         if (preg_match('/(?:&|\\A)=phpDroneLogo2600/',$_SERVER['QUERY_STRING']))
         {
 
-            http_send_content_type('image/x-png');
             if ($_GET['logo_size']=='large')
                 self::serveDroneResources("images/logo.png");
             else
                 self::serveDroneResources("images/powered.png");
+        }
+
+        if (preg_match('/(?:&|\\A)=droneadmin/',$_SERVER['QUERY_STRING']))
+        {
+            DroneAdmin::handle();
+            die();
         }
     }
     
@@ -28,7 +33,7 @@ class DroneCore
             $contentType = Utils::array_get($fileInfo['extension'],$mimes,'text/plain');
 
             $filename = Utils::getDronePath()."/res/{$resource}";
-            $handle = fopen($filename,'r+');
+            $handle = fopen($filename,'rb');
             $content = fread($handle, filesize($filename));
             fclose($handle);
 
@@ -56,6 +61,7 @@ class DroneCore
              if ($item['function']!="printStackTrace" &&
                  $item['function']!="handleDroneErrors" &&
                  $item['function']!="trigger_error" &&
+                 $item['function']!="getStackTrace" &&
                  $item['function']!="throwDroneError")
                 $result .= "<b>File:</b> {$item['file']}, <b>line</b> {$item['line']}, <b>in</b> {$item['function']}<br />";
         return $result;
@@ -76,7 +82,7 @@ class DroneCore
     }
 }
 
-DroneCore::sendLogo();
+DroneCore::handleSpecialURL();
 DroneCore::serveDroneResources();
 if ($_GET['phpDrone_captcha_action']=='regen' && $_GET['phpDrone_captcha_id']!="")
     {

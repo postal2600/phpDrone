@@ -3,14 +3,14 @@ class DroneAttach
 {
     function __construct($file)
     {
-        if (file_exists($file) && $handle = fopen($file, "r"))
+        if (file_exists($file) && $handle = fopen($file, "rb"))
         {
             $this->filename = $file;
             $this->content = fread($handle, filesize($file));
             fclose($handle);
         }
         else
-            DroneCore::throwDroneError(_("Can't attach file").": {$file}");
+            DroneCore::throwDroneError(dgettext("phpDrone","Can't attach file").": {$file}");
     }
     
     function getContent()
@@ -60,11 +60,6 @@ class DroneMail
         $this->attach = array();
     }
 
-    function setAuth($user,$pass)
-    {
-        $this->username = $user;
-        $this->password = $pass;
-    }
 
     function addAttachment($file)
     {
@@ -152,11 +147,14 @@ class DroneMail
     function send()
     {
         $this->cmd("HELO phpDrone","250","HELO failed");
-        if (isset($this->username))
+        $userName = DroneConfig::get('SMTP.username');
+        $password = DroneConfig::get('SMTP.password');
+        
+        if ($userName)
         {
             $this->cmd("auth login","334","Authentication init failed");
-            $this->cmd(base64_encode($this->username),"334","Invalid username");
-            $this->cmd(base64_encode($this->password),"235","Authentication failed");
+            $this->cmd(base64_encode($userName),"334","Invalid username");
+            $this->cmd(base64_encode($password),"235","Authentication failed");
         }
         
         $this->from = $this->getFrom();

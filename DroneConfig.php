@@ -38,9 +38,9 @@ class DroneConfig
     
     static function ensureConfig()
     {
-        if (!is_dir('droneEnv') && !mkdir("droneEnv"))
+        if (!@is_dir('droneEnv') && !@mkdir("droneEnv"))
             return false;
-        if (!is_file('droneEnv/settings.php') && !copy(dirname(__FILE__).'/res/default_settings.php','droneEnv/settings.php'))
+        if (!@is_file('droneEnv/settings.php') && !@copy(dirname(__FILE__).'/res/default_settings.php','droneEnv/settings.php'))
             return false;
         return true;
     }

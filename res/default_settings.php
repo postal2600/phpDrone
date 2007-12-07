@@ -1,6 +1,6 @@
-#Hacking attempt<?php /*?> #DON'T REMOVE PHP TAGS
+#Hacking attempt<?php /* #DON'T REMOVE PHP TAGS ?>
 [Main]
-;cacheDir = ./templates_cache
+;cacheDir = ./tmpl_cache
 debugMode = True
 ;compressHTML = True
 ;droneLanguage = en
@@ -13,6 +13,7 @@ template = true
 mail = true
 widgets = true
 i18n = true
+admin = true
 
 [Database]
 sqlEngine = mysql
@@ -20,4 +21,16 @@ sqlServer= localhost
 sqlUser= user
 sqlPassword= password
 sqlDatabase= databaseName
-;<?php */ ?> #DON'T REMOVE PHP TAGS
+
+[Admin]
+user =
+pass =
+;passHash =
+
+[SMTP]
+;host =
+;port =
+;username =
+;password =
+
+;<?php #DON'T REMOVE PHP TAGS*/ ?>

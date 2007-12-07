@@ -342,7 +342,7 @@ class Input
             if ($this->type=="select" || $this->type=="radio")
                 if ($this->mandatory && $this->request[$this->attributes['name']]==$this->initial)
                 {
-                    $this->error = _("Choose one");
+                    $this->error = dgettext("phpDrone","Choose one");
                     return false;
                 }
 
@@ -374,13 +374,13 @@ class Input
                         return true;
             }
             
-            $this->error = _("Invalid value");
+            $this->error = dgettext("phpDrone","Invalid value");
             return false;
         }
         
         if ($this->mandatory && strlen($this->request[$this->attributes['name']])==0)
         {
-            $this->error = _("Can't be empty");
+            $this->error = dgettext("phpDrone","Can't be empty");
             return false;
         }
 //         if (!$this->mandatory && strlen($this->request[$this->attributes['name']])==0)
@@ -389,7 +389,7 @@ class Input
 //         }
         if (isset($this->attributes['maxlength']) && strlen($this->request[$this->attributes['name']])>$this->attributes['maxlength'])
         {
-            $this->error = _("Max length for input is")." {$this->attributes['maxlength']}";
+            $this->error = dgettext("phpDrone","Max length for input is")." {$this->attributes['maxlength']}";
             return false;
         }
         
@@ -402,23 +402,33 @@ class Input
                 $this->request[$this->attributes['name']] = strftime($dateFormat,mktime($dateInfo["hour"],$dateInfo["minute"],$dateInfo["second"],$dateInfo["month"],$dateInfo["day"],$dateInfo["year"]));
                 return true;
             }
-            $this->error = _("Invalid value");
+            $this->error = dgettext("phpDrone","Invalid value");
             return false;
         }
-        
-        $meth = $this->validator['regExp'];
 
-        if (function_exists($meth))
+
+        $meth = preg_split('/::/',$this->validator['regExp']);
+
+        if (count($meth)==1 && function_exists($meth[0]))
         {
-            if ($meth($this->request,$this->attributes['name'])!=True)
+            if ($meth[0]($this->request,$this->attributes['name'])!=True)
             {
                 $this->error = $this->validator['message'];
                 return false;
             }
             return true;
         }
-        else
-        if ($this->validator!=null && $this->type!="hidden" && $this->type!="submit")
+        elseif (method_exists($meth[0],$meth[1]))
+        {
+            eval("\$probe = {$meth[0]}::{$meth[1]}(\$this->request,\$this->attributes['name']);");
+            if ($probe!=True)
+            {
+                $this->error = $this->validator['message'];
+                return false;
+            }
+            return true;
+        }
+        elseif ($this->validator!=null && $this->type!="hidden" && $this->type!="submit")
             if (!preg_match ($this->validator['regExp'],$this->request[$this->attributes['name']]))
             {
                 $this->error= $this->validator['message'];

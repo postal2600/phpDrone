@@ -31,8 +31,8 @@ class LoginWidget extends HTMLWidgets
     {
         $template = new Template('?htmlWidgets/login.tmpl');
         $loginForm = new Form("");
-        $loginForm->addInput("*"._("User"),"text","username");
-        $loginForm->addInput("*"._("Password"),"password","password");
+        $loginForm->addInput("*".dgettext("phpDrone","User"),"text","username");
+        $loginForm->addInput("*".dgettext("phpDrone","Password"),"password","password");
         
         $template->write("WidgetLoginForm",$loginForm->getHTML());
         $template->write("WidgetLoginPage",$_SERVER['PHP_SELF']);
