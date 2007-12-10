@@ -120,10 +120,8 @@ class Utils
     //get the language currently used by phpDrone
     static function getLanguage($localeDir)
     {
-        $droneLanguage = DroneConfig::get('Main.droneLanguage');
-        if (isset($droneLanguage))
-            return $droneLanguage;
-        elseif (isset($_SESSION['drone_language']))
+        $codeLanguage = DroneConfig::get('Main.codeLanguage','en');
+        if (isset($_SESSION['drone_language']))
             return $_SESSION['drone_language'];
         elseif (isset($_COOKIE['drone_language']))
             return $_COOKIE['drone_language'];
@@ -141,11 +139,11 @@ class Utils
             }
             arsort($userLanguages);
             foreach($userLanguages as $language=>$quality)
-                if (is_dir("$localeDir/{$language}"))
+                if (is_dir("$localeDir/{$language}") || $language==$codeLanguage)
                     return $language;
         }
 
-        return False;
+        return $droneLanguage;
     }
 
     static function getTempDir() //from http://www.phpit.net

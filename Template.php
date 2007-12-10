@@ -23,7 +23,6 @@ class Template
 
         $this->templateFilename = $this->setTemplateFilename($template);
         $this->templateContent = "";
-        $this->userTemplateFilename = $template;
         $this->vars = array();
     }
     
@@ -52,6 +51,7 @@ class Template
                     $templateFilename = "templates/".$template;
                 else
                     DroneCore::throwDroneError("Template file was not found: <b>{$template}</b>");
+            $this->userTemplateFilename = $template;
             return $templateFilename;
         }
         else
@@ -191,7 +191,7 @@ class Template
     private function solveVar($input,$forVar,$forId)
     {
         $output = $input;
-        preg_match_all('/<!--(?P<cont>[\\w-\/"| \\.\'\\n]*?)-->/s',$output,$vals);
+        preg_match_all('/<!--(?P<cont>[\\w-\/"| \\.\'\\n\\(\\)]*?)-->/s',$output,$vals);
         foreach($vals['cont'] as $f_val)
         {
             $ev = $this->parseVars($f_val,$forVar,$forId);
@@ -354,6 +354,7 @@ class Template
 
     private function render_p($args)
     {
+
         $output = $this->getBuffer($args[0]);
 
         $debugMode = DroneConfig::get('Main.debugMode');

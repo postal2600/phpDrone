@@ -3,7 +3,7 @@
 ;cacheDir = ./tmpl_cache
 debugMode = True
 ;compressHTML = True
-;droneLanguage = en
+codeLanguage = en
 
 [Modules]
 utils = true #required

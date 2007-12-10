@@ -65,11 +65,14 @@ function filter_stripTags($input)
     return strip_tags($input);
 }
 
-function filter_translate($input)
+function filter_translate($input,$internal=false)
 {
     if (!isset($input))
         $input = " ";
-	return _($input);
+    if (!$internal)
+        return _($input);
+    else
+        return dgettext('phpDrone',$input);
 }
 
 ?>

@@ -3,6 +3,7 @@ class i18n
 {
     static function init()
     {
+        bind_textdomain_codeset('phpDrone',"UTF-8");
         $phpDrone_localeDir = bindtextdomain("phpDrone", dirname(__FILE__)."/locale");
         $phpDrone_Lang = Utils::getLanguage($phpDrone_localeDir);
         putenv("LC_ALL={$phpDrone_Lang}");

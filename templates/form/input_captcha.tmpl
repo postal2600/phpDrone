@@ -1,7 +1,7 @@
     <img id='captchaImage' src='?phpDrone_draw_captchaid=<!--captchaId-->' alt='Captcha verification image' onclick='regenerate("<!--captchaId-->")'/>
     <!--if inputError-->
-        <span class='inputError'><span><!--"Error"|translate-->: </span><!--inputError--></span>
+        <span class='inputError'><span><!--"Error"|translate(true)-->: </span><!--inputError--></span>
     <!--/if-->
-    <span class="captchaNote"><b><!--"Note"|translate-->:</b>&nbsp;<!--"Click image to regenerate"|translate--></span>
+    <span class="captchaNote"><b><!--"Note"|translate(true)-->:</b>&nbsp;<!--"Click image to regenerate"|translate(true)--></span>
     <script type='text/javascript' src='?phpDroneRequestResource=scripts/captcha.js'></script>
     <input type='hidden' name='captchaId' value='<!--captchaId-->'/>
