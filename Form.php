@@ -22,7 +22,6 @@ class Form
         $this->madatoryMarker = "*";
         $this->submitTriggers = array();
         $this->isValid = false;
-        $this->allowHtml = false;
         $this->filter = array();
         
         switch ($method)
@@ -41,12 +40,6 @@ class Form
         }
         $this->cleanData($this->request);
     }
-
-    //DEPRECATED
-	function allowHTML($bool=True)
-	{
-		$this->allowHtml = $bool;
-	}
 
     function addFilter($filter)
     {
@@ -93,17 +86,6 @@ class Form
 				$this->cleanData($data[$key]);
 	}
 
-	private function clearHTML(&$data)
-	{
-		foreach ($data as $key=>$value)
-		    if (gettype($value)=="string")
-				if (!$this->inputs[$key]->allowHtml)
-				    $this->request[$key] = strtr($this->request[$key],Input::$safeChars);
-			else if (gettype($value)=="array")
-				$this->clearHTML($data[$key]);
-	}
-
-
     private function addInput_p($args)
     {
         if (count($args)>1)
@@ -140,7 +122,6 @@ class Form
             $this->inputs[$name]->setRequestData($this->request);
             if  ($type=="submit")
                 $this->submitTriggers[$this->inputs[$name]->attributes['name']]="";
-            $this->inputs[$name]->allowHTML($this->allowHtml);
             $this->inputs[$name]->setFilter($this->filter);
         }
         else
@@ -151,7 +132,6 @@ class Form
             $input->addedLater = true;
             $input->setRequestData($this->request);
             $this->inputs[$name] = $input;
-            $this->inputs[$name]->allowHTML($this->allowHtml);
             $this->inputs[$name]->setFilter($this->filter);
         }
         else
@@ -194,7 +174,6 @@ class Form
             {
                 if ($this->onSuccess)
                 {
-                    $this->clearHTML($this->request);
                     $this->valueFlag = true;
                     $meth = preg_split('/::/',$this->onSuccess);
                     if (count($meth)==1)

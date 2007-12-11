@@ -25,8 +25,6 @@ class Input
         $this->error = "";
         $this->initial = null;
         
-        $this->allowHtml = False;
-        
         $this->attributes = array("name"=>$name,"id"=>$name,"class"=>"textInput");
         if ($type=="submit")
             $this->setAttribute("class","buttonInput");
@@ -42,12 +40,6 @@ class Input
     function setRequestData(&$reqData)
     {
         $this->request = &$reqData;
-    }
-
-    //DEPRECATED
-    function setDefault($defVal)
-    {
-        $this->setValue($defVal);
     }
 
     function setValue($defVal)
@@ -106,11 +98,6 @@ class Input
         if ($attr != "name")
         	unset($this->attributes[$attr]);
     }
-
-	function allowHTML($bool=True)
-	{
-		$this->allowHtml = $bool;
-	}
 
     function write_text($template)
     {
@@ -252,9 +239,6 @@ class Input
     function write_submit($template)
     {
         $template->write("inputValue",htmlspecialchars($this->label,ENT_QUOTES));
-        //DEPRECATED
-        if (isset($this->defaultValue))
-            $template->write("inputValue",htmlspecialchars($this->defaultValue,ENT_QUOTES));
         return $template->getBuffer();
     }
 

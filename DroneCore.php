@@ -85,11 +85,10 @@ class DroneCore
 DroneCore::handleSpecialURL();
 DroneCore::serveDroneResources();
 if ($_GET['phpDrone_captcha_action']=='regen' && $_GET['phpDrone_captcha_id']!="")
-    {
-        $newValue = Captcha::generate(5,$_GET['phpDrone_captcha_id']);
-        Captcha::draw($newValue);
-    }
+{
+    $newValue = Captcha::generate(5,$_GET['phpDrone_captcha_id']);
+    Captcha::draw($newValue);
+}
 if ($_GET['phpDrone_draw_captchaid'])
     Captcha::draw($_GET['phpDrone_draw_captchaid']);
-
 ?>

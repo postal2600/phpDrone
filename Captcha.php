@@ -5,7 +5,12 @@ class Captcha extends Input
 {
     function __construct($label,$name)
     {
-       parent::__construct($label,"text",$name);
+        if (extension_loaded("gd"))
+        {
+            parent::__construct($label,"text",$name);
+        }
+        else
+            DroneCore::throwDroneError("GD extension for PHP must be loaded to use Captcha inputs.<br />Get it from <a href='http://www.libgd.org/'>http://www.libgd.org/</a>.");
     }
     
     static function generate($size,$id="")
