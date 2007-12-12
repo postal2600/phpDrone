@@ -423,7 +423,7 @@ class Template
             if (count($args)==1)
                 $this->vars["body"] .= $args[0];
             else
-                DroneCore::throwDroneError("Function takes at least one argument: <b>Template->write()</b>");
+                DroneCore::throwDroneError("Function takes at least one argument: <b>Template->set()</b>");
     }
 
     private function __call($method, $args)

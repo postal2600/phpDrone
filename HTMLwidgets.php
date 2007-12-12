@@ -34,19 +34,19 @@ class LoginWidget extends HTMLWidgets
         $loginForm->addInput("*".dgettext("phpDrone","User"),"text","username");
         $loginForm->addInput("*".dgettext("phpDrone","Password"),"password","password");
         
-        $template->write("WidgetLoginForm",$loginForm->getHTML());
-        $template->write("WidgetLoginPage",$_SERVER['PHP_SELF']);
+        $template->set("WidgetLoginForm",$loginForm->getHTML());
+        $template->set("WidgetLoginPage",$_SERVER['PHP_SELF']);
 
 
         $loginResult = include ("widgets/login.php");
 
         if ($loginResult)
             if (substr($loginResult,0,5)!="user:")
-                $template->write("loginFormStatusMessage",$loginResult);
+                $template->set("loginFormStatusMessage",$loginResult);
             else
-                $this->template->write("phpDroneLoggedUser",substr($loginResult,5));
+                $this->template->set("phpDroneLoggedUser",substr($loginResult,5));
 
-        $this->template->write("loginWidget",$template->getBuffer());
+        $this->template->set("loginWidget",$template->getBuffer());
     }
 }
 
@@ -94,13 +94,13 @@ class PageNum extends HTMLWidgets
     function getHTML()
     {
         $template = new Template("?htmlWidgets/PageNum.tmpl");
-        $template->write("itemCount",$this->itemCount);
-        $template->write("itemLabel",$this->itemLabel);
+        $template->set("itemCount",$this->itemCount);
+        $template->set("itemLabel",$this->itemLabel);
         
         $itemsPerPage = $this->getItemsPerPage();
-        $template->write("currentPerPage",$itemsPerPage);
-        $template->write("prefs",$this->prefOptionList);
-        $template->write("prefName",$this->prefName);
+        $template->set("currentPerPage",$itemsPerPage);
+        $template->set("prefs",$this->prefOptionList);
+        $template->set("prefName",$this->prefName);
         $currentPage = $this->getCurrentPage();
         $allPages = range(1,$this->totalPages);
     	$pages = $allPages;
@@ -114,24 +114,24 @@ class PageNum extends HTMLWidgets
 				    $lowerLimit -= $this->maxLinks - ($upperLimit-$lowerLimit);
 	            $pages = range($lowerLimit,$upperLimit);
 	            if ($lowerLimit!=1)
-	                $template->write("cutedLow","1");
+	                $template->set("cutedLow","1");
 	            if ($upperLimit!=$this->totalPages)
-	                $template->write("cutedHigh","1");
+	                $template->set("cutedHigh","1");
 			}
 		
-        $template->write("currentPage",$this->getCurrentPage());
+        $template->set("currentPage",$this->getCurrentPage());
 
 		$form = new Form(do_success);
 		$form->addInput("","select","page");
-		$form->inputs['page']->setDefault($allPages);
+		$form->inputs['page']->setValue($allPages);
 		$form->inputs['page']->setAttribute("onchange","window.location=\"?action=setPage&amp;page=\"+this.value");
 
-        $template->write("quickJumpSelector",$form->getHTML());
-        $template->write("pages",$pages);
-        $template->write("phpDroneURL",$this->droneURL);
-        $template->write("showPages",$this->showPages);
-        $template->write("showPrefs",$this->showPrefs);
-        $template->write("showQuickJump",$this->showQuickJump);
+        $template->set("quickJumpSelector",$form->getHTML());
+        $template->set("pages",$pages);
+        $template->set("phpDroneURL",$this->droneURL);
+        $template->set("showPages",$this->showPages);
+        $template->set("showPrefs",$this->showPrefs);
+        $template->set("showQuickJump",$this->showQuickJump);
         return $template->getBuffer();
     }
 

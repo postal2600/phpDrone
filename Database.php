@@ -25,23 +25,23 @@ class DBField
         if (!$this->size)
             DroneCore::throwDroneError("Please supply a size argument for database field '<b>{$this->name}</b>'.");
         $template = new Template("?database/field_{$this->type}.tmpl");
-        $template->write("fieldName",$this->name);
-        $template->write("fieldSize",$this->size);
-        $template->write("fieldNull",$this->null);
-        $template->write("fieldDefault",$this->default);
+        $template->set("fieldName",$this->name);
+        $template->set("fieldSize",$this->size);
+        $template->set("fieldNull",$this->null);
+        $template->set("fieldDefault",$this->default);
         return $template->getBuffer();
     }
 
     function getTextForInt()
     {
         $template = new Template("?database/field_{$this->type}.tmpl");
-        $template->write("fieldName",$this->name);
-        $template->write("fieldSize",$this->size);
-        $template->write("fieldNull",$this->null);
-        $template->write("fieldDefault",$this->default);
-        $template->write("fieldUnsigned",$this->unsigned);
-        $template->write("fieldAutoIncrement",$this->auto_increment);
-        $template->write("primary",$this->primary);
+        $template->set("fieldName",$this->name);
+        $template->set("fieldSize",$this->size);
+        $template->set("fieldNull",$this->null);
+        $template->set("fieldDefault",$this->default);
+        $template->set("fieldUnsigned",$this->unsigned);
+        $template->set("fieldAutoIncrement",$this->auto_increment);
+        $template->set("primary",$this->primary);
         return $template->getBuffer();
     }
 
@@ -184,8 +184,8 @@ class Database
                 array_push($txtFields,$field->getCreateText());
 
             $template = new Template("?database/qry_create_table.tmpl");
-            $template->write("tableName",$this->tableName);
-            $template->write("tableFields",join(",",$txtFields));
+            $template->set("tableName",$this->tableName);
+            $template->set("tableFields",join(",",$txtFields));
             $this->exec_qry($template->getBuffer());
 //             print $template->getBuffer();
         }

@@ -76,7 +76,7 @@ class DroneCore
         $debugMode = DroneConfig::get('Main.debugMode');
         if ($debugMode)
             $info .= DroneCore::getStackTrace();
-        $template->write('errorMessage',$info);
+        $template->set('errorMessage',$info);
         $template->render();
         die();
     }

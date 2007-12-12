@@ -88,6 +88,22 @@ class Template
             $this->templateContent = $templateContent;
     }
     
+    function solveInjections($templateFile,$templateContent)
+    {
+        if (preg_match_all('/<!--(?:\\s|)inject (?P<templatePart>.*)(?:\\s|)-->/', $templateContent, $result))
+            foreach($result['templatePart'] as $part)
+            {
+                $file = dirname($templateFile)."/".$part;
+                if (!file_exists($file))
+                     DroneCore::throwDroneError("Template file needed to be injected was not found: <b>{$file}</b>");
+                $handle = fopen($file, "r");
+                $partContent = fread($handle, filesize($file));
+                fclose($handle);
+
+                $this->templateContent = preg_replace('/<!--(?:\\s|)inject '.preg_quote($part,'/').'(?:\\s|)-->/',$partContent,$this->templateContent);
+            }
+    }
+    
     private function deltaTime()
     {
         return sprintf("%.4f",Utils::microTime()-$this->startTime);
@@ -128,7 +144,10 @@ class Template
                         if ($skipOne)
                             $skipOne = false;
                         else
-                            $ev .= "['".$item."']";
+                            if (is_numeric($item))
+                                $ev .= "[".$item."]";
+                            else
+                                $ev .= "['".$item."']";
                   }
             }
             else
@@ -153,7 +172,10 @@ class Template
                             if ($skipOne)
                                 $skipOne = false;
                             else
-                                $ev .= "['".$item."']";
+                                if (is_numeric($item))
+                                    $ev .= "[".$item."]";
+                                else
+                                    $ev .= "['".$item."']";
                     }
                     $toEval = preg_replace('/'.addslashes($part).'/',$ev,$toEval);
                 }
@@ -296,6 +318,7 @@ class Template
         if (strtolower($fileInfo['extension'])!='php')
         {
             $this->solveInheritance($this->templateFilename);
+            $this->solveInjections($this->templateFilename,$this->templateContent);
 
             $cacheDir = DroneConfig::get('Main.cacheDir');
             if (isset($cacheDir) && is_dir($cacheDir))
@@ -309,8 +332,8 @@ class Template
             $dbgInfo = $debugMode?basename($this->userTemplateFilename)."_":"";
             $outFilename = "{$cDir}/".$dbgInfo.md5($this->templateContent).".php";
 
-            // if file is cached and not in debug mode, no need to rebuild
-            if (file_exists($outFilename) && !$debugMode)
+            // if file is cached and, no need to rebuild
+            if (file_exists($outFilename))
                 return $outFilename;
 
             $handler = fopen($outFilename,'w');
@@ -368,12 +391,6 @@ class Template
 
     }
 
-    //deprecated
-    private function write_p($args)
-    {
-        $this->set_p($args);
-    }
-
 
     private function set_p($args)
     {
@@ -383,7 +400,7 @@ class Template
             if (count($args)==1)
                 $this->vars["body"] .= $args[0];
             else
-                DroneCore::throwDroneError("Function takes at least one argument: <b>Template->write()</b>");
+                DroneCore::throwDroneError("Function takes at least one argument: <b>Template->set()</b>");
     }
 
     private function __call($method, $args)

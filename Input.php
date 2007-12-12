@@ -102,25 +102,30 @@ class Input
     function write_text($template)
     {
         if (array_key_exists($this->attributes['name'],$this->request))
-            $template->write("inputValue",strtr($this->request[$this->attributes['name']],Input::$safeChars));
+            $template->set("inputValue",strtr($this->request[$this->attributes['name']],Input::$safeChars));
         else
-            $template->write("inputValue",strtr($this->defaultValue,Input::$safeChars));
-        return $template->getBuffer();
+            $template->set("inputValue",strtr($this->defaultValue,Input::$safeChars));
     }
 
     function write_password($template)
     {
-        return $this->write_text($template);
+        $this->write_text($template);
     }
 
     function write_textarea($template)
     {
-        return $this->write_text($template);
+        $this->write_text($template);
+    }
+
+    function write_count_textarea($template)
+    {
+        $this->attributes['class'] .= " drone_limited_textarea";
+        $this->write_text($template);
     }
 
     function write_date($template)
     {
-        return $this->write_text($template);
+        $this->write_text($template);
     }
 
     function write_select($template)
@@ -155,16 +160,14 @@ class Input
             if (!$hasSelected)
                 $values[0]["selected"] = True;
 			
-            $template->write("values",$values);
+            $template->set("values",$values);
         }
-        return $template->getBuffer();
     }
 
     function write_file($template)
     {
         // al what is needed for this input, is handeled in the write() method
         // (the value can't be set for a file input). So we return the buffer back.
-        return $template->getBuffer();
     }
 
     function write_checkbox($template)
@@ -191,9 +194,8 @@ class Input
                 $pas++;
             }
 
-            $template->write("values",$values);
+            $template->set("values",$values);
         }
-        return $template->getBuffer();
     }
 
     function write_radio($template)
@@ -225,21 +227,18 @@ class Input
                 $pas++;
             }
 
-            $template->write("values",$values);
+            $template->set("values",$values);
         }
-        return $template->getBuffer();
     }
 
     function write_hidden($template)
     {
-        $template->write("inputValue",htmlspecialchars($this->defaultValue,ENT_QUOTES));
-        return $template->getBuffer();
+        $template->set("inputValue",htmlspecialchars($this->defaultValue,ENT_QUOTES));
     }
 
     function write_submit($template)
     {
-        $template->write("inputValue",htmlspecialchars($this->label,ENT_QUOTES));
-        return $template->getBuffer();
+        $template->set("inputValue",htmlspecialchars($this->label,ENT_QUOTES));
     }
 
 
@@ -250,20 +249,19 @@ class Input
         {
             $template = new Template("?form/input_{$this->type}.tmpl");
             $template->vars = $upperTemplate->vars;
-            $template->write("inputLabel",htmlentities($this->label,ENT_QUOTES));
+            eval("\$this->write_{$this->type}(\$template);");
+            $template->set("inputLabel",htmlentities($this->label,ENT_QUOTES));
             if ($this->type=='date')
                 unset($this->attributes['format']);
-            $template->write("attributes",$this->attributes);
+            $template->set("attributes",$this->attributes);
             if ($this->mandatory)
-                $template->write("mandatoryMarker",$this->mandatoryMarker);
+                $template->set("mandatoryMarker",$this->mandatoryMarker);
             if ($this->error)
-                $template->write("inputError",$this->error);
-
-            eval("\$result .= \$this->write_{$this->type}(\$template);");
+                $template->set("inputError",$this->error);
         }
         else
             DroneCore::throwDroneError("Unknown form input type: {$this->type}.");
-        return $result;
+        return $template->getBuffer();;
     }
 
     function writeValueless($upperTemplate="")
@@ -367,10 +365,12 @@ class Input
             $this->error = dgettext("phpDrone","Can't be empty");
             return false;
         }
-//         if (!$this->mandatory && strlen($this->request[$this->attributes['name']])==0)
-//         {
-//             return true;
-//         }
+        
+        if (!$this->mandatory && strlen($this->request[$this->attributes['name']])==0)
+        {
+            return true;
+        }
+        
         if (isset($this->attributes['maxlength']) && strlen($this->request[$this->attributes['name']])>$this->attributes['maxlength'])
         {
             $this->error = dgettext("phpDrone","Max length for input is")." {$this->attributes['maxlength']}";

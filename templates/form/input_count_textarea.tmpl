@@ -1,0 +1,24 @@
+<!--block droneInput-->
+    <!--if inputLabel-->
+        <label for='<!--attributes.id-->' id='<!--attributes.id-->_label'>
+            <!--if2 mandatoryMarker-->
+                <span class='mandatoryMarker'><!--mandatoryMarker--></span>
+            <!--/if2-->
+            <!--inputLabel-->:
+        </label>
+    <!--/if-->
+    <!--if inputError-->
+        <span class='inputError'><span><!--"Error"|translate-->: </span><!--inputError--></span>
+    <!--/if-->
+    <textarea rows='5' cols='9' <!--for key,item in attributes--> <!--key-->='<!--item-->'<!--/for-->><!--inputValue--></textarea>
+    <input type='text' disabled='disabled' id="drone_display_<!--attributes.id-->" class='textInput drone_count_display'/>
+    <script type='text/javascript' src='?phpDroneRequestResource=scripts/jquery.js'></script>
+    <script type='text/javascript'>
+        <!--if attributes.maxlength-->
+            var drone_taMaxLength = <!--attributes.maxlength-->;
+        <!--else-->
+            var drone_taMaxLength = undefined;
+        <!--/if-->
+    </script>
+    <script type='text/javascript' src='?phpDroneRequestResource=scripts/taCounter.js'></script>
+<!--/block-->

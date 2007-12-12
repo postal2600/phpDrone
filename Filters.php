@@ -75,4 +75,9 @@ function filter_translate($input,$internal=false)
         return dgettext('phpDrone',$input);
 }
 
+function filter_count($input)
+{
+    return strlen($input);
+}
+
 ?>

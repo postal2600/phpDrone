@@ -61,7 +61,7 @@ class Captcha extends Input
     {
         $template = new Template("?form/input_captcha.tmpl");
 
-        $template->write("captchaId",$this->generate(5));
+        $template->set("captchaId",$this->generate(5));
         $result = $template->getBuffer(false);
         $_POST[$this->name] = "";
         $result .= parent::write();
