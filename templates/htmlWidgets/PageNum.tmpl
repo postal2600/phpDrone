@@ -1,52 +1,52 @@
 <!--block htmlWidget-->
     <div class="pageNum">
         <!--if9 showPages-->
-        <div class="pageNumPages">
-            <!--itemCount--> <!--itemLabel-->:
+        <div class="pageNumPages drone_pnModule">
+            <span class='drone_pnLabel'><!--itemCount--> <!--itemLabel-->:</span>
             <!--for item in pages-->
-                <!--if for_first-->
+                <!--if drone_for_first-->
                     <!--if2 item==currentPage-->
-                        <span class="disabledPageNumBtn">&laquo;<!--"Prev"|translate--></span>
+                        <span class="drone_pnPrevBtn drone_pnButton drone_pnDisabledBtn">&laquo;<!--"Prev"|translate(true)--></span>
                     <!--else2-->
-                        <a href="?action=setPage&amp;page=<!--currentPage-1-->" title="Go to page <!--currentPage-1-->">&laquo;<!--"Prev"|translate--></a>
+                        <a class="drone_pnPrevBtn drone_pnButton" href="?action=setPage&amp;page=<!--currentPage-1-->" title="Go to page <!--currentPage-1-->">&laquo;<!--"Prev"|translate(true)--></a>
                     <!--/if2-->
                 <!--/if-->
-                <!--if8 cutedLow&&for_first-->
+                <!--if8 cutedLow&&drone_for_first-->
                     <span class="andSoOn">...</span>
                 <!--/if8-->
                 <!--if item==currentPage-->
-                    <span title="<!--"You are on page"|translate--> <!--item-->"><!--item--></span>
+                    <span class="drone_pnPageBtn drone_pnButton drone_pnSelBtn" title="<!--"You are on page"|translate(true)--> <!--item-->"><!--item--></span>
                 <!--else-->
-                    <a href="?action=setPage&amp;page=<!--item-->" title="<!--"Go to page"|translate--> <!--item-->"><!--item--></a>
+                    <a class="drone_pnPageBtn drone_pnButton" href="?action=setPage&amp;page=<!--item-->" title="<!--"Go to page"|translate(true)--> <!--item-->"><!--item--></a>
                 <!--/if-->
-                <!--if8 cutedHigh&&for_last-->
+                <!--if8 cutedHigh&&drone_for_last-->
                     <span class="andSoOn">...</span>
                 <!--/if8-->
-                <!--if for_last-->
+                <!--if drone_for_last-->
                     <!--if2 item==currentPage-->
-                        <span class="disabledPageNumBtn"><!--"Next"|translate-->&raquo;</span>
+                        <span class="drone_pnNextBtn drone_pnButton drone_pnDisabledBtn"><!--"Next"|translate(true)-->&raquo;</span>
                     <!--else2-->
-                        <a href="?action=setPage&amp;page=<!--currentPage+1-->" title="<!--"Go to page"|translate--> <!--currentPage+1-->"><!--"Next"|translate-->&raquo;</a>
+                        <a class="drone_pnNextBtn drone_pnButton" href="?action=setPage&amp;page=<!--currentPage+1-->" title="<!--"Go to page"|translate(true)--> <!--currentPage+1-->"><!--"Next"|translate(true)-->&raquo;</a>
                     <!--/if2-->
                 <!--/if-->
             <!--/for-->
         </div>
         <!--/if9-->
         <!--if9 showPrefs-->
-        <div  class="pageNumPrefs">
-            <!--currentPerPage--> <!--"per page"|translate--> :
+        <div  class="pageNumPrefs drone_pnModule">
+            <span class='drone_pnLabel'><!--currentPerPage--> <!--"per page"|translate(true)--> :</span>
             <!--for pref in prefs-->
                 <!--if pref==currentPerPage-->
-                    <span title="<!--"Curently set at"|translate--> <!--currentPerPage--> <!--"per page"|translate-->"><!--currentPerPage--></span>
+                    <span class="drone_pnPrefBtn drone_pnButton drone_pnSelBtn" title="<!--"Curently set at"|translate(true)--> <!--currentPerPage--> <!--"per page"|translate(true)-->"><!--currentPerPage--></span>
                 <!--else-->
-                    <a title="<!--"Switch to"|translate--> <!--pref--> <!--"per page"|translate-->" href="?action=setPref&amp;prefName=<!--prefName-->&amp;pref=<!--pref-->"><!--pref--></a>
+                    <a class="drone_pnPrefBtn drone_pnButton" title="<!--"Switch to"|translate(true)--> <!--pref--> <!--"per page"|translate(true)-->" href="?action=setPref&amp;prefName=<!--prefName-->&amp;pref=<!--pref-->"><!--pref--></a>
                 <!--/if-->
             <!--/for-->
         </div>
         <!--/if9-->
         <!--if9 showQuickJump-->
-        <div class="pageNumQUickJump">
-            <!--"Quick jump"|translate-->:<!--quickJumpSelector-->
+        <div class="pageNumQUickJump drone_pnModule">
+            <span class='drone_pnLabel'><!--"Quick jump"|translate(true)-->:</span><!--quickJumpSelector-->
         </div>
         <!--/if9-->
     </div>

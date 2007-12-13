@@ -213,7 +213,7 @@ class Template
     private function solveVar($input,$forVar,$forId)
     {
         $output = $input;
-        preg_match_all('/<!--(?P<cont>[\\w-\/"| \\.\'\\n\\(\\)]*?)-->/s',$output,$vals);
+        preg_match_all('/<!--(?P<cont>[\\w-\/"| \\.\'\\n\\(\\)\+\*]*?)-->/s',$output,$vals);
         foreach($vals['cont'] as $f_val)
         {
             $ev = $this->parseVars($f_val,$forVar,$forId);
@@ -251,6 +251,8 @@ class Template
             preg_match('/<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'-->(?P<ifBlock>.*?)(?:(?:(?:[ ]*|)<!--(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)-->)(?P<elseBlock>.*?))?(?:[ ]*|)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->/s',$output,$capt);
             if (rtrim($capt['elseBlock'])!="")
                 $cElseBlock = "<?php }else{ ?>".rtrim($capt['elseBlock']," ");
+            else
+                $cElseBlock = "";
             $output = preg_replace ('/(?:[ ]{2,}|)<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'-->(?:.*?)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->(?:[\\n]|)/s',"<?php if ({$toEval}){?>".$capt['ifBlock'].$cElseBlock."<?php } ?>",$output,1);
 
         }
