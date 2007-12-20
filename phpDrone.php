@@ -8,7 +8,8 @@
                               'widgets'=>'HTMLwidgets.php',
                               'utils'=>'Utils.php',
                               'i18n'=>'i18n.php',
-                              'admin'=>'DroneAdmin.php'
+                              'admin'=>'DroneAdmin.php',
+                              'profiler'=>'DroneProfiler.php'
     					     );
         session_start();
         ob_start();
@@ -25,10 +26,9 @@
         else
     	    foreach ($validModules as $module)
     	    		require $module;
-        
+        require("DroneCore.php");
         if (is_file('droneEnv/drone.php'))
             include 'droneEnv/drone.php';
-        require("DroneCore.php");
 	}
 	else
 	{

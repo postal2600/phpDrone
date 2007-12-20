@@ -20,3 +20,4 @@ function countChar()
 }
 
 $('.drone_limited_textarea').bind('keyup',countChar);
+$('.drone_limited_textarea').bind('focus',countChar);

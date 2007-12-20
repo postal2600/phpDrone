@@ -38,6 +38,7 @@ class DroneCore
             fclose($handle);
 
             header("Content-type: {$contentType}");
+            ob_end_clean();
             die($content);
         }
         elseif (isset($resource) && !is_file(Utils::getDronePath())."/res/{$resource}")
@@ -78,7 +79,7 @@ class DroneCore
             $info .= DroneCore::getStackTrace();
         $template->set('errorMessage',$info);
         $template->render();
-        die();
+        die(/*$info*/);
     }
 }
 

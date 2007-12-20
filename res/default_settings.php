@@ -4,6 +4,8 @@
 debugMode = True
 ;compressHTML = True
 codeLanguage = en
+appMode = development
+
 
 [Modules]
 utils = true #required
@@ -14,6 +16,7 @@ mail = true
 widgets = true
 i18n = true
 admin = true
+profiler = true
 
 [Database]
 sqlEngine = mysql

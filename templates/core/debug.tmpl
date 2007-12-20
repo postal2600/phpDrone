@@ -1,0 +1,25 @@
+<!--REM The following will apear only in debug mode -->
+<link type='text/css' rel='stylesheet' href='?phpDroneRequestResource=styles/debug.css' />
+<script type='text/javascript' src='?phpDroneRequestResource=scripts/jquery.js'></script>
+<div id='phpDroneConsole'>
+    <div id='droneConsoleSmall'>
+        <!--if consoleError-->
+        <img class='drone_consoleBtn' src='?phpDroneRequestResource=images/debug_err.png' alt='<!--"There was an error"|translate-->' title='<!--"There was an error"-->' />
+        <!--else-->
+            <!--if2 consoleText-->
+        <img class='drone_consoleBtn' id='drone_consoleBigBtn' src='?phpDroneRequestResource=images/debug_big.png' alt='<!--"Big console"|translate-->' title='<!--"Make the console big"-->' />
+        <img class='drone_consoleBtn' id='drone_consoleSmallBtn' src='?phpDroneRequestResource=images/debug_small.png' alt='<!--"Small console"|translate-->' title='<!--"Make the console small"-->' />
+            <!--/if2-->
+        <!--/if-->
+        <b><!--codeSize--></b> kb built in <b><!--time--></b> seconds with <b>phpDrone</b> v<!--droneVersion-->
+    </div>
+    <div id='droneConsoleBig'>
+        <!--if consoleError-->
+        <div id='droneConsoleError'>
+            <!--consoleError-->
+        </div>
+        <!--/if-->
+        <!--consoleText-->
+    </div>
+</div>
+<script type='text/javascript' src='?phpDroneRequestResource=scripts/debug.js'></script>

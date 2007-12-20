@@ -110,13 +110,6 @@ class Utils
                 return $default;
     }
 
-    // get UNIX timestamp in microseconds
-	static function microTime()
-	{
-	    list($usec, $sec) = explode(" ", microtime());
-	    return ((float)$usec + (float)$sec);
-	}
-
     //get the language currently used by phpDrone
     static function getLanguage($localeDir)
     {
@@ -146,6 +139,7 @@ class Utils
         return $droneLanguage;
     }
 
+    //get the location of the temporary directory
     static function getTempDir() //from http://www.phpit.net
     {
         if (!empty($_ENV['TMP']))
@@ -163,10 +157,20 @@ class Utils
         return false;
     }
 
-
+    //return the path to phpDrone library
     static function getDronePath()
     {
         return dirname(__FILE__);
+    }
+
+
+    //calculates the size of the image of size ($picWidth,$picHeight) that will feet inside a box of ($maxWidth,$maxHeight)
+    static function getThumbSize($picWidth,$picHeight,$maxWidth,$maxHeight)
+    {
+        $scaleFactor = 1.0;
+        if ($picWidth>$maxWidth || $picHeight>$maxHeight)
+            $scaleFactor = min((float) $maxWidth/$picWidth,(float) $maxHeight/$picHeight);
+        return array($scaleFactor*$picWidth,$scaleFactor*$picHeight);
     }
 
 }

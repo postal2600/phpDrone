@@ -1,0 +1,52 @@
+body
+{
+    margin-bottom:50px;
+}
+
+#phpDroneFooter
+{
+    bottom:21px;
+}
+
+#phpDroneConsole
+{
+    background:url("?phpDroneRequestResource=images/debug_bkg.png") left top;
+    position:fixed;
+    bottom:0px;
+    width:100%;
+    font-size:12px;
+    font-family: "Trebuchet MS";
+    color:white;
+    border-top:2px solid black;
+    margin-top:20px;
+}
+
+    #phpDroneConsole #drone_consoleSmallBtn
+    {
+        display:none;
+    }
+
+    #phpDroneConsole #droneConsoleSmall
+    {
+        padding-left:10px;
+        border-bottom:1px solid black;
+    }
+
+    #phpDroneConsole .drone_consoleBtn
+    {
+        float:right;
+        margin-right:10px;
+        margin-top:1px;
+        
+        cursor: pointer;
+        width:16px;
+        height:16px;
+        z-index:10;
+    }
+    
+    #phpDroneConsole #droneConsoleBig
+    {
+        padding-left:10px;
+        padding-top:10px;
+        display:none;
+    }

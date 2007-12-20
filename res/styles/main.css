@@ -158,7 +158,7 @@ a:hover
     margin-right:4px;
 }
 
-#footer
+#phpDroneFooter
 {
     text-align:right;
     float:right;
@@ -174,13 +174,13 @@ a:hover
     margin-top:10px;
 }
 
-#footer #subMenu li
+#phpDroneFooter #subMenu li
 {
     display:inline;
     font-size:12px;
 }
 
-#footer #copyright
+#phpDroneFooter #copyright
 {
     font-size:9px;
     margin-top:5px;
