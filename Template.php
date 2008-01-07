@@ -213,8 +213,7 @@ class Template
     private function solveVar($input,$forVar,$forId)
     {
         $output = $input;
-        //this regExp will be redefined to support strings better
-        preg_match_all('/<!--(?P<cont>[\\w-\/"| \\.\'\\n\\(\\)\+\*;&:]*?)-->/s',$output,$vals);
+        preg_match_all('/<!--(?!(?:\\s*)REM|cycle)(?P<cont>.*?)-->/s',$output,$vals);
         foreach($vals['cont'] as $f_val)
         {
             $ev = $this->parseVars($f_val,$forVar,$forId);
@@ -321,11 +320,11 @@ class Template
     {
         $output = $input;
         //process reminders
-        $output = preg_replace('/<!--(?:\\s*)REM (.*?)(?:\\s*)-->/s', "<!-- <!-- '$1' --> -->", $output);
         $output = preg_replace('/(<\\?.*?\\?>)/s',"<?php echo addcslashes('$1',\"'\"); ?>\n",$output);
         $output = $this->solveFor($output,$forVar,$forId);
         $output = $this->solveIf($output,$forVar,$forId);
         $output = $this->solveVar($output,$forVar,$forId);
+        $output = preg_replace('/<!--(?:\\s*)REM (.*?)(?:\\s*)-->/s', "<!-- $1 -->", $output);
         //delete the rest of unused vars from template
 //         $output = preg_replace ('/<!--[^\\}]*-->/',"",$output);
         return $output;
@@ -425,25 +424,40 @@ class Template
 
     private function render_p($args)
     {
-
         $output = $this->getBuffer($args[0]);
 
         $debugMode = DroneConfig::get('Main.debugMode');
         if ($debugMode)
         {
+            DroneProfiler::buildResults();
             require("ver.php");
 
             $tmpl = new Template("?core/debug.tmpl");
             $tmpl->set('droneVersion',$phpDroneVersion);
             $tmpl->set('codeSize',sprintf("%.2f", strlen($output)/1024));
             $tmpl->set('time',$this->deltaTime());
-            $tmpl->set('consoleText',"Test console<br /><br /><br /><br /><br /><br /><br />End test");
+            $profilerTimes = array();
+            if (isset($_SESSION['droneProfilerTimes']))
+            {
+                foreach ($_SESSION['droneProfilerTimes'] as $key=>$times)
+                {
+                    $tmpArr = $times;
+                    sort($tmpArr);
+                    $profilerTimes[$key] = array();
+                    $profilerTimes[$key]['now'] = sprintf("%.4f",$times[count($times)-1]);
+                    $profilerTimes[$key]['prev'] = sprintf("%.4f",$times[count($times)-2]);
+                    $profilerTimes[$key]['best'] = sprintf("%.4f",$tmpArr[0]);
+                    $profilerTimes[$key]['worst'] = sprintf("%.4f",$tmpArr[count($tmpArr)-1]);
+                    $profilerTimes[$key]['avg'] = sprintf("%.4f",array_sum($times)/count($times));
+                }
+                $tmpl->set('profilerTimes',$profilerTimes);
+                $tmpl->set('consoleText',' ');
+            }
+//             $tmpl->set('consoleText',"Test console<br /><br /><br /><br /><br /><br /><br />End test");
             $output .= $tmpl->getBuffer();
         }
         print $output;
-
     }
-
 
     private function set_p($args)
     {

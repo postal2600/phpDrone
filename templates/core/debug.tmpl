@@ -1,4 +1,4 @@
-<!--REM The following will apear only in debug mode -->
+<!-- REM The following will apear only in debug mode -->
 <link type='text/css' rel='stylesheet' href='?phpDroneRequestResource=styles/debug.css' />
 <script type='text/javascript' src='?phpDroneRequestResource=scripts/jquery.js'></script>
 <div id='phpDroneConsole'>
@@ -19,6 +19,30 @@
             <!--consoleError-->
         </div>
         <!--/if-->
+        
+        <!--if profilerTimes-->
+            <table id='droneProfilerTimes'>
+            <thead>
+                <th><!--"Section"|translate--></th>
+                <th><!--"Now"|translate--></th>
+                <th><!--"Previous time"|translate--></th>
+                <th><!--"Best time"|translate--></th>
+                <th><!--"Worst time"|translate--></th>
+                <th><!--"Average time"|translate--></th>
+            </thead>
+            <!--for key,item in profilerTimes-->
+                <tr>
+                    <td><!--key--></td>
+                    <td><!--item.now--></td>
+                    <td><!--item.prev--></td>
+                    <td><!--item.best--></td>
+                    <td><!--item.worst--></td>
+                    <td><!--item.avg--></td>
+                </tr>
+            <!--/for-->
+            </table>
+        <!--/if-->
+        
         <!--consoleText-->
     </div>
 </div>

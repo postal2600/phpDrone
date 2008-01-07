@@ -32,7 +32,7 @@ function filter_obfuscate($input)
 {
     $text = preg_split("//",$input);
     $text = implode("'+'",$text);
-    $result = "<script type='text/javascript' src='phpDrone/res/scripts/obfuscater.js'></script>\n";
+    $result = "<script type='text/javascript' src='?phpDroneRequestResource=scripts/obfuscater.js'></script>\n";
     $result .= "<script type='text/javascript'>obfuscate('{$text}')</script><noscript>You need to have JavaScript enabled to see this text</noscript>";
     return $result;
 }
@@ -78,6 +78,15 @@ function filter_translate($input,$internal=false)
 function filter_count($input)
 {
     return strlen($input);
+}
+
+function filter_nonFalse($input,$replacement = null)
+{
+    if (!$replacement)
+        $replacement = _("Not defined");
+    if (!$input)
+        return $replacement;
+    return $input;
 }
 
 ?>

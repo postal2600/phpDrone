@@ -50,3 +50,16 @@ body
         padding-top:10px;
         display:none;
     }
+
+#droneProfilerTimes
+{
+    color:white;
+    font-size:10px;
+    border:1px solid #FF9A15;
+    margin-bottom:10px;
+}
+
+    #droneProfilerTimes td
+    {
+        border:1px solid #FF9A15;
+    }

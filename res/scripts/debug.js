@@ -6,17 +6,26 @@ function initphpDroneDebug()
 
 function consoleBig()
 {
-    $('#droneConsoleBig').show('medium');
+    $('#droneConsoleBig').show('medium',BigEnd);
+}
+
+function BigEnd()
+{
     $('#drone_consoleBigBtn').hide();
     $('#drone_consoleSmallBtn').show();
 }
 
 function consoleSmall()
 {
-    $('#droneConsoleBig').hide('medium');
+    $('#droneConsoleBig').hide('medium',SmallEnd);
+}
+
+function SmallEnd()
+{
     $('#drone_consoleBigBtn').show();
     $('#drone_consoleSmallBtn').hide();
 }
+
 
 
 initphpDroneDebug();

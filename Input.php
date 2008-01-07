@@ -167,7 +167,7 @@ class Input
     function write_file($template)
     {
         // al what is needed for this input, is handeled in the write() method
-        // (the value can't be set for a file input). So we return the buffer back.
+        // (the value can't be set for a file input).
     }
 
     function write_checkbox($template)

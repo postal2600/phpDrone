@@ -1,3 +1,8 @@
+<link rel="stylesheet" type="text/css" media="all" href="?phpDroneRequestResource=styles/calendar/calendar-system.css" title="Calendar skin" />
+<script type="text/javascript" src="?phpDroneRequestResource=scripts/calendar/calendar.js"></script>
+<script type="text/javascript" src="?phpDroneRequestResource=scripts/calendar-lang/calendar-en.js"></script>
+<script type="text/javascript" src="?phpDroneRequestResource=scripts/calendar/calendar-setup.js"></script>
+
 <!--if inputLabel-->
     <label for='<!--attributes.id-->' id='<!--attributes.id-->_label'>
         <!--if2 mandatoryMarker-->
@@ -11,3 +16,13 @@
     <span class='inputError'><span><!--"Error"|translate(true)-->: </span><!--inputError--></span>
 <!--/if-->
 <input type='text' value='<!--inputValue-->' <!--for key,item in attributes--> <!--key-->='<!--item-->'<!--/for-->/>
+<input type='button' class='droneDateTrigger' id='trigger4<!--attributes.name-->' value='...'/>
+<script type="text/javascript">
+    Calendar.setup({
+        inputField     :    "<!--attributes.name-->",
+        ifFormat       :    "%Y-%m-%d %H:%M:%S",
+        showsTime      :    true,
+        button         :    "trigger4<!--attributes.name-->",
+        step           :    1
+    });
+</script>

@@ -14,18 +14,24 @@ class DroneProfiler
         self::$endTimes[$label] = microtime(true);
     }
 
-    static function getResults()
+    static function clear($label)
+    {
+        unset($_SESSION['droneProfilerTimes'][$label]);
+    }
+
+    static function buildResults()
     {
         $result = array();
         foreach (self::$startTimes as $key=>$value)
         {
+            if (!isset($_SESSION['droneProfilerTimes'][$key]))
+                $_SESSION['droneProfilerTimes'][$key] = array();
             if (self::$endTimes[$key])
-                $result[$key] = self::$endTimes[$key] - self::$startTimes[$key];
+                array_push($_SESSION['droneProfilerTimes'][$key],self::$endTimes[$key] - self::$startTimes[$key]);
             else
-                $result[$key] = "Error: Timing started but not stoped!";
+                array_push($_SESSION['droneProfilerTimes'][$key],-1);
         }
         return $result;
     }
-
 }
 ?>
