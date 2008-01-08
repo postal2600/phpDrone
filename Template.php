@@ -14,25 +14,25 @@ class Template
     public $vars;
     private $guard = "free";
     
-    function __construct($template=null)
+    function __construct($template=null,$internal=false)
     {
-        $debugMode = DroneConfig::get('Main.debugMode');
-        $templateDir = DroneConfig::get('Main.templateDir');
+        DroneProfiler::start('__construct');        
+        $debugMode = DroneConfig::get('Main.debugMode');                
         if ($debugMode)
             $this->startTime = microTime(true);
-
-        $this->templateFilename = $this->setTemplateFilename($template);
+        $this->templateFilename = $this->setTemplateFilename($template,$internal);        
         $this->templateContent = "";
         $this->vars = array();
+        DroneProfiler::stop('__construct');
     }
     
-    private function setTemplateFilename($template)
+    private function setTemplateFilename($template,$internal)
     {
         if (isset($template))
         {
-            if ($template{0}=="?")
+            $templateDir = DroneConfig::get('Main.templateDir');            
+            if ($internal)
             {
-                $template = substr($template,1);
                 $droneDir = Utils::getDronePath();
                 if (isset($templateDir) && file_exists($templateDir.$template))
                     $templateFilename = $templateDir.$template;
@@ -330,9 +330,9 @@ class Template
         return $output;
     }
 
-    function prepareTemplate($templateName)
+    function prepareTemplate($templateName,$internal)
     {
-        if (!isset($this->templateFilename) && !$this->templateFilename = $this->setTemplateFilename($templateName))
+        if (!isset($this->templateFilename) && !$this->templateFilename = $this->setTemplateFilename($templateName,$internal))
             DroneCore::throwDroneError("You must set the template you want to render.");
             
         $fileInfo = pathinfo($this->templateFilename);
@@ -401,19 +401,16 @@ class Template
         return $outFilename;
     }
 
-    function getBuffer($templateName=null)
+    function getBuffer($templateName=null,$internal=false)
     {
-        $templateFile = $this->prepareTemplate($templateName);
-        if (is_file($templateFile))
-        {
-            ob_start();
-            extract($this->vars);
-            include $templateFile;
-            $content = ob_get_contents();
-            ob_end_clean();
-        }
-        else
-            DroneCore::throwDroneError("Error reading cache!");
+        $templateFile = $this->prepareTemplate($templateName,$internal);
+        ob_start();
+        extract($this->vars);
+        DroneProfiler::start('template code');
+        include $templateFile;
+        DroneProfiler::stop('template code');
+        $content = ob_get_contents();
+        ob_end_clean();
 
         $compressHTML = DroneConfig::get('Main.compressHTML');
         if ($compressHTML)
@@ -424,18 +421,18 @@ class Template
 
     private function render_p($args)
     {
-        $output = $this->getBuffer($args[0]);
-
+        $output = $this->getBuffer($args[0],$args[1]);
+        $endTime = $this->deltaTime();
         $debugMode = DroneConfig::get('Main.debugMode');
         if ($debugMode)
         {
             DroneProfiler::buildResults();
             require("ver.php");
 
-            $tmpl = new Template("?core/debug.tmpl");
+            $tmpl = new Template("core/debug.tmpl",true);
             $tmpl->set('droneVersion',$phpDroneVersion);
             $tmpl->set('codeSize',sprintf("%.2f", strlen($output)/1024));
-            $tmpl->set('time',$this->deltaTime());
+            $tmpl->set('time',$endTime);
             $profilerTimes = array();
             if (isset($_SESSION['droneProfilerTimes']))
             {
@@ -461,13 +458,7 @@ class Template
 
     private function set_p($args)
     {
-        if (count($args)>1)
-            $this->vars[$args[0]] = $args[1];
-        else
-            if (count($args)==1)
-                $this->vars["body"] .= $args[0];
-            else
-                DroneCore::throwDroneError("Function takes at least one argument: <b>Template->set()</b>");
+        $this->vars[$args[0]] = $args[1];
     }
 
     private function __call($method, $args)

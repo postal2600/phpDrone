@@ -51,7 +51,7 @@ class DroneAdmin
     {
         global $tmpl;
         $tmpl->set('section',"main");
-        $tmpl->render("?admin/login.tmpl");
+        $tmpl->render("admin/login.tmpl",true);
     }
     
     static function login()
@@ -64,7 +64,7 @@ class DroneAdmin
 
         $tmpl->set('form',$form->getHTML());
         $tmpl->set('next',$_GET['section']);
-        $tmpl->render("?admin/login.tmpl");
+        $tmpl->render("admin/login.tmpl",true);
     }
 
 
@@ -72,7 +72,7 @@ class DroneAdmin
     {
         global $tmpl;
         $tmpl->set('section',"i18n");
-        $tmpl->render("?admin/login.tmpl");
+        $tmpl->render("admin/login.tmpl",true);
     }
     
 }

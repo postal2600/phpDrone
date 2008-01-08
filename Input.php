@@ -247,7 +247,7 @@ class Input
     {
         if (method_exists($this,"write_{$this->type}"))
         {
-            $template = new Template("?form/input_{$this->type}.tmpl");
+            $template = new Template("form/input_{$this->type}.tmpl",true);
             $template->vars = $upperTemplate->vars;
             eval("\$this->write_{$this->type}(\$template);");
             $template->set("inputLabel",htmlentities($this->label,ENT_QUOTES));

@@ -14,11 +14,8 @@ class DroneConfig
             else
             {
                 $conf = parse_ini_file("droneEnv/settings.php",True);
-                foreach ($conf as $i_key=>$i_value)
-                    if ($i_key==$parts[0])
-                        foreach ($i_value as $item_key=>$item_value)
-                            if ($item_key == $parts[1])
-                                return $item_value;
+                if (isset($conf[$parts[0]][$parts[1]]))
+                    return $conf[$parts[0]][$parts[1]];
             }
         }
         return $default;
@@ -29,9 +26,7 @@ class DroneConfig
         if (is_file("droneEnv/settings.php"))
         {
             $conf = parse_ini_file("droneEnv/settings.php",True);
-            foreach ($conf as $i_key=>$i_value)
-                if ($i_key==$key)
-                    return $i_value;
+            return $conf[$key];
         }
         return $default;
     }

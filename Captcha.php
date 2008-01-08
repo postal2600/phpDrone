@@ -59,7 +59,7 @@ class Captcha extends Input
     
     function write()
     {
-        $template = new Template("?form/input_captcha.tmpl");
+        $template = new Template("form/input_captcha.tmpl",true);
 
         $template->set("captchaId",$this->generate(5));
         $result = $template->getBuffer(false);

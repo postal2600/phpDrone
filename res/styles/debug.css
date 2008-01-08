@@ -55,11 +55,22 @@ body
 {
     color:white;
     font-size:10px;
-    border:1px solid #FF9A15;
     margin-bottom:10px;
 }
 
+    #droneProfilerTimes td, #droneProfilerTimes th
+    {
+        text-align:center;
+    }
+    
     #droneProfilerTimes td
     {
         border:1px solid #FF9A15;
+        background-color:#5B5B5B;
+        width:70px;
+    }
+    
+    #droneProfilerTimes td.sectionCell
+    {
+        width:auto;
     }

@@ -29,7 +29,7 @@ class LoginWidget extends HTMLWidgets
 
     function execute()
     {
-        $template = new Template('?htmlWidgets/login.tmpl');
+        $template = new Template('htmlWidgets/login.tmpl',true);
         $loginForm = new Form("");
         $loginForm->addInput("*".dgettext("phpDrone","User"),"text","username");
         $loginForm->addInput("*".dgettext("phpDrone","Password"),"password","password");
@@ -93,7 +93,7 @@ class PageNum extends HTMLWidgets
 
     function getHTML()
     {
-        $template = new Template("?htmlWidgets/PageNum.tmpl");
+        $template = new Template("htmlWidgets/PageNum.tmpl",true);
         $template->set("itemCount",$this->itemCount);
         $template->set("itemLabel",$this->itemLabel);
         
