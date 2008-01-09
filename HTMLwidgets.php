@@ -83,7 +83,6 @@ class PageNum extends HTMLWidgets
                 header("Location: {$url}");
                 break;
             case "setPref":
-                session_start();
                 $_SESSION["drone_pn_{$_GET['prefName']}"] = $_GET['pref'];
                 $url = Utils::querySetVar($_SERVER['HTTP_REFERER'],"page",1);
                 header("Location: {$url}");
@@ -162,5 +161,78 @@ class PageNum extends HTMLWidgets
 
 }
 
+
+class TableHeader extends HTMLWidgets
+{
+    const ORDER_DESC = 1;
+    const ORDER_ASC = 0;
+
+    function __construct()
+    {
+        if (isset($_GET['action']))
+            $this->handleAction();
+        $this->elements = array();
+        $this->defaultTag = null;
+    }
+
+    function addElement($label, $tag=null, $order=self::ORDER_DESC)
+    {
+        if ($tag!=null)
+        {
+            if ($this->defaultTag==null)
+                $this->defaultTag = $tag;
+            $this->elements[$tag] = array("label"=>$label,"order"=>isset($_SESSION["drone_th_{$tag}"])?$_SESSION["drone_th_{$tag}"]:$order,"sort"=>true);
+        }
+        else
+            array_push($this->elements,array("label"=>$label,"sort"=>false));
+    }
+
+    function handleAction()
+    {
+        switch ($_GET['action'])
+        {
+            case "sortTable":
+                $tag = $_GET['tag'];
+                if ($tag!=$_SESSION["drone_th_by"])
+                {
+                    $_SESSION["drone_th_order"] = self::ORDER_DESC;
+                    $_SESSION["drone_th_by"] = $tag;
+                }
+                else
+                {
+                    $_SESSION["drone_th_order"] = abs((int)$_GET['order'] - 1);
+                    $_SESSION["drone_th_by"] = $tag;
+                }
+                header("Location: {$_SERVER['HTTP_REFERER']}");
+                break;
+        }
+    }
+
+    function getSortBy()
+    {
+        return $_SESSION["drone_th_by"];
+    }
+
+    function getOrder()
+    {
+        return $_SESSION["drone_th_order"];
+    }
+
+    function setDefault($tag,$order=self::ORDER_DESC)
+    {
+        $_SESSION["drone_th_order"] = $order;
+        $_SESSION["drone_th_by"] = $this->defaultTag;
+    }
+
+    function getHTML()
+    {
+        $template = new Template("htmlWidgets/tableHeader.tmpl",true);
+        $template->set("elements",$this->elements);
+        $template->set("order",$this->getOrder());
+        $template->set("by",$this->getSortBy());
+        return $template->getBuffer();
+    }
+
+}
 
 ?>

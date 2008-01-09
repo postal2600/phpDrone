@@ -16,14 +16,15 @@ class Template
     
     function __construct($template=null,$internal=false)
     {
-        DroneProfiler::start('__construct');        
+        
         $debugMode = DroneConfig::get('Main.debugMode');                
         if ($debugMode)
             $this->startTime = microTime(true);
-        $this->templateFilename = $this->setTemplateFilename($template,$internal);        
+//         $startTime = microTime(true);
+        $this->templateFilename = $this->setTemplateFilename($template,$internal);
+//         print "construct({$template}): ".sprintf("%.4f",microTime(true)-$startTime);
         $this->templateContent = "";
         $this->vars = array();
-        DroneProfiler::stop('__construct');
     }
     
     private function setTemplateFilename($template,$internal)
@@ -113,7 +114,8 @@ class Template
                               'drone_for_index'=>"\$drone_for_index_{$forId}",
                               'drone_for_total'=>"\$drone_for_total_{$forId}",
                               'drone_for_first'=>"\$drone_for_index_{$forId}==0",
-                              'drone_for_last'=>"\$drone_for_index_{$forId}==\$drone_for_total_{$forId}-1"
+                              'drone_for_last'=>"\$drone_for_index_{$forId}==\$drone_for_total_{$forId}-1",
+                              'null'=>'null'
                              );
 
         //is a string?
@@ -235,7 +237,8 @@ class Template
             $innerIfNumber = $ifs[1][$f];
             
             $toEval = trim($ifStatement);
-            $parts = preg_split('/(?:\!)|(?:\+)|(?:-)|(?:\*)|(?:%)|(?:\/)|(?:\!=)|(?:==)|(?:<=)|(?:>=)|(?:<)|(?:>)|(?:\|\|)|(?:&&)|(?:\()|(?:\))/',$toEval);
+            $parts = preg_split('/(?:\!=)|(?:\!)|(?:\+)|(?:-)|(?:\*)|(?:%)|(?:\/)|(?:==)|(?:<=)|(?:>=)|(?:<)|(?:>)|(?:\|\|)|(?:&&)|(?:\()|(?:\))/',$toEval);
+            
             if (count($parts)!=1)
             {
                 foreach ($parts as $part)
@@ -406,9 +409,7 @@ class Template
         $templateFile = $this->prepareTemplate($templateName,$internal);
         ob_start();
         extract($this->vars);
-        DroneProfiler::start('template code');
         include $templateFile;
-        DroneProfiler::stop('template code');
         $content = ob_get_contents();
         ob_end_clean();
 
