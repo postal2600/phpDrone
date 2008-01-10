@@ -1,0 +1,13 @@
+<thead>
+    <!--for tag,element in elements-->
+    <th id='headCell_<!--tag-->'>
+        <!--if element.sort-->
+        <a <!--if3 by==tag--><!--if2 element.order==1-->class='tableOrderDesc'<!--else2-->class='tableOrderAsc'<!--/if2--><!--/if3--> href='?action=sortTable&amp;tag=<!--tag-->&amp;order=<!--element.order-->'>
+            <!--element.label-->
+        </a>
+        <!--else-->
+        <!--element.label-->
+        <!--/if-->
+    </th>
+    <!--/for-->
+</thead>

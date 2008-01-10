@@ -11,6 +11,12 @@ function filter_toLower($input)
     return strtolower($input);
 }
 
+function filter_capitalize($input)
+{
+    return ucwords($input);
+}
+
+
 function filter_toUpper($input)
 {
     return strtolower($input);
