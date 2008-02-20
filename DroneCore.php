@@ -92,4 +92,7 @@ if ($_GET['phpDrone_captcha_action']=='regen' && $_GET['phpDrone_captcha_id']!="
 }
 if ($_GET['phpDrone_draw_captchaid'])
     Captcha::draw($_GET['phpDrone_draw_captchaid']);
+
+if (DroneConfig::get('Modules.controller',false))
+    Controller::handleSEFurl();
 ?>

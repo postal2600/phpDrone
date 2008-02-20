@@ -9,7 +9,8 @@
                               'utils'=>'Utils.php',
                               'i18n'=>'i18n.php',
                               'admin'=>'DroneAdmin.php',
-                              'profiler'=>'DroneProfiler.php'
+                              'profiler'=>'DroneProfiler.php',
+                              'controller'=>'DroneController.php'
     					     );
         session_start();
         ob_start();

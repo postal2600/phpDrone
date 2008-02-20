@@ -17,6 +17,7 @@ widgets = true
 i18n = true
 admin = true
 profiler = true
+controller = false
 
 [Database]
 sqlEngine = mysql

@@ -31,22 +31,18 @@ class Template
     {
         if (isset($template))
         {
-            $templateDir = DroneConfig::get('Main.templateDir');            
+            $templateDir = DroneConfig::get('Main.templateDir','templates/');
             if ($internal)
             {
                 $droneDir = Utils::getDronePath();
-                if (isset($templateDir) && file_exists($templateDir.$template))
+                if (file_exists($templateDir.$template))
                     $templateFilename = $templateDir.$template;
-                elseif (file_exists("templates/".$template))
-                    $templateFilename = "templates/".$template;
                 else
                     $templateFilename = "{$droneDir}/templates/".$template;
             }
             else
-                if (isset($templateDir) && file_exists($templateDir.$template))
+                if (file_exists($templateDir.$template))
                     $templateFilename = $templateDir.$template;
-                elseif (file_exists("templates/".$template))
-                    $templateFilename = "templates/".$template;
                 else
                     DroneCore::throwDroneError("Template file was not found: <b>{$template}</b>");
             $this->userTemplateFilename = $template;
@@ -107,62 +103,38 @@ class Template
         return sprintf("%.4f",microTime(true)-$this->startTime);
     }
 
-    private function parseVars($input,$forVar=null,$forId=null)
+    private function parseVars($input,$forId=null)
     {
-        $filterPieces = preg_split("/\|/",trim($input));
-        $reservedVars = array('drone_for_step'=>"\$drone_for_index_{$forId}+1",
-                              'drone_for_index'=>"\$drone_for_index_{$forId}",
-                              'drone_for_total'=>"\$drone_for_total_{$forId}",
-                              'drone_for_first'=>"\$drone_for_index_{$forId}==0",
-                              'drone_for_last'=>"\$drone_for_index_{$forId}==\$drone_for_total_{$forId}-1",
-                              'null'=>'null'
-                             );
-
-        //is a string?
-        if (!preg_match('/("|\')(?P<string>[^"\\\\]*(?:\\\\.[^"\\\\]*)*)\\1/', $filterPieces[0],$valCapt))
+        $pieces = preg_split('/[\\[\\]]/', $input);
+        foreach ($pieces as $piece)
+        if ($piece!="")
         {
-            $opParts = preg_split('/(?:\\+)|(?:-)|(?:\\*)|(?:%)|(?:!)|(?:\/)/',trim($filterPieces[0]));
-            if (count($opParts)==1)
+            $filterPieces = preg_split("/\|/",trim($piece));
+            $reservedVars = array('drone_for_step'=>"\$drone_for_index_{$forId}+1",
+                                  'drone_for_index'=>"\$drone_for_index_{$forId}",
+                                  'drone_for_total'=>"\$drone_for_total_{$forId}",
+                                  'drone_for_first'=>"\$drone_for_index_{$forId}==0",
+                                  'drone_for_last'=>"\$drone_for_index_{$forId}==\$drone_for_total_{$forId}-1",
+                                  'null'=>'null'
+                                 );
+
+            //is a string?
+            if (!preg_match('/("|\')(?P<string>[^"\\\\]*(?:\\\\.[^"\\\\]*)*)\\1/', $filterPieces[0],$valCapt))
             {
-
-                  $subs = preg_split("/\./",trim($filterPieces[0]));
-                  if (count($subs)==1)
-
-                        //detect if it's a number or a var name (TODO: I should check if string)
-                        if (!intval($subs[0]))
-                            $ev = array_key_exists($subs[0],$reservedVars)?$reservedVars[$subs[0]]:"\${$subs[0]}";
-                        else
-                            $ev = $subs[0];
-                  else
-                  {
-
-                    $skipOne = true;
-                    $ev = "\${$subs[0]}";
-                        
-                    foreach ($subs as $item)
-                        if ($skipOne)
-                            $skipOne = false;
-                        else
-                            if (is_numeric($item))
-                                $ev .= "[".$item."]";
-                            else
-                                $ev .= "['".$item."']";
-                  }
-            }
-            else
-            {
-                $toEval = trim($filterPieces[0]);
-                foreach ($opParts as $part)
+                $opParts = preg_split('/(?:\\+)|(?:-)|(?:\\*)|(?:%)|(?:!)|(?:\/)/',trim($filterPieces[0]));
+                if (count($opParts)==1)
                 {
-                    $subs = preg_split("/\./",$part);
-                    if (count($subs)==1)
-                        //detect if it's a number or a var name (TODO: I should check if string)
-                        if (!intval($subs[0]))
-                            $ev = array_key_exists($subs[0],$reservedVars)?$reservedVars[$subs[0]]:"\${$subs[0]}";
-                        else
-                            $ev = $subs[0];
-                    else
-                    {
+
+                      $subs = preg_split("/\./",trim($filterPieces[0]));
+                      if (count($subs)==1)
+
+                            //detect if it's a number or a var name (TODO: I should check if string)
+                            if (!intval($subs[0]))
+                                $ev = array_key_exists($subs[0],$reservedVars)?$reservedVars[$subs[0]]:"\${$subs[0]}";
+                            else
+                                $ev = $subs[0];
+                      else
+                      {
 
                         $skipOne = true;
                         $ev = "\${$subs[0]}";
@@ -175,57 +147,87 @@ class Template
                                     $ev .= "[".$item."]";
                                 else
                                     $ev .= "['".$item."']";
-                    }
-                    $toEval = preg_replace('/'.addslashes($part).'/',$ev,$toEval);
+                      }
                 }
-                  $ev = $toEval;
-            }
-        }
-        else
-        {
-            $string = addcslashes($valCapt['string'],"'");
-            $ev = "'{$string}'";
-        }
+                else
+                {
+                    $toEval = trim($filterPieces[0]);
+                    foreach ($opParts as $part)
+                    {
+                        $subs = preg_split("/\./",$part);
+                        if (count($subs)==1)
+                            //detect if it's a number or a var name (TODO: I should check if string)
+                            if (!intval($subs[0]))
+                                $ev = array_key_exists($subs[0],$reservedVars)?$reservedVars[$subs[0]]:"\${$subs[0]}";
+                            else
+                                $ev = $subs[0];
+                        else
+                        {
 
-        //apply filters
-        if (count($filterPieces)>1)
-            for ($f=1;$f<count($filterPieces);$f++)
-            {
-                if (preg_match('/(?P<filterName>.*)\\((?P<filterArgs>.+)\\)/',$filterPieces[$f],$capt))
-                {
-                    $filterName = $capt['filterName'];
-                    $filterArgs = ",".$capt['filterArgs'];
+                            $skipOne = true;
+                            $ev = "\${$subs[0]}";
+
+                            foreach ($subs as $item)
+                                if ($skipOne)
+                                    $skipOne = false;
+                                else
+                                    if (is_numeric($item))
+                                        $ev .= "[".$item."]";
+                                    else
+                                        $ev .= "['".$item."']";
+                        }
+                        $toEval = preg_replace('/'.addslashes($part).'/',$ev,$toEval);
+                    }
+                      $ev = $toEval;
                 }
-                else
-                {
-                    $filterName = str_replace(array("(",")"),"",$filterPieces[$f]);
-                    $filterArgs = "";
-                }
-                if (function_exists("filter_".$filterName))
-                {
-                    $ev = "filter_{$filterName}({$ev}{$filterArgs})";
-                }
-                else
-                    DroneCore::throwDroneError("Unknown filter: <b>{$filterName}</b>.");
             }
-        
-        return $ev;
+            else
+            {
+                $string = addcslashes($valCapt['string'],"'");
+                $ev = "'{$string}'";
+            }
+
+            //apply filters
+            if (count($filterPieces)>1)
+                for ($f=1;$f<count($filterPieces);$f++)
+                {
+                    if (preg_match('/(?P<filterName>.*)\\((?P<filterArgs>.+)\\)/',$filterPieces[$f],$capt))
+                    {
+                        $filterName = $capt['filterName'];
+                        $filterArgs = ",".$capt['filterArgs'];
+                    }
+                    else
+                    {
+                        $filterName = str_replace(array("(",")"),"",$filterPieces[$f]);
+                        $filterArgs = "";
+                    }
+                    if (function_exists("filter_".$filterName))
+                    {
+                        $ev = "filter_{$filterName}({$ev}{$filterArgs})";
+                    }
+                    else
+                        DroneCore::throwDroneError("Unknown filter: <b>{$filterName}</b>.");
+                }
+
+            $input = preg_replace('/'.preg_quote($piece).'/',$ev,$input);
+        }
+        return $input;
     }
 
-    private function solveVar($input,$forVar,$forId)
+    private function solveVar($input,$forId)
     {
         $output = $input;
         preg_match_all('/<!--(?!(?:\\s*)REM|cycle)(?P<cont>.*?)-->/s',$output,$vals);
         foreach($vals['cont'] as $f_val)
         {
-            $ev = $this->parseVars($f_val,$forVar,$forId);
+            $ev = $this->parseVars($f_val,$forId);
             //TODO: tailing \n-s are not preserved.
             $output = preg_replace ('/<!--(?:[ ]*|)'.preg_quote($f_val,'/').'(?:[ ]*|)-->/',"<?php echo {$ev}; ?>",$output);
         }
         return $output;
     }
 
-    private function solveIf($input,$forVar,$forId)
+    private function solveIf($input,$forId)
     {
         $output = $input;
         //<!--(?:[ ]*|)if([\d]*|) (?P<ifStatement>.*?)-->(?P<ifCont>.*?)<!--(?:[ ]*|)/if\1(?:[ ]*|)-->
@@ -243,26 +245,26 @@ class Template
             {
                 foreach ($parts as $part)
                 {
-                    $ev = $this->parseVars($part,$forVar,$forId);
+                    $ev = $this->parseVars($part,$forId);
                     $toEval = preg_replace('/'.addslashes($part).'/',$ev,$toEval);
                 }
             }
             else
-                $toEval = $this->parseVars(trim($toEval),$forVar,$forId);
+                $toEval = $this->parseVars(trim($toEval),$forId);
 
             //<!--(?:[ ]*|)if([\d]*|) .*-->(?P<ifBlock>.*?)(?:(?:<!--(?:[ ]*|)else\1(?:[ ]*|)-->)(?P<elseBlock>.*?))?<!--(?:[ ]*|)/if\1(?:[ ]*|)-->
-            preg_match('/<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'-->(?P<ifBlock>.*?)(?:(?:(?:[ ]*|)<!--(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)-->)(?P<elseBlock>.*?))?(?:[ ]*|)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->/s',$output,$capt);
+            preg_match('/<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*[]").'-->(?P<ifBlock>.*?)(?:(?:(?:[ ]*|)<!--(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)-->)(?P<elseBlock>.*?))?(?:[ ]*|)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->/s',$output,$capt);
             if (rtrim($capt['elseBlock'])!="")
                 $cElseBlock = "<?php }else{ ?>".rtrim($capt['elseBlock']," ");
             else
                 $cElseBlock = "";
-            $output = preg_replace ('/(?:[ ]{2,}|)<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*").'-->(?:.*?)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->(?:[\\n]|)/s',"<?php if ({$toEval}){?>".$capt['ifBlock'].$cElseBlock."<?php } ?>",$output,1);
-
+            
+            $output = preg_replace ('/(?:[ ]{2,}|)<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*[]").'-->(?:.*?)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->(?:[\\n]|)/s',"<?php if ({$toEval}){?>".$capt['ifBlock'].$cElseBlock."<?php } ?>",$output,1);
         }
         return $output;
     }
 
-    private function solveFor($input,$forVar,$forId)
+    private function solveFor($input,$forId)
     {
         $output = $input;
         preg_match_all('/<!--(?:\\s*)for([\\d]*|) (?P<item>.*) in (?P<bunch>.*?)-->/', $output, $fors);
@@ -279,9 +281,9 @@ class Template
 
             $builtBlock = $blockContent;
             $f_vars = preg_match_all('/<!--(?:[ ]*|)(?P<cont>'.$item.'.*?)-->/s',$builtBlock,$varCapt);
-
-            $builtBlock = $this->compileTemplate($builtBlock,$item,$forId);
-            $droneBunch = $this->parseVars($bunch,$forVar,$forId);
+            
+            $builtBlock = $this->compileTemplate($builtBlock,$forId);
+            $droneBunch = $this->parseVars($bunch,$forId);
 
             $droneItem = implode('=>$',preg_split('/,/',$item));
 
@@ -319,14 +321,14 @@ class Template
         return $output;
     }
     
-    function compileTemplate($input,$forVar=null,$forId=null)
+    function compileTemplate($input,$forId=null)
     {
         $output = $input;
         //process reminders
         $output = preg_replace('/(<\\?.*?\\?>)/s',"<?php echo addcslashes('$1',\"'\"); ?>\n",$output);
-        $output = $this->solveFor($output,$forVar,$forId);
-        $output = $this->solveIf($output,$forVar,$forId);
-        $output = $this->solveVar($output,$forVar,$forId);
+        $output = $this->solveFor($output,$forId);
+        $output = $this->solveIf($output,$forId);
+        $output = $this->solveVar($output,$forId);
         $output = preg_replace('/<!--(?:\\s*)REM (.*?)(?:\\s*)-->/s', "<!-- $1 -->", $output);
         //delete the rest of unused vars from template
 //         $output = preg_replace ('/<!--[^\\}]*-->/',"",$output);
