@@ -30,6 +30,9 @@
         require("DroneCore.php");
         if (is_file('droneEnv/drone.php'))
             include 'droneEnv/drone.php';
+        if (DroneConfig::get('Modules.controller',false))
+            DroneController::handleMVCurl();
+
 	}
 	else
 	{

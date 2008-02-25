@@ -6,7 +6,7 @@ if (file_exists('droneEnv/filters.php'))
     include('droneEnv/filters.php');
 }
 
-class Template
+class DroneTemplate
 {
     
     private $buffer;    
@@ -329,7 +329,7 @@ class Template
         $output = $this->solveFor($output,$forId);
         $output = $this->solveIf($output,$forId);
         $output = $this->solveVar($output,$forId);
-        $output = preg_replace('/<!--(?:\\s*)REM (.*?)(?:\\s*)-->/s', "<!-- $1 -->", $output);
+        $output = preg_replace('/<!--(?:\\s*)REM(.*?)-->/s', "<!--$1 -->", $output);
         //delete the rest of unused vars from template
 //         $output = preg_replace ('/<!--[^\\}]*-->/',"",$output);
         return $output;
@@ -432,7 +432,7 @@ class Template
             DroneProfiler::buildResults();
             require("ver.php");
 
-            $tmpl = new Template("core/debug.tmpl",true);
+            $tmpl = new DroneTemplate("core/debug.tmpl",true);
             $tmpl->set('droneVersion',$phpDroneVersion);
             $tmpl->set('codeSize',sprintf("%.2f", strlen($output)/1024));
             $tmpl->set('time',$endTime);

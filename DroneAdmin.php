@@ -4,7 +4,7 @@ class DroneAdmin
     static function handle()
     {
         global $tmpl;
-        $tmpl = new Template();
+        $tmpl = new DroneTemplate();
         if (isset($_SESSION['drone_admin_user']))
             self::processRequest();
         else
@@ -57,7 +57,7 @@ class DroneAdmin
     static function login()
     {
         global $tmpl;
-        $form = new Form("DroneAdmin::login_success");
+        $form = new DroneForm("DroneAdmin::login_success");
         $form->addInput('*'.dgettext('phpDrone','User'),'text',"user",array("DroneAdmin::verify_credentials",dgettext('phpDrone',"Invalid user/password")));
         $form->addInput('*'.dgettext('phpDrone','Password'),'password',"pass");
         $form->addInput('*'.dgettext('phpDrone','Login'),'submit',"action");

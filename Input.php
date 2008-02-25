@@ -1,5 +1,5 @@
 <?php
-class Input
+class DroneInput
 {
 	static $safeChars = array('<'=>'&lt;','>'=>'&gt;','"'=>'&quot;',"'"=>'&#039;');
 
@@ -102,9 +102,9 @@ class Input
     function write_text($template)
     {
         if (array_key_exists($this->attributes['name'],$this->request))
-            $template->set("inputValue",strtr($this->request[$this->attributes['name']],Input::$safeChars));
+            $template->set("inputValue",strtr($this->request[$this->attributes['name']],DroneInput::$safeChars));
         else
-            $template->set("inputValue",strtr($this->defaultValue,Input::$safeChars));
+            $template->set("inputValue",strtr($this->defaultValue,DroneInput::$safeChars));
     }
 
     function write_password($template)
@@ -141,12 +141,12 @@ class Input
                 if (gettype($item)=="array")
                 {
                     $values[$pas]["key"] = $item[0];
-                    $values[$pas]["value"] = htmlentities($item[1],ENT_QUOTES);
+                    $values[$pas]["value"] = $item[1]; //htmlentities($item[1],ENT_QUOTES)
                 }
                 else
                 {
                     $values[$pas]["key"] = $item;
-                    $values[$pas]["value"] = htmlentities($item,ENT_QUOTES);
+                    $values[$pas]["value"] = $item; //htmlentities($item,ENT_QUOTES)
                 }
                 if ((array_key_exists($this->attributes['name'],$this->request) && ($values[$pas]["key"]==$this->request[$this->attributes['name']])) || (gettype($item)=="array" && isset($item[2]) && $item[2]))
                 {
@@ -247,10 +247,10 @@ class Input
     {
         if (method_exists($this,"write_{$this->type}"))
         {
-            $template = new Template("form/input_{$this->type}.tmpl",true);
+            $template = new DroneTemplate("form/input_{$this->type}.tmpl",true);
             $template->vars = $upperTemplate->vars;
             eval("\$this->write_{$this->type}(\$template);");
-            $template->set("inputLabel",htmlentities($this->label,ENT_QUOTES));
+            $template->set("inputLabel",$this->label); //htmlentities($this->label,ENT_QUOTES)
             if ($this->type=='date')
                 unset($this->attributes['format']);
             $template->set("attributes",$this->attributes);
@@ -266,7 +266,7 @@ class Input
 
     function writeValueless($upperTemplate="")
     {
-        $this->request[$this->attributes['name']] = "";
+//         $this->request[$this->attributes['name']] = "";
         return $this->write($upperTemplate);
     }
 

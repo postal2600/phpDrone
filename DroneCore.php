@@ -70,7 +70,7 @@ class DroneCore
 
     static function handleDroneErrors($errno, $errstr, $errfile, $errline)
     {
-        $template = new Template("?core/error.tmpl");
+        $template = new DroneTemplate("core/error.tmpl",true);
         $info = "<b>phpDrone error:</b> <br />";
         $info .= $errstr."<br />";
 
@@ -92,7 +92,4 @@ if ($_GET['phpDrone_captcha_action']=='regen' && $_GET['phpDrone_captcha_id']!="
 }
 if ($_GET['phpDrone_draw_captchaid'])
     Captcha::draw($_GET['phpDrone_draw_captchaid']);
-
-if (DroneConfig::get('Modules.controller',false))
-    Controller::handleSEFurl();
 ?>

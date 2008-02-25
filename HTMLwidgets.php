@@ -29,8 +29,8 @@ class LoginWidget extends HTMLWidgets
 
     function execute()
     {
-        $template = new Template('htmlWidgets/login.tmpl',true);
-        $loginForm = new Form("");
+        $template = new DroneTemplate('htmlWidgets/login.tmpl',true);
+        $loginForm = new DroneForm("");
         $loginForm->addInput("*".dgettext("phpDrone","User"),"text","username");
         $loginForm->addInput("*".dgettext("phpDrone","Password"),"password","password");
         
@@ -92,7 +92,7 @@ class PageNum extends HTMLWidgets
 
     function getHTML()
     {
-        $template = new Template("htmlWidgets/PageNum.tmpl",true);
+        $template = new DroneTemplate("htmlWidgets/PageNum.tmpl",true);
         $template->set("itemCount",$this->itemCount);
         $template->set("itemLabel",$this->itemLabel);
         
@@ -120,7 +120,7 @@ class PageNum extends HTMLWidgets
 		
         $template->set("currentPage",$this->getCurrentPage());
 
-		$form = new Form(do_success);
+		$form = new DroneForm(do_success);
 		$form->addInput("","select","page");
 		$form->inputs['page']->setValue($allPages);
 		$form->inputs['page']->setAttribute("onchange","window.location=\"?action=setPage&amp;page=\"+this.value");
@@ -226,7 +226,7 @@ class TableHeader extends HTMLWidgets
 
     function getHTML()
     {
-        $template = new Template("htmlWidgets/tableHeader.tmpl",true);
+        $template = new DroneTemplate("htmlWidgets/tableHeader.tmpl",true);
         $template->set("elements",$this->elements);
         $template->set("order",$this->getOrder());
         $template->set("by",$this->getSortBy());

@@ -1,7 +1,7 @@
 <?php
 require_once("Input.php");
     
-class Captcha extends Input
+class Captcha extends DroneInput
 {
     function __construct($label,$name)
     {
@@ -59,7 +59,7 @@ class Captcha extends Input
     
     function write()
     {
-        $template = new Template("form/input_captcha.tmpl",true);
+        $template = new DroneTemplate("form/input_captcha.tmpl",true);
 
         $template->set("captchaId",$this->generate(5));
         $result = $template->getBuffer(false);

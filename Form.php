@@ -1,7 +1,7 @@
 <?php
 require_once ("Input.php"); //I know captcha already contains Input.php, but maby later I'll want to get it separated somewhow
 require_once ("Captcha.php");
-class Form
+class DroneForm
 {
 	const VALID_USERNAME = '/^[\\w_.$]*$/';
 	const VALID_NUMBER = '/^[-+]?(?:\\b[0-9]+(?:\\.[0-9]*)?|\\.[0-9]+\\b)(?:[eE][-+]?[0-9]+\\b)?$/';
@@ -97,7 +97,7 @@ class Form
             $maxLen = $args[4];
 
             if ($type!="captcha")
-                $this->inputs[$name] = new Input($label,$type,$name,$this->madatoryMarker);
+                $this->inputs[$name] = new DroneInput($label,$type,$name,$this->madatoryMarker);
             else
                 $this->inputs[$name] = new Captcha($label,$name);
 
@@ -196,7 +196,7 @@ class Form
 
         if (count($this->submitTriggers)==0)
         {
-            $validate_trigger = new Input("needed for phpDrone form validation","hidden","droneSubmitTrigger");
+            $validate_trigger = new DroneInput("needed for phpDrone form validation","hidden","droneSubmitTrigger");
             $validate_trigger->setValidator("required","required");
             array_push($this->inputs,$validate_trigger);
         }

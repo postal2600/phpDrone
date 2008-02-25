@@ -19,6 +19,7 @@ body
     color:white;
     border-top:2px solid black;
     margin-top:20px;
+    z-index: 99999;
 }
 
     #phpDroneConsole #drone_consoleSmallBtn
