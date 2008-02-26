@@ -209,7 +209,7 @@ class DroneTemplate
                         DroneCore::throwDroneError("Unknown filter: <b>{$filterName}</b>.");
                 }
 
-            $input = preg_replace('/'.preg_quote($piece).'/',$ev,$input);
+            $input = preg_replace('/'.preg_quote($piece,'|/').'/',$ev,$input);
         }
         return $input;
     }
@@ -240,26 +240,25 @@ class DroneTemplate
             
             $toEval = trim($ifStatement);
             $parts = preg_split('/(?:\!=)|(?:\!)|(?:\+)|(?:-)|(?:\*)|(?:%)|(?:\/)|(?:==)|(?:<=)|(?:>=)|(?:<)|(?:>)|(?:\|\|)|(?:&&)|(?:\()|(?:\))/',$toEval);
-            
             if (count($parts)!=1)
             {
                 foreach ($parts as $part)
                 {
                     $ev = $this->parseVars($part,$forId);
-                    $toEval = preg_replace('/'.addslashes($part).'/',$ev,$toEval);
+                    $toEval = preg_replace('/'.preg_quote($part,'|/').'/',$ev,$toEval);
                 }
             }
             else
                 $toEval = $this->parseVars(trim($toEval),$forId);
-
+            
             //<!--(?:[ ]*|)if([\d]*|) .*-->(?P<ifBlock>.*?)(?:(?:<!--(?:[ ]*|)else\1(?:[ ]*|)-->)(?P<elseBlock>.*?))?<!--(?:[ ]*|)/if\1(?:[ ]*|)-->
-            preg_match('/<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*[]").'-->(?P<ifBlock>.*?)(?:(?:(?:[ ]*|)<!--(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)-->)(?P<elseBlock>.*?))?(?:[ ]*|)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->/s',$output,$capt);
+            preg_match('/<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*[]|").'-->(?P<ifBlock>.*?)(?:(?:(?:[ ]*|)<!--(?:[ ]*|)else'.$innerIfNumber.'(?:[ ]*|)-->)(?P<elseBlock>.*?))?(?:[ ]*|)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->/s',$output,$capt);
             if (rtrim($capt['elseBlock'])!="")
                 $cElseBlock = "<?php }else{ ?>".rtrim($capt['elseBlock']," ");
             else
                 $cElseBlock = "";
             
-            $output = preg_replace ('/(?:[ ]{2,}|)<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*[]").'-->(?:.*?)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->(?:[\\n]|)/s',"<?php if ({$toEval}){?>".$capt['ifBlock'].$cElseBlock."<?php } ?>",$output,1);
+            $output = preg_replace ('/(?:[ ]{2,}|)<!--(?:[ ]*|)if'.$innerIfNumber.' '.addcslashes($ifStatement,"+*[]|").'-->(?:.*?)<!--(?:[ ]*|)\/if'.$innerIfNumber.'(?:[ ]*|)-->(?:[\\n]|)/s',"<?php if ({$toEval}){?>".$capt['ifBlock'].$cElseBlock."<?php } ?>",$output,1);
         }
         return $output;
     }
