@@ -2,6 +2,7 @@
 class DroneController
 {
     static $args = array();
+    static $defaultIndex = null;
 
     static function handleMVCurl()
     {
@@ -27,17 +28,21 @@ class DroneController
         if (!file_exists($controlerFile))
             DroneCore::throwDroneError("404: Controler file not found: {$controlerFile}");
         include ($controlerFile);
+        $instance = new $class();
+        if (self::$defaultIndex)
+            $method = self::$defaultIndex;
         if (!method_exists($class,$method))
             DroneCore::throwDroneError("404: Method <b>{$method}</b> not found in controller: {$controlerFile}");
-        call_user_func_array(array(new $class(), $method),$args);
+        call_user_func_array(array($instance, $method),$args);
         die();
 
     }
     
+    
     function getArg($index)
     {
         global $args;
-        return $args[$index];
+        return $args[$index-1];
     }
 }
 ?>
