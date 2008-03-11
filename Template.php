@@ -288,7 +288,7 @@ class DroneTemplate
 
             if ( preg_match('/\\$drone_for_step|\\$drone_for_index|\\$drone_for_total|\\$drone_for_first|\\$drone_for_last/',$builtBlock) )
             {
-                $forSet = "\$drone_for_total_{$forId}=count({$droneBunch});".
+                $forSet = "\$drone_for_total_{$forId}=count(\$for_{$forId}_value);".
                           "\$drone_for_index_{$forId}=0;";
 
                 $forUnSet = "unset(\$drone_for_total_{$forId});".
@@ -305,7 +305,7 @@ class DroneTemplate
                     $partsArray = 'array("'.implode('","',preg_split('/\,/',addcslashes($cyc_item,'"'))).'")';
                     $builtBlock = preg_replace('/<!--(?:\\s*)cycle '.preg_quote($cyc_item,'/"').'-->/s','<?php echo Utils::array_get($drone_for_index_'.$forId.'%count('.$partsArray.'),'.$partsArray.');?>',$builtBlock);
                 }
-                $forSet = "\$drone_for_total_{$forId}=count({$droneBunch});".
+                $forSet = "\$drone_for_total_{$forId}=count(\$for_{$forId}_value);".
                           "\$drone_for_index_{$forId}=0;";
 
                 $forUnSet = "unset(\$drone_for_total_{$forId});".
@@ -314,7 +314,7 @@ class DroneTemplate
                 $forIncrement = "\$drone_for_index_{$forId}++;";
             }
             
-            $output = preg_replace('/(?:[ ]{2,}|)<!--(?:\\s*)for([\\d]*|) '.$item.' in '.$bunch.'-->(?:[\\n]|)'.preg_quote($blockContent,'/').'(?:\\s*)<!--(?:\\s*)\/for\\1(?:\\s*)-->/',"<?php {$droneBunch}=is_array({$droneBunch})||is_object({$droneBunch})?{$droneBunch}:array(); {$forSet} foreach({$droneBunch} as \${$droneItem}) {?>{$builtBlock}<?php {$forIncrement}} {$forUnSet} ?>",$output);
+            $output = preg_replace('/(?:[ ]{2,}|)<!--(?:\\s*)for([\\d]*|) '.$item.' in '.$bunch.'-->(?:[\\n]|)'.preg_quote($blockContent,'/').'(?:\\s*)<!--(?:\\s*)\/for\\1(?:\\s*)-->/',"<?php \$for_{$forId}_value=is_array({$droneBunch})||is_object({$droneBunch})||is_numeric({$droneBunch})?DroneTemplate::int2array({$droneBunch}):array(); {$forSet} foreach(\$for_{$forId}_value as \${$droneItem}) {?>{$builtBlock}<?php {$forIncrement}} {$forUnSet} ?>",$output);
             $pas++;
         }
         return $output;
@@ -332,6 +332,14 @@ class DroneTemplate
         //delete the rest of unused vars from template
 //         $output = preg_replace ('/<!--[^\\}]*-->/',"",$output);
         return $output;
+    }
+
+    static function int2array($int)
+    {
+        if (is_numeric($int))
+            return range(0,$int);
+        else
+            return $int;
     }
 
     function prepareTemplate($templateName,$internal)
