@@ -34,7 +34,7 @@ class DroneMail
     const TYPE_HTML = 1;
     const TYPE_MULTIPART = 2;
 
-    function __construct($server,$port,$timeout=30)
+    function __construct($timeout=30)
     {
         $this->headers = array("Content-type: text/plain; charset= {%charEncoding%} \r\n",
                                "Content-type: text/html; charset= {%charEncoding%} \r\n",
@@ -42,7 +42,7 @@ class DroneMail
                               );
 
 
-        $this->con = fsockopen($server, $port, $errno, $errstr, $timeout);
+        $this->con = fsockopen(DroneConfig::get('SMTP.host'), DroneConfig::get('SMTP.port'), $errno, $errstr, $timeout);
         if(!$this->con)
         {
             print "SMTP connect error {$errno}: {$errstr}";
@@ -160,7 +160,7 @@ class DroneMail
         $this->from = $this->getFrom();
         $this->to = $this->getTo();
         $this->prepareData();
-        print $this->data."\r\n.";
+        //print $this->data."\r\n.";
         $this->cmd("MAIL FROM:{$this->raw_from[1]}","250","MAIL FROM failed");
         $this->cmd("RCPT TO:<{$this->raw_to[1]}>","250","RCPT TO failed");
         $this->cmd("DATA","354","DATA failed");

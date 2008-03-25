@@ -340,22 +340,23 @@ class DroneInput
                 }
             }
 
-            foreach ($this->defaultValue as $item)
-            {
-                if (gettype($item)=="array")
-                    $key=$item[0];
-                else
-                    $key = $item;
-                if (gettype($this->request[$this->attributes['name']])=="array")
+            if (gettype($this->defaultValue)=="array")
+                foreach ($this->defaultValue as $item)
                 {
-                    if (in_array($key,$this->request[$this->attributes['name']]) && $validatorResult)
-                        return true;
+                    if (gettype($item)=="array")
+                        $key=$item[0];
+                    else
+                        $key = $item;
+                    if (gettype($this->request[$this->attributes['name']])=="array")
+                    {
+                        if (in_array($key,$this->request[$this->attributes['name']]) && $validatorResult)
+                            return true;
+                    }
+                    else
+                        if ($this->request[$this->attributes['name']]==$key && $validatorResult)
+                            return true;
                 }
-                else
-                    if ($this->request[$this->attributes['name']]==$key && $validatorResult)
-                        return true;
-            }
-            
+
             $this->error = dgettext("phpDrone","Invalid value");
             return false;
         }

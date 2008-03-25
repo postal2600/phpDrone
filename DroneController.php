@@ -27,9 +27,14 @@ class DroneController
         if (!file_exists($controlerFile))
             DroneCore::throwDroneError("404: Controler file not found: {$controlerFile}");
         include ($controlerFile);
+        if (!class_exists($class))
+            DroneCore::throwDroneError("404: Class <b>{$class}</b> not found in controller: {$controlerFile}");
         if (!method_exists($class,$method))
             DroneCore::throwDroneError("404: Method <b>{$method}</b> not found in controller: {$controlerFile}");
-        call_user_func_array(array(new $class(), $method),$args);
+        if ($class!=$method)
+            call_user_func(array(new $class(), $method));
+        else
+            new $class();
         die();
 
     }
