@@ -208,8 +208,7 @@ class DroneTemplate
                     else
                         DroneCore::throwDroneError("Unknown filter: <b>{$filterName}</b>.");
                 }
-
-            $input = preg_replace('/'.preg_quote($piece,'|/').'/',$ev,$input);
+            $input = preg_replace('/'.preg_quote($piece,'/|').'/',$ev,$input);
         }
         return $input;
     }
