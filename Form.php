@@ -164,8 +164,8 @@ class DroneForm
 
             foreach ($this->inputs as $item)
             {
-                $result = $item->validate();
                 $item->filterInput();
+                $result = $item->validate();
                 if (!$result)
                     $isValid = false;
             }

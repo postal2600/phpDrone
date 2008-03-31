@@ -313,7 +313,7 @@ class DroneInput
     {
         foreach ($this->filter as $filter)
             if (function_exists($filter))
-                $this->request[$this->attributes['name']] = $filter($this->request[$this->attributes['name']]);
+                $this->request[$this->attributes['name']] = $filter($this->request,$this->attributes['name']);
     }
 
     function validate()
