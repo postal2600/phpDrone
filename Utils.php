@@ -43,7 +43,7 @@ class Utils
 
     static function loremIpsum($paragraphs = 4, $classicStart = true, $minWords = 20, $maxWords = 70)
     {
-        $start = "Lorem ipsum dolor sit amet consectetuer ";
+        $start = "Lorem ipsum dolor sit amet consectetuer";
         $ipsumText = "Lorem ipsum dolor sit amet consectetuer adipiscing elit donec id eros quisque elit nisl lacinia cursus lacinia tincidunt porttitor non leo nunc metus nibh semper ac interdum nec fringilla ut felis donec tempor semper ligula suspendisse ut ipsum quis est commodo dignissim suspendisse mauris neque convallis ac tincidunt id interdum porttitor urna sed orci turpis pretium id semper consequat venenatis et risus cras facilisis augue in ipsum praesent pellentesque diam sed est vestibulum nec justo curabitur lorem sed sed dui vivamus vitae dui at enim laoreet tincidunt phasellus nunc metus cursus eget ornare et pulvinar ut enim vivamus a turpis aenean condimentum nullam id nibh mauris quis ante in fermentum sed scelerisque velit ac justo morbi quis urna nam rhoncus orci quis laoreet dapibus libero orci suscipit dui ut hendrerit elit elit at tortor integer congue sem quis orci morbi pretium integer eu felis vestibulum mauris pellentesque mi tellus condimentum et nonummy non vestibulum ac lacus duis in wisi aliquam justo nam nulla cum sociis natoque penatibus et magnis dis parturient montes nascetur ridiculus mus sed nibh nibh sodales at tincidunt vitae congue id tortor proin et leo morbi odio nunc tempor vitae pretium auctor convallis quis nulla sed sollicitudin consectetuer neque vestibulum adipiscing maecenas ac magna aliquam quis velit donec tristique urna vitae convallis malesuada velit libero fringilla nunc sed euismod libero sem eget elit phasellus et neque curabitur vel ante a elit cursus porta curabitur interdum lorem ipsum dolor sit amet consectetuer adipiscing elit vestibulum consequat sapien id eros phasellus metus elit cursus et tempus vitae mattis ut massa in vel purus at arcu congue eleifend nullam sit amet dolor a risus mollis tempus ut eget lacus nulla eu lorem ut aliquet lacinia tellus nulla interdum sed pharetra semper tellus nam sapien pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas vestibulum sagittis nam id justo nec nibh gravida molestie nulla facilisi in volutpat quisque a augue vel mauris feugiat egestas curabitur accumsan nibh vel justo phasellus consequat wisi sed eros vestibulum tellus pede pellentesque et auctor non dictum et dui curabitur lobortis semper urna aenean aliquam in hac habitasse platea dictumst aenean rutrum pede vitae auctor consequat enim sem condimentum lacus vitae iaculis orci lorem et mauris pellentesque tempus volutpat orci curabitur at nunc maecenas pellentesque nulla eget tellus nam sagittis curabitur wisi leo lobortis eu congue ut hendrerit vel enim aenean pretium nisl pretium leo vestibulum pellentesque augue et faucibus adipiscing tortor ligula faucibus urna id gravida pede justo eget pede curabitur eu ligula nec magna convallis condimentum fusce malesuada laoreet felis nulla sed risus vivamus laoreet accumsan odio quisque ut nibh tincidunt ante tincidunt feugiat nunc est massa ultrices id ullamcorper id laoreet at quam";
         
         $result = "";
@@ -52,7 +52,7 @@ class Utils
         if ($classicStart)
         {
             $result .= $start;
-            $count += 5;
+            $count += 6;
         }
 
         $wordCount = mt_rand($minWords,$maxWords);
@@ -61,26 +61,38 @@ class Utils
 
         for ($f=0;$f<$paragraphs;$f++)
         {
-            $lastSentEnd = 0;
             for ($count;$count<=$wordCount;$count++)
             {
                 if ($count!=0)
+                    $word = $pool[mt_rand(0,count($pool)-1)];
+                else
                 {
                     $lastSentEnd = $count;
-                    $word = $pool[mt_rand(0,count($pool)-1)];
-                }
-                else
+                    $commaCount = 0;
                     $word = ucwords($pool[mt_rand(0,count($pool)-1)]);
-                $endSentance = mt_rand(1,100)<25 && $count - $lastSentEnd >= 5;
+                }
+                $endSentance = mt_rand(1,100)<10 && $count - $lastSentEnd >= 5 && $wordCount - $count >= 5 && $count - $lastComma >= 3 || $count - $lastSentEnd > 20;
+                $putComma = mt_rand(1,100)<10 && $commaCount < 2 && $count - $lastComma >= 3 && !$endSentance && $wordCount - $count >= 3;
+                
+                if ($count!=$wordCount && !$endSentance && $count!=0 && !$putComma)
+                    $result .= " ";
+                    
                 if ($endSentance)
                 {
                     $lastSentEnd = $count;
+                    $commaCount = 0;
                     $word = ucwords($word);
                     $result .= ". ";
                 }
+                
+                if ($putComma)
+                {
+                    $lastComma = $count;
+                    $commaCount ++;
+                    $result .= ", ";
+                }
+                
                 $result .= $word;
-                if ($count!=$wordCount)
-                    $result .= " ";
             }
             $result .= ".\n";
             $count = 0;

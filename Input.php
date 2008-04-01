@@ -333,9 +333,13 @@ class DroneInput
             
             if (function_exists($meth))
             {
-                if ($meth($this->request,$this->attributes['name'])!=True)
+                $validFuncResult = $meth($this->request,$this->attributes['name']);
+                if (gettype($validFuncResult)!="boolean" || $validFuncResult!= True)
                 {
-                    $this->error = $this->validator['message'];
+                    if (gettype($validResult)=="string")
+                        $this->error = $validFuncResult;
+                    else
+                        $this->error = $this->validator['message'];
                     $validatorResult = false;
                 }
             }
@@ -396,9 +400,13 @@ class DroneInput
 
         if (count($meth)==1 && function_exists($meth[0]))
         {
-            if ($meth[0]($this->request,$this->attributes['name'])!=True)
+            $validFuncResult = $meth[0]($this->request,$this->attributes['name']);
+            if (gettype($validFuncResult)!="boolean" || $validFuncResult!=true)
             {
-                $this->error = $this->validator['message'];
+                if (gettype($validFuncResult)=="string")
+                    $this->error = $validFuncResult;
+                else
+                    $this->error = $this->validator['message'];
                 return false;
             }
             return true;
