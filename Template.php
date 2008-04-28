@@ -105,7 +105,7 @@ class DroneTemplate
 
     private function parseVars($input,$forId=null)
     {
-        $pieces = preg_split('/[\\[\\]]/', $input);
+        $pieces = preg_split('/[\[\]]/', $input);
         foreach ($pieces as $piece)
         if ($piece!="")
         {
@@ -191,16 +191,20 @@ class DroneTemplate
             if (count($filterPieces)>1)
                 for ($f=1;$f<count($filterPieces);$f++)
                 {
+                    $filterArgs = "";
                     if (preg_match('/(?P<filterName>.*)\\((?P<filterArgs>.+)\\)/',$filterPieces[$f],$capt))
                     {
                         $filterName = $capt['filterName'];
-                        $filterArgs = ",".$capt['filterArgs'];
+                        $args = preg_split('/,/',$capt['filterArgs']);
+                        for ($f=0;$f<count($args);$f++)
+                        {
+                            $finalArg = $this->parseVars($args[$f],$forId);
+                            $filterArgs .= ",".$finalArg;
+                        }
                     }
                     else
-                    {
                         $filterName = str_replace(array("(",")"),"",$filterPieces[$f]);
-                        $filterArgs = "";
-                    }
+
                     if (function_exists("filter_".$filterName))
                     {
                         $ev = "filter_{$filterName}({$ev}{$filterArgs})";
