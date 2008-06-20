@@ -140,8 +140,9 @@ class DroneInput
                 $values[$pas] = array();
                 if (gettype($item)=="array")
                 {
-                    $values[$pas]["key"] = $item[0];
-                    $values[$pas]["value"] = $item[1]; //htmlentities($item[1],ENT_QUOTES)
+                    $innerKeys = array_keys($item);
+                    $values[$pas]["key"] = $item[$innerKeys[0]];
+                    $values[$pas]["value"] = $item[$innerKeys[1]]; //htmlentities($item[1],ENT_QUOTES)
                 }
                 else
                 {
@@ -181,8 +182,9 @@ class DroneInput
                 $values[$pas] = array();
                 if (gettype($item)=="array")
                 {
-                    $values[$pas]["key"] = $item[0];
-                    $values[$pas]["value"] = htmlentities($item[1],ENT_QUOTES);
+                    $innerKeys = array_keys($item);
+                    $values[$pas]["key"] = $item[$innerKeys[0]];
+                    $values[$pas]["value"] = htmlentities($item[$innerKeys[1]],ENT_QUOTES);
                 }
                 else
                 {
@@ -210,8 +212,9 @@ class DroneInput
                 $values[$pas] = array();
                 if (gettype($item)=="array")
                 {
-                    $values[$pas]["key"] = $item[0];
-                    $values[$pas]["value"] = htmlentities($item[1],ENT_QUOTES);
+                    $innerKeys = array_keys($item);
+                    $values[$pas]["key"] = $item[$innerKeys[0]];
+                    $values[$pas]["value"] = htmlentities($item[$innerKeys[1]],ENT_QUOTES);
                 }
                 else
                 {
@@ -322,7 +325,7 @@ class DroneInput
         {
 
             if ($this->type=="select" || $this->type=="radio")
-                if ($this->mandatory && $this->request[$this->attributes['name']]==$this->initial)
+                if ($this->mandatory && $this->request[$this->attributes['name']]==$this->initial && count($this->defaultValue)!=0)
                 {
                     $this->error = dgettext("phpDrone","Choose one");
                     return false;
@@ -344,11 +347,18 @@ class DroneInput
                 }
             }
 
+            // if the input has no values inside and the user didn't try to squize spmething inside, we don't bother to try to validate anymore
+            if (count($this->defaultValue)==0 && !isset($this->request[$this->attributes['name']]))
+                return true;
+
             if (gettype($this->defaultValue)=="array")
                 foreach ($this->defaultValue as $item)
                 {
                     if (gettype($item)=="array")
-                        $key=$item[0];
+                    {
+                        $innerKeys = array_keys($item);
+                        $key=$item[$innerKeys[0]];
+                    }
                     else
                         $key = $item;
                     if (gettype($this->request[$this->attributes['name']])=="array")
