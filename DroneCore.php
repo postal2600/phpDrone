@@ -78,6 +78,7 @@ class DroneCore
         if ($debugMode)
             $info .= DroneCore::getStackTrace();
         $template->set('errorMessage',$info);
+        header("HTTP/1.0 500 Internal Server Error");
         $template->render();
         die(/*$info*/);
     }

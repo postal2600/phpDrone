@@ -274,11 +274,9 @@ class DroneInput
     }
 
 
-    function setValidator($validator,$msg=false)
+    function setValidator($validator)
     {
-        if (!$msg)
-            $msg = "";
-        $this->validator=array('regExp'=>$validator,'message'=>$msg);
+        $this->validator=$validator;
     }
 
     function addFilter($filter)
@@ -331,7 +329,7 @@ class DroneInput
                     return false;
                 }
 
-            $meth = $this->validator['regExp'];
+            $meth = $this->validator;
             $validatorResult = True;
             
             if (function_exists($meth))
@@ -342,7 +340,7 @@ class DroneInput
                     if (gettype($validResult)=="string")
                         $this->error = $validFuncResult;
                     else
-                        $this->error = $this->validator['message'];
+                        $this->error = dgettext("phpDrone","Invalid value");
                     $validatorResult = false;
                 }
             }
@@ -370,7 +368,6 @@ class DroneInput
                         if ($this->request[$this->attributes['name']]==$key && $validatorResult)
                             return true;
                 }
-
             $this->error = dgettext("phpDrone","Invalid value");
             return false;
         }
@@ -406,7 +403,7 @@ class DroneInput
         }
 
 
-        $meth = preg_split('/::/',$this->validator['regExp']);
+        $meth = preg_split('/::/',$this->validator);
 
         if (count($meth)==1 && function_exists($meth[0]))
         {
@@ -416,7 +413,7 @@ class DroneInput
                 if (gettype($validFuncResult)=="string")
                     $this->error = $validFuncResult;
                 else
-                    $this->error = $this->validator['message'];
+                    $this->error = dgettext("phpDrone","Invalid value");
                 return false;
             }
             return true;
@@ -424,9 +421,12 @@ class DroneInput
         elseif (method_exists($meth[0],$meth[1]))
         {
             eval("\$probe = {$meth[0]}::{$meth[1]}(\$this->request,\$this->attributes['name']);");
-            if ($probe!=True)
+            if (gettype($probe)!="boolean" || $probe!=true)
             {
-                $this->error = $this->validator['message'];
+                if (gettype($validResult)=="string")
+                    $this->error = $probe;
+                else
+                    $this->error = dgettext("phpDrone","Invalid value");
                 return false;
             }
             return true;
@@ -434,7 +434,7 @@ class DroneInput
         elseif ($this->validator!=null && $this->type!="hidden" && $this->type!="submit")
             if (!preg_match ($this->validator['regExp'],$this->request[$this->attributes['name']]))
             {
-                $this->error= $this->validator['message'];
+                $this->error= dgettext("phpDrone","Invalid value");;
                 return false;
             }
         return true;

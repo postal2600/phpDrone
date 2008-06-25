@@ -108,12 +108,7 @@ class DroneForm
 				    $this->inputs[$name]->initial = $this->defaults[$name];
 
             if ($validator!="")
-                if (is_array($validator))
-                {
-                    $this->inputs[$name]->setValidator($validator[0],$validator[1]);
-                }
-                else
-                    $this->inputs[$name]->setValidator($validator,dgettext("phpDrone","Invalid value"));
+                $this->inputs[$name]->setValidator($validator);
                     
                     
             if ($maxLen)
@@ -197,7 +192,7 @@ class DroneForm
         if (count($this->submitTriggers)==0)
         {
             $validate_trigger = new DroneInput("needed for phpDrone form validation","hidden","droneSubmitTrigger");
-            $validate_trigger->setValidator("required","required");
+            $validate_trigger->setValidator("required");
             array_push($this->inputs,$validate_trigger);
         }
         $this->isValid = $isValid;
