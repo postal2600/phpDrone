@@ -9,7 +9,7 @@ class DroneConfig
             if (count($parts)==1)
             {
                 $conf = parse_ini_file("droneEnv/settings.php");
-                return Utils::array_get($key,$conf,$default);
+                return DroneUtils::array_get($key,$conf,$default);
             }
             else
             {

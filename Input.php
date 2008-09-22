@@ -24,6 +24,7 @@ class DroneInput
         $this->filter = array();
         $this->error = "";
         $this->initial = null;
+        $this->parent = null;
         
         $this->attributes = array("name"=>$name,"id"=>$name,"class"=>"textInput");
         if ($type=="submit")
@@ -34,7 +35,13 @@ class DroneInput
 		    $this->setAttribute("class","checkBox");
 		elseif ($type=="select")
 		    $this->setAttribute("class","selectInput");
+        elseif ($type=="date")
+            $this->requires = array("date");
+    }
 
+    function setParent(&$parent)
+    {
+        $this->parent = &$parent;
     }
 
     function setRequestData(&$reqData)
@@ -62,8 +69,8 @@ class DroneInput
 	                    $isSelected = true;
 	                    if ($valType=="array")
 	                    {
-	                        $s_value = Utils::array_get(0,$defVal[$f],"");
-	                        $s_text = Utils::array_get(1,$defVal[$f],$s_value);
+	                        $s_value = DroneUtils::array_get(0,$defVal[$f],"");
+	                        $s_text = DroneUtils::array_get(1,$defVal[$f],$s_value);
                         	$defVal[$f] = array($s_value,$s_text,True);
 						}
 						else
@@ -244,6 +251,10 @@ class DroneInput
         $template->set("inputValue",htmlspecialchars($this->label,ENT_QUOTES));
     }
 
+    function write_button($template)
+    {
+        $template->set("inputValue",htmlspecialchars($this->label,ENT_QUOTES));
+    }
 
 
     function write($upperTemplate="")
@@ -264,7 +275,7 @@ class DroneInput
         }
         else
             DroneCore::throwDroneError("Unknown form input type: {$this->type}.");
-        return $template->getBuffer();;
+        return $template->getBuffer();
     }
 
     function writeValueless($upperTemplate="")
@@ -273,6 +284,23 @@ class DroneInput
         return $this->write($upperTemplate);
     }
 
+
+    function writeRequirements($upperTemplate="")
+    {
+        if (isset($this->requires))
+        {
+            $_buf = "";
+            foreach ($this->requires as $req)
+                if (!array_key_exists($req, $this->parent->hasReq))
+                {
+                    $template = new DroneTemplate("form/req_{$req}.tmpl",true);
+                    $buf .= $template->getBuffer();
+                    $this->parent->hasReq[$req] = true;
+                }
+            return $buf;
+        }
+        return "";
+    }
 
     function setValidator($validator)
     {
@@ -378,7 +406,7 @@ class DroneInput
             return false;
         }
         
-        if (!$this->mandatory && strlen($this->request[$this->attributes['name']])==0)
+        if (!$this->mandatory && strlen($this->request[$this->attributes['name']])==0 && $this->validator==null)
         {
             return true;
         }
@@ -389,12 +417,12 @@ class DroneInput
             return false;
         }
         
-        if ($this->type=='date')
+        if ($this->type=='date' && strlen($this->request[$this->attributes['name']])!=0)
         {
             $dateInfo=date_parse($this->request[$this->attributes['name']]);
             if ($dateInfo && !$dateInfo[errors])
             {
-                $dateFormat = Utils::array_get('format',$this->attributes,'%Y-%m-%d %H:%M:%S');
+                $dateFormat = DroneUtils::array_get('format',$this->attributes,'%Y-%m-%d %H:%M:%S');
                 $this->request[$this->attributes['name']] = strftime($dateFormat,mktime($dateInfo["hour"],$dateInfo["minute"],$dateInfo["second"],$dateInfo["month"],$dateInfo["day"],$dateInfo["year"]));
                 return true;
             }
@@ -431,8 +459,8 @@ class DroneInput
             }
             return true;
         }
-        elseif ($this->validator!=null && $this->type!="hidden" && $this->type!="submit")
-            if (!preg_match ($this->validator['regExp'],$this->request[$this->attributes['name']]))
+        elseif ($this->validator!=null && $this->type!="hidden" && $this->type!="submit" && strlen($this->request[$this->attributes['name']])!=0)
+            if (!preg_match ($this->validator,$this->request[$this->attributes['name']]))
             {
                 $this->error= dgettext("phpDrone","Invalid value");;
                 return false;

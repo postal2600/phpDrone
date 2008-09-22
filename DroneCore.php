@@ -22,7 +22,7 @@ class DroneCore
     static function serveDroneResources($resource=null)
     {
         $resource = isset($resource)?$resource:$_GET['phpDroneRequestResource'];
-        if ($resource && !preg_match('/\\.\\.(?:\/|\\\\)/',$resource) && is_file(Utils::getDronePath()."/res/{$resource}"))
+        if ($resource && !preg_match('/\\.\\.(?:\/|\\\\)/',$resource) && (is_file(DroneUtils::getDronePath()."/res/{$resource}") || is_file("droneEnv/res/{$resource}")))
         {
             $mimes = array('gif'=>'image/gif',
                            'png'=>'image/x-png',
@@ -30,9 +30,13 @@ class DroneCore
                            'js'=>'text/javascript'
                           );
             $fileInfo = pathinfo($resource);
-            $contentType = Utils::array_get($fileInfo['extension'],$mimes,'text/plain');
+            $contentType = DroneUtils::array_get($fileInfo['extension'],$mimes,'text/plain');
 
-            $filename = Utils::getDronePath()."/res/{$resource}";
+            if (is_file("droneEnv/res/{$resource}"))
+                $filename = "droneEnv/res/{$resource}";
+            else
+                $filename = DroneUtils::getDronePath()."/res/{$resource}";
+                
             $handle = fopen($filename,'rb');
             $content = fread($handle, filesize($filename));
             fclose($handle);
@@ -41,7 +45,7 @@ class DroneCore
             ob_end_clean();
             die($content);
         }
-        elseif (isset($resource) && !is_file(Utils::getDronePath())."/res/{$resource}")
+        elseif (isset($resource) && !(is_file(DroneUtils::getDronePath())."/res/{$resource}" || is_file("droneEnv/res/{$resource}")))
             die('Resource not found.');
         
         return preg_match('/\\.\\.(?:\/|\\\\)/',$resource)?die('Invalid resource path.'):false;

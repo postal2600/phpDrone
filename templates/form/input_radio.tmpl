@@ -1,5 +1,5 @@
 <!--if inputLabel-->
-    <label for='<!--inputId-->' id='<!--attributes.id-->_label'>
+    <label for='<!--attributes.id-->' id='<!--attributes.id-->_label'>
         <!--if2 mandatoryMarker-->
             <span class='mandatoryMarker'><!--mandatoryMarker--></span>
         <!--/if2-->
@@ -10,5 +10,5 @@
     <span class='inputError'><span><!--"Error"|translate(true)-->: </span><!--inputError--></span>
 <!--/if-->
 <!--for item in values-->
-    <input <!--if attributes.disabled[item.key]--> disabled='disabled'<!--/if-->type="radio" <!--if drone_for_first--> id='<!--attributes.id-->'<!--/if--> name='<!--attributes.name-->' value='<!--item.key-->' <!--if item.selected-->checked='checked'<!--/if-->><span class='checkboxValue'><!--item.value--></span><span class="checkboxDelimiter">&nbsp;</span>
+    <input <!--if attributes.disabled[item.key]--> disabled='disabled'<!--/if-->type="radio" <!--if drone_for_first--> id='<!--attributes.id-->'<!--/if--> name='<!--attributes.name-->' value='<!--item.key-->' <!--if item.selected-->checked='checked'<!--/if--> /><span class='checkboxValue'><!--item.value--></span><span class="checkboxDelimiter">&nbsp;</span>
 <!--/for-->

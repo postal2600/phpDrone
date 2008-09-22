@@ -23,6 +23,7 @@ class DroneForm
         $this->submitTriggers = array();
         $this->isValid = false;
         $this->filter = array();
+        $this->hasReq = array();
         
         switch ($method)
         {
@@ -118,6 +119,7 @@ class DroneForm
             if  ($type=="submit")
                 $this->submitTriggers[$this->inputs[$name]->attributes['name']]="";
             $this->inputs[$name]->setFilter($this->filter);
+            $this->inputs[$name]->setParent($this);
         }
         else
         if (count($args)==1)
@@ -128,6 +130,7 @@ class DroneForm
             $input->setRequestData($this->request);
             $this->inputs[$name] = $input;
             $this->inputs[$name]->setFilter($this->filter);
+            $this->inputs[$name]->setParent($this);
         }
         else
         {
@@ -208,11 +211,14 @@ class DroneForm
         $this->validateForm();
         $htmlResult = "";
         foreach ($this->inputs as $item)
+        {
+            $htmlResult .= $item->writeRequirements($upperTemplate);
             if (!$item->addedLater)
                 if (isset($this->valueFlag))
                     $htmlResult .= $item->writeValueless($upperTemplate);
                 else
                     $htmlResult .= $item->write($upperTemplate);
+        }
         return $htmlResult;
     }
     
@@ -221,11 +227,16 @@ class DroneForm
         $this->validateForm();
         $arrayResult = array();
         foreach ($this->inputs as $item)
+        {
             if (!$item->addedLater)
                 if (isset($this->valueFlag))
                     $arrayResult[$item->attributes['name']] = $item->writeValueless($upperTemplate);
                 else
-                    $arrayResult[$item->attributes['name']] = $item->write($upperTemplate);
+                {
+                    $arrayResult[$item->attributes['name']] = $item->writeRequirements($upperTemplate);
+                    $arrayResult[$item->attributes['name']] .= $item->write($upperTemplate);
+                }
+        }
         return $arrayResult;
 
     }

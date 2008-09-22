@@ -41,21 +41,11 @@ class DroneMail
                                'Content-type: multipart/mixed; \r\nboundary= "{%binaryBoundary%}" \r\n\r\n'
                               );
 
-
-        $this->con = fsockopen(DroneConfig::get('SMTP.host'), DroneConfig::get('SMTP.port'), $errno, $errstr, $timeout);
-        if(!$this->con)
-        {
-            print "SMTP connect error {$errno}: {$errstr}";
-        	exit;
-        }
-        fgets($this->con,256);
-
+        $this->timeout = $timeout;
         $this->type = self::TYPE_TEXT;
         $this->mimeVersion = "1.0";
         $this->charEncoding = "US-ASCII";
         $this->binaryBoundary = "phpDroneBoundaryForBinaryContent";
-        
-        $this->data = "To: {%to%}\r\nFrom: {%from%}\r\nSubject: {%subject%}\r\nMIME-Version: {%mimeVersion%}\r\n";
         
         $this->attach = array();
     }
@@ -146,6 +136,16 @@ class DroneMail
 
     function send()
     {
+        $this->con = fsockopen(DroneConfig::get('SMTP.host'), DroneConfig::get('SMTP.port'), $errno, $errstr, $this->timeout);
+        if(!$this->con)
+        {
+            print "SMTP connect error {$errno}: {$errstr}";
+        	exit;
+        }
+        fgets($this->con,256);
+
+        $this->data = "To: {%to%}\r\nFrom: {%from%}\r\nSubject: {%subject%}\r\nMIME-Version: {%mimeVersion%}\r\n";
+
         $this->cmd("HELO phpDrone","250","HELO failed");
         $userName = DroneConfig::get('SMTP.username');
         $password = DroneConfig::get('SMTP.password');

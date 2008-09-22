@@ -34,7 +34,7 @@ class DroneTemplate
             $templateDir = DroneConfig::get('Main.templateDir','templates/');
             if ($internal)
             {
-                $droneDir = Utils::getDronePath();
+                $droneDir = DroneUtils::getDronePath();
                 if (file_exists($templateDir.$template))
                     $templateFilename = $templateDir.$template;
                 else
@@ -50,6 +50,22 @@ class DroneTemplate
         }
         else
             return null;
+    }
+
+    static function exists($template,$internal)
+    {
+            $templateDir = DroneConfig::get('Main.templateDir','templates/');
+            if ($internal)
+            {
+                $droneDir = DroneUtils::getDronePath();
+                if (file_exists($templateDir.$template) || file_exists("{$droneDir}/templates/".$template))
+                    return true;
+            }
+            else
+                if (file_exists($templateDir.$template))
+                    return true;
+                else
+                    return false;
     }
 
     function solveInheritance($templateFile)
@@ -118,18 +134,17 @@ class DroneTemplate
                                   'null'=>'null'
                                  );
 
-            //is a string?
-            if (!preg_match('/("|\')(?P<string>[^"\\\\]*(?:\\\\.[^"\\\\]*)*)\\1/', $filterPieces[0],$valCapt))
+            //is ONLY a string?
+            if (!(preg_match('/("|\')(?P<string>[^"\\\\]*(?:\\\\.[^"\\\\]*)*)\\1/', $filterPieces[0],$valCapt) && strlen($valCapt['string'])+2==strlen($filterPieces[0])))
             {
                 $opParts = preg_split('/(?:\\+)|(?:-)|(?:\\*)|(?:%)|(?:!)|(?:\/)/',trim($filterPieces[0]));
                 if (count($opParts)==1)
                 {
-
                       $subs = preg_split("/\./",trim($filterPieces[0]));
                       if (count($subs)==1)
 
-                            //detect if it's a number or a var name (TODO: I should check if string)
-                            if (!intval($subs[0]))
+                            //detect if it's a number, a string or a var name
+                            if (!(intval($subs[0]) || preg_match('/("|\')(?P<string>[^"\\\\]*(?:\\\\.[^"\\\\]*)*)\\1/', $subs[0])))
                                 $ev = array_key_exists($subs[0],$reservedVars)?$reservedVars[$subs[0]]:"\${$subs[0]}";
                             else
                                 $ev = $subs[0];
@@ -156,8 +171,8 @@ class DroneTemplate
                     {
                         $subs = preg_split("/\./",$part);
                         if (count($subs)==1)
-                            //detect if it's a number or a var name (TODO: I should check if string)
-                            if (!intval($subs[0]))
+                            //detect if it's a number, a string or a var name
+                            if (!(intval($subs[0]) || preg_match('/("|\')(?P<string>[^"\\\\]*(?:\\\\.[^"\\\\]*)*)\\1/', $subs[0])))
                                 $ev = array_key_exists($subs[0],$reservedVars)?$reservedVars[$subs[0]]:"\${$subs[0]}";
                             else
                                 $ev = $subs[0];
@@ -306,7 +321,7 @@ class DroneTemplate
                 foreach ($capt['elems'] as $cyc_item)
                 {
                     $partsArray = 'array("'.implode('","',preg_split('/\,/',addcslashes($cyc_item,'"'))).'")';
-                    $builtBlock = preg_replace('/<!--(?:\\s*)cycle '.preg_quote($cyc_item,'/"').'-->/s','<?php echo Utils::array_get($drone_for_index_'.$forId.'%count('.$partsArray.'),'.$partsArray.');?>',$builtBlock);
+                    $builtBlock = preg_replace('/<!--(?:\\s*)cycle '.preg_quote($cyc_item,'/"').'-->/s','<?php echo DroneUtils::array_get($drone_for_index_'.$forId.'%count('.$partsArray.'),'.$partsArray.');?>',$builtBlock);
                 }
                 $forSet = "\$drone_for_total_{$forId}=count(\$for_{$forId}_value);".
                           "\$drone_for_index_{$forId}=0;";
@@ -370,8 +385,8 @@ class DroneTemplate
             
             if (isset($cacheDir) && is_dir($cacheDir))
                 $cDir = realpath($cacheDir);
-            elseif (is_dir(Utils::getTempDir()."/phpDroneCache") || mkdir(Utils::getTempDir()."/phpDroneCache"))
-                $cDir = Utils::getTempDir()."/phpDroneCache";
+            elseif (is_dir(DroneUtils::getTempDir()."/phpDroneCache") || mkdir(DroneUtils::getTempDir()."/phpDroneCache"))
+                $cDir = DroneUtils::getTempDir()."/phpDroneCache";
             else
                 DroneCore::throwDroneError("Could not create the cache directory.");
 

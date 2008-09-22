@@ -13,6 +13,7 @@ class Captcha extends DroneInput
         if (extension_loaded("gd"))
         {
             parent::__construct($label,"text",$name);
+            $this->requires = array("jquery","captcha");
         }
         else
             DroneCore::throwDroneError("GD extension for PHP must be loaded to use Captcha inputs.<br />Get it from <a href='http://www.libgd.org/'>http://www.libgd.org/</a>.");
@@ -23,7 +24,7 @@ class Captcha extends DroneInput
         $result = "";
         
         for ($f=0;$f<$size;$f++)
-            $result=$result.substr(Captcha::alphabet,rand(0,strlen(Captcha::alphabet)-1),1);
+            $result .= substr(Captcha::alphabet,rand(0,strlen(Captcha::alphabet)-1),1);
         if ($id=="")
         {
             $tmp_id = "";
@@ -62,7 +63,7 @@ class Captcha extends DroneInput
         {
             header("Content-type: image/gif");
             header('Cache-control: no-cache, no-store');
-            $noiseFile = Utils::getDronePath()."/res/images/captcha_noise.png";
+            $noiseFile = DroneUtils::getDronePath()."/res/images/captcha_noise.png";
             $noiseSource = imagecreatefrompng($noiseFile);
             $im     = imagecreatetruecolor(Captcha::width,Captcha::height);
             $noiseBkg     = imagecreate(Captcha::width,Captcha::height);
@@ -70,18 +71,22 @@ class Captcha extends DroneInput
             $noiseSourceSize = getimagesize($noiseFile);
             imagecopy($noiseBkg, $noiseSource, 0, 0, rand(0,$noiseSourceSize[0]-Captcha::width), rand(0,$noiseSourceSize[1]-Captcha::height), Captcha::width, Captcha::height);
 
-            $gradientImg  = imagecreatetruecolor(Captcha::width,Captcha::height);
-            $rndNoiseColor1 = array(rand(100,255), rand(100,255), rand(100,255));
-            $rndNoiseColor2 = array(rand(50,150), rand(50,150), rand(50,150));
+            //this step requires GD 2.0.1 or later, so we check if available first. Later, this will be logged as a worning
+            if (function_exists("imagecolormatch"))
+            {
+                $gradientImg  = imagecreatetruecolor(Captcha::width,Captcha::height);
+                $rndNoiseColor1 = array(rand(100,255), rand(100,255), rand(100,255));
+                $rndNoiseColor2 = array(rand(50,150), rand(50,150), rand(50,150));
 
-            Captcha::gradient($gradientImg,$rndNoiseColor1, $rndNoiseColor2);
-
-            imagecolormatch($gradientImg, $noiseBkg);
+                Captcha::gradient($gradientImg,$rndNoiseColor1, $rndNoiseColor2);
+                
+                imagecolormatch($gradientImg, $noiseBkg);
+            }
 
             imagecopy($im, $noiseBkg, 0, 0, 0, 0, Captcha::width, Captcha::height);
 
 
-            $font = realpath(Utils::getDronePath()."/res/fonts/arialbd.ttf");
+            $font = realpath(DroneUtils::getDronePath()."/res/fonts/arialbd.ttf");
             $px=30;
             for ($f=0;$f<strlen($text);$f++)
             {

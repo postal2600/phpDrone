@@ -1,5 +1,5 @@
 <?php
-class Utils
+class DroneUtils
 {
     // get the preview image and the embed value for a internet movie (will be used in MovieWidget)
 	static function getVideoData($videourl)
@@ -162,11 +162,9 @@ class Utils
     //extracts the value from an array from certain key.If the key is not found, it will return NULL or the $default argument.
     static function array_get($key,$array,$default=NULL)
     {
-        if (gettype($array)=="array")
-            if (array_key_exists($key, $array))
-                return $array[$key];
-            else
-                return $default;
+        if (gettype($array)=="array" && array_key_exists($key, $array))
+            return $array[$key];
+        return $default;
     }
 
     //get the language currently used by phpDrone

@@ -97,7 +97,7 @@ class Database
     
         if (isset($sqlEngine)&&$sqlEngine=="mysql")
         {
-            set_error_handler("Utils::silentDeath");
+            set_error_handler("DroneUtils::silentDeath");
             $this->con = mysql_connect($sqlServer, $sqlUser, $sqlPassword) or DroneCore::throwDroneError("Can't start connection to the database. <br />SQL said: <b>".mysql_error()."</b><br />Please check your <b>drone/settings.php</b> file.");;
             mysql_select_db($sqlDatabase,$this->con) or DroneCore::throwDroneError("Can't find database <b>{$sqlDatabase}</b> on server <b>{$sqlServer}</b>.<br />Please check your <b>drone/settings.php</b> file.");
             restore_error_handler();
@@ -193,9 +193,9 @@ class Database
 
     private function getUniqueKey($size)
     {
-        $result = Utils::genRandomString($size);
+        $result = DroneUtils::genRandomString($size);
         while (mysql_num_rows($this->exec_qry("SELECT * FROM {$this->tableName} WHERE {$this->id}='{$result}'"))>0)
-            $result = Utils::genRandomString($size);
+            $result = DroneUtils::genRandomString($size);
         return $result;
     }
 
@@ -206,8 +206,8 @@ class Database
         {
             if (count($args)==1)
             {
-                if (Utils::array_get("name",$args[0]))
-                    $this->fields[Utils::array_get("name",$args[0])] = new DBField($args[0]);
+                if (DroneUtils::array_get("name",$args[0]))
+                    $this->fields[DroneUtils::array_get("name",$args[0])] = new DBField($args[0]);
                 else
                     DroneCore::throwDroneError("You try to add an database field withouth a name.");
             }

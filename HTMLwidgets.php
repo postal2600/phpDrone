@@ -79,13 +79,15 @@ class PageNum extends HTMLWidgets
         switch ($_GET['action'])
         {
             case "setPage":
-                $url = Utils::querySetVar($_SERVER['HTTP_REFERER'],"page",$_GET['page']);
+                $url = DroneUtils::querySetVar($_SERVER['HTTP_REFERER'],"page",$_GET['page']);
                 header("Location: {$url}");
+                die();
                 break;
             case "setPref":
                 $_SESSION["drone_pn_{$_GET['prefName']}"] = $_GET['pref'];
-                $url = Utils::querySetVar($_SERVER['HTTP_REFERER'],"page",1);
+                $url = DroneUtils::querySetVar($_SERVER['HTTP_REFERER'],"page",1);
                 header("Location: {$url}");
+                die();
                 break;
         }
     }
@@ -136,12 +138,12 @@ class PageNum extends HTMLWidgets
 
     function getCurrentPage()
     {
-        return max(1,min($this->totalPages,intval(Utils::array_get("page",$_GET,1))));
+        return max(1,min($this->totalPages,intval(DroneUtils::array_get("page",$_GET,1))));
     }
 
     function getItemsPerPage()
     {
-        return in_array(intval(Utils::array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0])),$this->prefOptionList)?intval(Utils::array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0])):$this->prefOptionList[0];
+        return in_array(intval(DroneUtils::array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0])),$this->prefOptionList)?intval(DroneUtils::array_get("drone_pn_{$this->prefName}",$_SESSION,$this->prefOptionList[0])):$this->prefOptionList[0];
     }
 
 	function hidePages($bool=true)

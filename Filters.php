@@ -95,4 +95,21 @@ function filter_nonFalse($input,$replacement = null)
     return $input;
 }
 
+function filter_replaceRegexp($input,$needle, $replacement)
+{
+    return preg_replace("/{$needle}/",$replacement,$input);
+}
+
+function filter_replace($input,$needle, $replacement)
+{
+    return str_replace($needle,$replacement,$input);
+}
+
+function filter_mask($input, $maskArray)
+{
+    return DroneUtils::array_get($input,$maskArray,$input);
+}
+
+
+
 ?>
