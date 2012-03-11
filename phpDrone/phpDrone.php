@@ -1,16 +1,16 @@
 <?php
 	if (version_compare(phpversion(),"5")>-1)
     {
-    	$validModules = array('database'=>'Database.php',
-                              'form'=>'Form.php',
-                              'template'=>'Template.php',
-                              'mail'=>'DroneMail.php',
-                              'widgets'=>'HTMLwidgets.php',
-                              'utils'=>'Utils.php',
-                              'i18n'=>'i18n.php',
-                              'admin'=>'DroneAdmin.php',
-                              'profiler'=>'DroneProfiler.php',
-                              'controller'=>'DroneController.php'
+    	$validModules = array('database'=>'phpDrone/Database.php',
+                              'form'=>'phpDrone/Form.php',
+                              'template'=>'phpDrone/Template.php',
+                              'mail'=>'phpDrone/DroneMail.php',
+                              'widgets'=>'phpDrone/HTMLwidgets.php',
+                              'utils'=>'phpDrone/Utils.php',
+                              'i18n'=>'phpDrone/i18n.php',
+                              'admin'=>'phpDrone/DroneAdmin.php',
+                              'profiler'=>'phpDrone/DroneProfiler.php',
+                              'controller'=>'phpDrone/DroneController.php'
     					     );
         session_start();
         ob_start();

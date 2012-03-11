@@ -434,11 +434,15 @@ class DroneTemplate
     function getBuffer($templateName=null,$internal=false)
     {
         $templateFile = $this->prepareTemplate($templateName,$internal);
-        ob_start();
+      	
+     	$old_display_errors = ini_get('display_errors');
+      	ini_set('display_errors', '0');
+	    ob_start();
         extract($this->vars);
         include $templateFile;
         $content = ob_get_contents();
         ob_end_clean();
+		ini_set('display_errors', $old_display_errors);
 
         $compressHTML = DroneConfig::get('Main.compressHTML');
         if ($compressHTML)
