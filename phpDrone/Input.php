@@ -1,4 +1,7 @@
 <?php
+
+require_once 'phpDrone/Template.php';
+
 class DroneInput
 {
 	static $safeChars = array('<'=>'&lt;','>'=>'&gt;','"'=>'&quot;',"'"=>'&#039;');

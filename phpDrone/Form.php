@@ -140,7 +140,7 @@ class DroneForm
         
     }
     
-    private function __call($method, $args)
+    function __call($method, $args)
     {
         if (method_exists($this,$method."_p"))
             eval("\$this->".$method."_p(\$args);");

@@ -1,5 +1,7 @@
 <?php
-require_once('Filters.php');
+require_once('phpDrone/Filters.php');
+require_once('phpDrone/Settings.php');
+require_once('phpDrone/Utils.php');
 
 if (file_exists('droneEnv/filters.php'))
 {
@@ -16,9 +18,7 @@ class DroneTemplate
     
     function __construct($template=null,$internal=false)
     {
-        
-        $debugMode = DroneConfig::get('Main.debugMode');                
-        if ($debugMode)
+        if (DroneSettings::get('DEBUG'))
             $this->startTime = microTime(true);
 //         $startTime = microTime(true);
         $this->templateFilename = $this->setTemplateFilename($template,$internal);
@@ -31,7 +31,7 @@ class DroneTemplate
     {
         if (isset($template))
         {
-            $templateDir = DroneConfig::get('Main.templateDir','templates/');
+            $templateDir = DroneSettings::get('TEMPLATE_DIR','templates/');
             if ($internal)
             {
                 $droneDir = DroneUtils::getDronePath();
@@ -54,7 +54,7 @@ class DroneTemplate
 
     static function exists($template,$internal)
     {
-            $templateDir = DroneConfig::get('Main.templateDir','templates/');
+            $templateDir = DroneSettings::get('TEMPLATE_DIR','templates/');
             if ($internal)
             {
                 $droneDir = DroneUtils::getDronePath();
@@ -369,11 +369,10 @@ class DroneTemplate
         if (strtolower($fileInfo['extension'])!='php')
         {
 
-            $cacheDir = DroneConfig::get('Main.cacheDir');
-            $appMode = DroneConfig::get('Main.appMode');
-            $debugMode = DroneConfig::get('Main.debugMode');
+            $cacheDir = DroneSettings::get('CACHE_DIR');
+            $debugMode = DroneSettings::get('DEBUG');
             
-            if ($appMode=='development')
+            if ($debugMode)
             {
                 $this->solveInheritance($this->templateFilename);
                 $this->solveInjections($this->templateFilename,$this->templateContent);
@@ -444,8 +443,7 @@ class DroneTemplate
         ob_end_clean();
 		ini_set('display_errors', $old_display_errors);
 
-        $compressHTML = DroneConfig::get('Main.compressHTML');
-        if ($compressHTML)
+        if (DroneSettings::get('COMPRESS_HTML'))
             $content = preg_replace('/[\s]{2,}/', ' ',preg_replace('/\n|\r\n|\t/', '', $content));
 
         return $content;
@@ -455,8 +453,8 @@ class DroneTemplate
     {
         $output = $this->getBuffer($args[0],$args[1]);
         $endTime = $this->deltaTime();
-        $debugMode = DroneConfig::get('Main.debugMode');
-        if ($debugMode)
+
+        if (DroneSettings::get('DEBUG'))
         {
             DroneProfiler::buildResults();
             require("ver.php");
@@ -493,7 +491,7 @@ class DroneTemplate
         $this->vars[$args[0]] = $args[1];
     }
 
-    private function __call($method, $args)
+    function __call($method, $args)
     {
         
         if (method_exists($this,$method."_p"))

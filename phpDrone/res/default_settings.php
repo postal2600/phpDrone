@@ -1,47 +1,46 @@
-#Hacking attempt<?php /* #DON'T REMOVE PHP TAGS ?>
-[Main]
-#cacheDir = ./tmpl_cache
-debugMode = True
-#compressHTML = True
-codeLanguage = en
-appMode = development
+<?php
+//Main
+$CACHE_DIR = "./tmpl_cache";
+$DEBUG= True;
+$COMPRESS_HTML = False;
+$CODE_LANGUAGE = "en";
+$TEMPLATE_DIR = "templates/";
 
 
-[Modules]
-utils = true #Rrequired
-database = true
-form = true
-template = true
-mail = true
-widgets = true
-i18n = true
-admin = true
-profiler = true
-controller = false
+//Modules
+$USE_DATABASE = True;
+$USE_FORM = True;
+$USE_TEMPLATE = True;
+$USE_MAIL = True;
+$USE_WIDGETS = True;
+$USE_I18N = True;
+$USE_ADMIN = True;
+$USE_PROFILER = True;
+$USE_CONTROLLER = False;
 
-[Database] #This options will work only if 'database' module is loaded
-sqlEngine = mysql
-sqlServer= localhost
-sqlUser= user
-sqlPassword= password
-sqlDatabase= databaseName
-
-
-[Admin] #This options will work only if 'admin' module is loaded
-user =
-pass =
-#passHash =
+// Database. This options will work only if $USE_DATABASE is set to True
+$SQL_ENGINE = "mysql";
+$SQL_SERVER = "localhost";
+$SQL_USER = "";
+$SQL_PASSWORD = "";
+$SQL_DATABASE = "";
 
 
-[SMTP] #This options will work only if 'mail' module is loaded
-#host =
-#port =
-#username =
-#password =
+// Admin. This options will work only if $USE_ADMIN is set to True
+$ADMIN_USER = "";
+$ADMIN_PASS = "";
+$ADMIN_PASS_HASH = "";
 
 
-[Controller] #This options will work only if 'controller' module is loaded
-defaultController = index
-defaultMethod = index
+// SMTP. This options will work only if $USE_MAIL is set to True
+$SMTP_HOST = "";
+$SMTP_PORT = "";
+$SMTP_USER = "";
+$SMTP_PASSWORD = "";
 
-;<?php #DON'T REMOVE PHP TAGS*/ ?>
+
+// Controller. This options will work only if $USE_CONTROLLER is set to True
+$DEFAULT_CONTROLLER = "index";
+$DEFAULT_METHOD = "index";
+
+?>
